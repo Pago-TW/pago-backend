@@ -17,28 +17,28 @@ public class TripServiceImpl implements TripService {
     private TripDAO tripDAO;
 
     @Override
-    public Trip get(Integer trip_id) throws SQLException {
-        return tripDAO.get(trip_id);
+    public Trip getById(Integer tripId) throws SQLException {
+        return tripDAO.getById(tripId);
     }
 
     @Override
-    public List<Trip> getList() throws SQLException {
-        return tripDAO.getList();
+    public List<Trip> findAll() throws SQLException {
+        return tripDAO.findAll();
     }
 
     @Override
-    public Integer insert(Trip trip_request) throws SQLException {
-        return tripDAO.insert(trip_request);
+    public Integer insert(Trip tripRequest) throws SQLException {
+        return tripDAO.insert(tripRequest);
     }
 
     @Override
-    public void update(Integer trip_id, Trip trip_request) throws SQLException {
-        tripDAO.update(trip_id, trip_request);
+    public void update(Integer tripId, Trip tripRequest) throws SQLException {
+        tripDAO.update(tripId, tripRequest);
     }
 
     @Override
-    public void delete(Integer trip_id) throws SQLException {
-        tripDAO.delete(trip_id);
+    public void delete(Integer tripId) throws SQLException {
+        tripDAO.delete(tripId);
     }
 
 }

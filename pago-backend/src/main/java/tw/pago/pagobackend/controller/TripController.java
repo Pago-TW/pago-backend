@@ -24,8 +24,8 @@ public class TripController {
     private TripService tripService;
 
     @GetMapping("trip/{trip_id}")
-    public ResponseEntity<Trip> get(@PathVariable Integer trip_id) throws SQLException {
-        Trip trip = tripService.get(trip_id);
+    public ResponseEntity<Trip> getById(@PathVariable("trip_id") Integer tripId) throws SQLException {
+        Trip trip = tripService.getById(tripId);
         if (trip != null) {
             return ResponseEntity.status(HttpStatus.OK).body(trip);
         } else {
@@ -34,35 +34,35 @@ public class TripController {
     }
 
     @GetMapping("trip")
-    public ResponseEntity<List<Trip>> getList() throws SQLException {
-        List<Trip> trips = tripService.getList();
+    public ResponseEntity<List<Trip>> findAll() throws SQLException {
+        List<Trip> trips = tripService.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(trips);
     }
 
     @PostMapping("trip")
-    public ResponseEntity<Trip> insert(@RequestBody Trip trip_request) throws SQLException {
-        Integer trip_id = tripService.insert(trip_request);
-        Trip trip = tripService.get(trip_id);
+    public ResponseEntity<Trip> insert(@RequestBody Trip tripRequest) throws SQLException {
+        Integer tripId = tripService.insert(tripRequest);
+        Trip trip = tripService.getById(tripId);
         return ResponseEntity.status(HttpStatus.CREATED).body(trip);
     }
 
     @PutMapping("trip/{trip_id}")
-    public ResponseEntity<Trip> update(@RequestBody Trip trip_request, @PathVariable Integer trip_id) throws SQLException {
+    public ResponseEntity<Trip> update(@RequestBody Trip tripRequest, @PathVariable("trip_id") Integer tripId) throws SQLException {
         // check if trip exist
-        Trip check_trip = tripService.get(trip_id);
-        if (check_trip == null) {
+        Trip checkTrip = tripService.getById(tripId);
+        if (checkTrip == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         // update trip
-        tripService.update(trip_id, trip_request);
-        Trip trip = tripService.get(trip_id);
+        tripService.update(tripId, tripRequest);
+        Trip trip = tripService.getById(tripId);
         return ResponseEntity.status(HttpStatus.OK).body(trip);
     }
 
     @DeleteMapping("trip/{trip_id}")
-    public ResponseEntity<?> delete(@PathVariable Integer trip_id) throws SQLException {
-        tripService.delete(trip_id);
+    public ResponseEntity<?> delete(@PathVariable("trip_id") Integer tripId) throws SQLException {
+        tripService.delete(tripId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

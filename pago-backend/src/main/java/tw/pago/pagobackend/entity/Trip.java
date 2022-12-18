@@ -1,60 +1,60 @@
 package tw.pago.pagobackend.entity;
 
 public class Trip {
-    private Integer trip_id;
-    private Integer traveler_id;
-    private String from_location;
-    private String to_location;
-    private String arrival_date;
+    private Integer tripId;
+    private Integer travelerId;
+    private String fromLocation;
+    private String toLocation;
+    private String arrivalDate;
     private double profit;
 
-    public Trip(Integer trip_id, Integer traveler_id, String from_location, String to_location, String arrival_date, double profit) {
-        this.trip_id = trip_id;
-        this.traveler_id = traveler_id;
-        this.from_location = from_location;
-        this.to_location = to_location;
-        this.arrival_date = arrival_date;
+    public Trip(Integer tripId, Integer travelerId, String fromLocation, String toLocation, String arrivalDate, double profit) {
+        this.tripId = tripId;
+        this.travelerId = travelerId;
+        this.fromLocation = fromLocation;
+        this.toLocation = toLocation;
+        this.arrivalDate = arrivalDate;
         this.profit = profit;
     }
 
     public Integer getTripId() {
-        return trip_id;
+        return tripId;
     }
 
-    public void setTripId(Integer trip_id) {
-        this.trip_id = trip_id;
+    public void setTripId(Integer tripId) {
+        this.tripId = tripId;
     }
 
     public Integer getTravelerId() {
-        return traveler_id;
+        return travelerId;
     }
 
-    public void setTravelerId(Integer traveler_id) {
-        this.traveler_id = traveler_id;
+    public void setTravelerId(Integer travelerId) {
+        this.travelerId = travelerId;
     }
 
     public String getFromLocation() {
-        return from_location;
+        return fromLocation;
     }
 
-    public void setFromLocation(String from_location) {
-        this.from_location = from_location;
+    public void setFromLocation(String fromLocation) {
+        this.fromLocation = fromLocation;
     }
 
     public String getToLocation() {
-        return to_location;
+        return toLocation;
     }
 
-    public void setToLocation(String to_location) {
-        this.to_location = to_location;
+    public void setToLocation(String toLocation) {
+        this.toLocation = toLocation;
     }
 
     public String getArrivalDate() {
-        return arrival_date;
+        return arrivalDate;
     }
 
-    public void setArrivalDate(String arrival_date) {
-        this.arrival_date = arrival_date;
+    public void setArrivalDate(String arrivalDate) {
+        this.arrivalDate = arrivalDate;
     }
 
     public double getProfit() {
