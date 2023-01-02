@@ -6,15 +6,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import tw.pago.pagobackend.dao.TripDAO;
-import tw.pago.pagobackend.entity.Trip;
+import tw.pago.pagobackend.dao.TripDao;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.TripService;
 
 @Component
 public class TripServiceImpl implements TripService {
 
     @Autowired
-    private TripDAO tripDAO;
+    private TripDao tripDAO;
 
     @Override
     public Trip getById(Integer tripId) throws SQLException {

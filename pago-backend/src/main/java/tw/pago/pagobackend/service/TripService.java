@@ -3,7 +3,7 @@ package tw.pago.pagobackend.service;
 import java.sql.SQLException;
 import java.util.List;
 
-import tw.pago.pagobackend.entity.Trip;
+import tw.pago.pagobackend.model.Trip;
 
 public interface TripService {
     

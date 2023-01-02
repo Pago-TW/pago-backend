@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import tw.pago.pagobackend.entity.Trip;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.TripService;
 
 @RestController

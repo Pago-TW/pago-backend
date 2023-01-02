@@ -1,4 +1,4 @@
-package tw.pago.pagobackend.entity;
+package tw.pago.pagobackend.model;
 
 public class Trip {
     private Integer tripId;
