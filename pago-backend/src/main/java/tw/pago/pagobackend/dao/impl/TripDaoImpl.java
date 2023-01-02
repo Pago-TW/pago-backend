@@ -12,11 +12,11 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import tw.pago.pagobackend.dao.TripDAO;
-import tw.pago.pagobackend.entity.Trip;
+import tw.pago.pagobackend.dao.TripDao;
+import tw.pago.pagobackend.model.Trip;
 
 @Component
-public class TripDAOImpl implements TripDAO {
+public class TripDaoImpl implements TripDao {
     @Autowired
     private DataSource dataSource;
 
