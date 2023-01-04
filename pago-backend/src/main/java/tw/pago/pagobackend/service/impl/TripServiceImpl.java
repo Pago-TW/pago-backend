@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import tw.pago.pagobackend.dao.TripDao;
+import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.TripService;
 
@@ -17,24 +18,24 @@ public class TripServiceImpl implements TripService {
     private TripDao tripDAO;
 
     @Override
-    public Trip getById(Integer tripId) throws SQLException {
-        return tripDAO.getById(tripId);
+    public Trip getTripById(Integer tripId) throws SQLException {
+        return tripDAO.getTripById(tripId);
     }
 
-    @Override
-    public List<Trip> findAll() throws SQLException {
-        return tripDAO.findAll();
-    }
+//    @Override
+//    public List<Trip> findAll() throws SQLException {
+//        return tripDAO.findAll();
+//    }
 
     @Override
-    public Integer insert(Trip tripRequest) throws SQLException {
-        return tripDAO.insert(tripRequest);
+    public Integer createTrip(CreateTripRequestDto createTripRequestDto) throws SQLException {
+        return tripDAO.createTrip(createTripRequestDto);
     }
 
-    @Override
-    public void update(Integer tripId, Trip tripRequest) throws SQLException {
-        tripDAO.update(tripId, tripRequest);
-    }
+//    @Override
+//    public void update(Integer tripId, Trip tripRequest) throws SQLException {
+//        tripDAO.update(tripId, tripRequest);
+//    }
 
     @Override
     public void delete(Integer tripId) throws SQLException {

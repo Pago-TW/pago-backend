@@ -1,20 +1,29 @@
 package tw.pago.pagobackend.model;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 public class Trip {
     private Integer tripId;
     private Integer travelerId;
     private String fromLocation;
     private String toLocation;
-    private String arrivalDate;
-    private double profit;
+    private Date arrivalDate;
+    private BigDecimal profit;
+    private Date createDate;
+    private Date updateDate;
 
-    public Trip(Integer tripId, Integer travelerId, String fromLocation, String toLocation, String arrivalDate, double profit) {
+    public Trip(Integer tripId, Integer travelerId, String fromLocation, String toLocation, Date arrivalDate, BigDecimal profit) {
         this.tripId = tripId;
         this.travelerId = travelerId;
         this.fromLocation = fromLocation;
         this.toLocation = toLocation;
         this.arrivalDate = arrivalDate;
         this.profit = profit;
+    }
+
+    public Trip() {
+
     }
 
     public Integer getTripId() {
@@ -49,19 +58,35 @@ public class Trip {
         this.toLocation = toLocation;
     }
 
-    public String getArrivalDate() {
+    public Date getArrivalDate() {
         return arrivalDate;
     }
 
-    public void setArrivalDate(String arrivalDate) {
+    public void setArrivalDate(Date arrivalDate) {
         this.arrivalDate = arrivalDate;
     }
 
-    public double getProfit() {
+    public BigDecimal getProfit() {
         return profit;
     }
 
-    public void setProfit(double profit) {
+    public void setProfit(BigDecimal profit) {
         this.profit = profit;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
     }
 }
