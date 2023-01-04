@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.UserService;
@@ -24,5 +25,11 @@ public class UserController {
     User user = userService.getUserById(userId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(user);
+  }
+  @PostMapping("/users/login")
+  public ResponseEntity<User> login(@RequestBody @Valid UserLoginRequestDto userLoginRequestDto) {
+    User user = userService.login(userLoginRequestDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(user);
   }
 }
