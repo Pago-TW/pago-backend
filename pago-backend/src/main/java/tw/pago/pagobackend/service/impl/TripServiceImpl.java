@@ -1,7 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ public class TripServiceImpl implements TripService {
     private TripDao tripDAO;
 
     @Override
-    public Trip getTripById(Integer tripId) throws SQLException {
+    public Trip getTripById(Integer tripId) {
         return tripDAO.getTripById(tripId);
     }
 
@@ -28,7 +27,7 @@ public class TripServiceImpl implements TripService {
 //    }
 
     @Override
-    public Integer createTrip(CreateTripRequestDto createTripRequestDto) throws SQLException {
+    public Integer createTrip(CreateTripRequestDto createTripRequestDto) {
         return tripDAO.createTrip(createTripRequestDto);
     }
 

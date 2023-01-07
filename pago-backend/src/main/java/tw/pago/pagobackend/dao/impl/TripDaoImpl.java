@@ -2,10 +2,7 @@ package tw.pago.pagobackend.dao.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,40 +19,32 @@ import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.rowmapper.TripRowMapper;
 
 @Component
 public class TripDaoImpl implements TripDao {
 
-    @Autowired
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  @Autowired
+  private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Autowired
-    private DataSource dataSource;
+  @Autowired
+  private DataSource dataSource;
 
-    @Override
-    public Trip getTripById(Integer tripId) throws SQLException {
-        Trip trip = null;
-        String sql = "SELECT trip_id, traveler_id, from_location, to_location, arrival_date, profit FROM trip WHERE trip_id = ?";
-        try (
-                Connection conn = dataSource.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql);) {
-            stmt.setInt(1, tripId);
-            try (ResultSet rs = stmt.executeQuery();) {
-                if (rs.next()) {
-                    trip = new Trip(0, 0, "", "", null, null);
-                    trip.setTripId(rs.getInt("trip_id"));
-                    trip.setTravelerId(rs.getInt("traveler_id"));
-                    trip.setFromLocation(rs.getString("from_location"));
-                    trip.setToLocation(rs.getString("to_location"));
-                    trip.setArrivalDate(rs.getTimestamp("arrival_date"));
-                    trip.setProfit(rs.getBigDecimal("profit"));
-                }
-            }
-        } catch (SQLException e) {
-            throw e;
-        }
-        return trip;
+  @Override
+  public Trip getTripById(Integer tripId) {
+    String sql = "SELECT trip_id, traveler_id, from_location, to_location, arrival_date, profit, create_date, update_date FROM trip WHERE trip_id = :tripId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("tripId", tripId);
+
+    List<Trip> tripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    if (tripList.size() > 0) {
+      return tripList.get(0);
+    } else {
+      return null;
     }
+  }
 
 //    @Override
 //    public List<Trip> findAll() throws SQLException {
@@ -81,31 +70,33 @@ public class TripDaoImpl implements TripDao {
 //        return trips;
 //    }
 
-    @Override
-    public Integer createTrip(CreateTripRequestDto createTripRequestDto) throws SQLException {
-        String sql = "INSERT INTO trip (traveler_id, from_location, to_location, arrival_date, create_date, upate_date "
-            + "VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate)";
+  @Override
+  public Integer createTrip(CreateTripRequestDto createTripRequestDto) {
+    String sql =
+        "INSERT INTO trip (traveler_id, from_location, to_location, arrival_date, create_date, upate_date "
+        + " VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate)";
+    System.out.println(sql);
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("travelerId", createTripRequestDto.getTravelerId());
-        map.put("fromLocation", createTripRequestDto.getFromLocation());
-        map.put("toLocation", createTripRequestDto.getToLocation());
-        map.put("arrivalDate", createTripRequestDto.getArrivalDate());
+    Map<String, Object> map = new HashMap<>();
+    map.put("travelerId", createTripRequestDto.getTravelerId());
+    map.put("fromLocation", createTripRequestDto.getFromLocation());
+    map.put("toLocation", createTripRequestDto.getToLocation());
+    map.put("arrivalDate", createTripRequestDto.getArrivalDate());
 
-        Date now = new Date();
-        map.put("createDate", now);
-        map.put("updateDate", now);
+    Date now = new Date();
+    map.put("createDate", now);
+    map.put("updateDate", now);
+    System.out.println(sql);
+    KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
 
-        namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
+    int tripId = keyHolder.getKey().intValue();
+    System.out.println(sql);
+    return tripId;
+  }
 
-        int tripId = keyHolder.getKey().intValue();
-
-        return tripId;
-    }
-
-    @Override
+//  @Override
 //    public void update(Integer tripId, Trip tripRequest) throws SQLException {
 //        String sql = "UPDATE trip SET traveler_id=?, from_location=?, to_location=?, arrival_date=?, profit=? WHERE trip_id=?";
 //        try (
@@ -123,15 +114,15 @@ public class TripDaoImpl implements TripDao {
 //        }
 //    }
 
-    public void delete(Integer tripId) throws SQLException {
-        String sql = "DELETE FROM trip WHERE trip_id=?";
-        try (
-                Connection conn = dataSource.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql);) {
-            stmt.setInt(1, tripId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        }
+  public void delete(Integer tripId) throws SQLException {
+    String sql = "DELETE FROM trip WHERE trip_id=?";
+    try (
+        Connection conn = dataSource.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql);) {
+      stmt.setInt(1, tripId);
+      stmt.executeUpdate();
+    } catch (SQLException e) {
+      throw e;
     }
+  }
 }

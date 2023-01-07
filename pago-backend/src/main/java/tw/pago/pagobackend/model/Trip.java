@@ -13,15 +13,6 @@ public class Trip {
     private Date createDate;
     private Date updateDate;
 
-    public Trip(Integer tripId, Integer travelerId, String fromLocation, String toLocation, Date arrivalDate, BigDecimal profit) {
-        this.tripId = tripId;
-        this.travelerId = travelerId;
-        this.fromLocation = fromLocation;
-        this.toLocation = toLocation;
-        this.arrivalDate = arrivalDate;
-        this.profit = profit;
-    }
-
     public Trip() {
 
     }

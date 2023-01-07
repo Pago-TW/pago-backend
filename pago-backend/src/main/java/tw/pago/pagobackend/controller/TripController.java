@@ -23,9 +23,10 @@ public class TripController {
   @Autowired
   private TripService tripService;
 
-  @GetMapping("user/{userId}/trip/{tripId}")
-  public ResponseEntity<Trip> getTripById(@PathVariable Integer userId, @PathVariable Integer tripId) throws SQLException {
+  @GetMapping("/trip/{tripId}")
+  public ResponseEntity<Trip> getTripById(@PathVariable Integer tripId) {
     Trip trip = tripService.getTripById(tripId);
+
     if (trip != null) {
       return ResponseEntity.status(HttpStatus.OK).body(trip);
     } else {

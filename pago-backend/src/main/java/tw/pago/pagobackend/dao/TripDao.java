@@ -6,11 +6,11 @@ import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 
 public interface TripDao {
-    public Trip getTripById(Integer tripId) throws SQLException;
+    public Trip getTripById(Integer tripId);
 
 //    public List<Trip> findAll() throws SQLException;
 
-    public Integer createTrip(CreateTripRequestDto createTripRequestDto) throws SQLException;
+    public Integer createTrip(CreateTripRequestDto createTripRequestDto);
 
 //    public void update(Integer tripId, Trip tripRequest) throws SQLException;
 
