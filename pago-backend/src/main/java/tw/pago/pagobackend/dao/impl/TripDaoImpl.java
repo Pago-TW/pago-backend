@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
+import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.TripRowMapper;
 
@@ -74,7 +75,7 @@ public class TripDaoImpl implements TripDao {
   public Integer createTrip(CreateTripRequestDto createTripRequestDto) {
     String sql =
         "INSERT INTO trip (traveler_id, from_location, to_location, arrival_date, create_date, update_date) "
-        + "VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate )";
+            + "VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate )";
     System.out.println(sql);
 
     Map<String, Object> map = new HashMap<>();
@@ -96,23 +97,27 @@ public class TripDaoImpl implements TripDao {
     return tripId;
   }
 
-//  @Override
-//    public void update(Integer tripId, Trip tripRequest) throws SQLException {
-//        String sql = "UPDATE trip SET traveler_id=?, from_location=?, to_location=?, arrival_date=?, profit=? WHERE trip_id=?";
-//        try (
-//                Connection conn = dataSource.getConnection();
-//                PreparedStatement stmt = conn.prepareStatement(sql);) {
-//            stmt.setInt(1, tripRequest.getTravelerId());
-//            stmt.setString(2, tripRequest.getFromLocation());
-//            stmt.setString(3, tripRequest.getToLocation());
-//            stmt.setString(4, tripRequest.getArrivalDate());
-//            stmt.setDouble(5, tripRequest.getProfit());
-//            stmt.setInt(6, tripId);
-//            stmt.executeUpdate();
-//        } catch (SQLException e) {
-//            throw e;
-//        }
-//    }
+
+  @Override
+  public void updateTrip(UpdateTripRequestDto updateTripRequestDto) {
+    String sql = "UPDATE trip "
+        + "SET traveler_id = :travelerId, from_location = :fromLocation, to_location = :toLocation, "
+        + "arrival_date = :arrivalDate, update_date = :updateDate "
+        + "WHERE trip_id = :tripId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("travelerId", updateTripRequestDto.getTravelerId());
+    map.put("fromLocation", updateTripRequestDto.getFromLocation());
+    map.put("toLocation", updateTripRequestDto.getToLocation());
+    map.put("arrivalDate", updateTripRequestDto.getArrivalDate());
+
+    Date now = new Date();
+    map.put("updateDate", now);
+    map.put("tripId", updateTripRequestDto.getTripId());
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
 
   public void delete(Integer tripId) throws SQLException {
     String sql = "DELETE FROM trip WHERE trip_id=?";

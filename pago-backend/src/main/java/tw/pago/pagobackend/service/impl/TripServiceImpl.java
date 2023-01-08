@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
+import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.TripService;
 
@@ -31,10 +32,10 @@ public class TripServiceImpl implements TripService {
         return tripDAO.createTrip(createTripRequestDto);
     }
 
-//    @Override
-//    public void update(Integer tripId, Trip tripRequest) throws SQLException {
-//        tripDAO.update(tripId, tripRequest);
-//    }
+    @Override
+    public void updateTrip(UpdateTripRequestDto updateTripRequestDto) {
+        tripDAO.updateTrip(updateTripRequestDto);
+    }
 
     @Override
     public void delete(Integer tripId) throws SQLException {

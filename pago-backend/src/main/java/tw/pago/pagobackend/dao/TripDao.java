@@ -3,16 +3,17 @@ package tw.pago.pagobackend.dao;
 import java.sql.SQLException;
 
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
+import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 
 public interface TripDao {
-    public Trip getTripById(Integer tripId);
+    Trip getTripById(Integer tripId);
 
 //    public List<Trip> findAll() throws SQLException;
 
-    public Integer createTrip(CreateTripRequestDto createTripRequestDto);
+    Integer createTrip(CreateTripRequestDto createTripRequestDto);
 
-//    public void update(Integer tripId, Trip tripRequest) throws SQLException;
+    void updateTrip(UpdateTripRequestDto updateTripRequestDto);
 
-    public void delete(Integer tripId) throws SQLException;
+    void delete(Integer tripId) throws SQLException;
 }

@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
+import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.TripService;
 
@@ -52,24 +54,29 @@ public class TripController {
 
   }
 
-//  @PutMapping("trip/{trip_id}")
-//  public ResponseEntity<Trip> update(@RequestBody Trip tripRequest,
-//      @PathVariable("trip_id") Integer tripId)
-//      throws SQLException {
-//    // check if trip exist
-//    Trip checkTrip = tripService.getTripById(tripId);
-//    if (checkTrip == null) {
-//      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//    }
+  @PutMapping("/users/{userId}/trips/{tripId}")
+  public ResponseEntity<Trip> updateTrip(@PathVariable Integer userId,
+      @PathVariable Integer tripId,
+      @RequestBody @Valid UpdateTripRequestDto updateTripRequestDto) {
 
-    // update trip
-//    tripService.update(tripId, tripRequest);
-//    Trip trip = tripService.getTripById(tripId);
-//    return ResponseEntity.status(HttpStatus.OK).body(trip);
-//  }
+
+    // Check if the Trip to be updated exists
+    Trip trip = tripService.getTripById(tripId);
+    if (trip == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(trip);
+    }
+    // Update Trip
+    updateTripRequestDto.setTravelerId(userId);
+    updateTripRequestDto.setTripId(tripId);
+    tripService.updateTrip(updateTripRequestDto);
+    Trip updatedTrip = tripService.getTripById(tripId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(updatedTrip);
+  }
 
   @DeleteMapping("user/{userId}/trip/{tripId}")
-  public ResponseEntity<?> delete(@PathVariable Integer userId, @PathVariable Integer tripId) throws SQLException {
+  public ResponseEntity<?> delete(@PathVariable Integer userId, @PathVariable Integer tripId)
+      throws SQLException {
     tripService.delete(tripId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
