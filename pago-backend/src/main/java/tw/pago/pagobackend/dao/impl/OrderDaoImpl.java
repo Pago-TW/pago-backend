@@ -2,6 +2,7 @@ package tw.pago.pagobackend.dao.impl;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -11,6 +12,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.rowmapper.OrderRowMapper;
 
 @Component
 public class OrderDaoImpl implements OrderDao {
@@ -93,5 +96,25 @@ public class OrderDaoImpl implements OrderDao {
 
     return orderItemId;
 
+  }
+
+
+  @Override
+  public Order getOrderById(Integer orderId) {
+    String sql = "SELECT order_id, order_item_id, shopper_id, create_date, update_date, packaging, "
+        + "verification, destination, traveler_fee, currency, platform_fee_percent, "
+        + "tariff_fee_percent, latest_receive_item_date, note, order_status "
+        + "FROM order_main WHERE order_id = :orderId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderId", orderId);
+
+    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderRowMapper());
+
+    if (orderList.size() > 0) {
+      return  orderList.get(0);
+    } else {
+      return null;
+    }
   }
 }
