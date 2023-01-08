@@ -73,8 +73,8 @@ public class TripDaoImpl implements TripDao {
   @Override
   public Integer createTrip(CreateTripRequestDto createTripRequestDto) {
     String sql =
-        "INSERT INTO trip (traveler_id, from_location, to_location, arrival_date, create_date, upate_date "
-        + " VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate)";
+        "INSERT INTO trip (traveler_id, from_location, to_location, arrival_date, create_date, update_date) "
+        + "VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate )";
     System.out.println(sql);
 
     Map<String, Object> map = new HashMap<>();
