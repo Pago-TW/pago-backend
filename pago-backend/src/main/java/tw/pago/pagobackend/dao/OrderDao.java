@@ -13,5 +13,5 @@ public interface OrderDao {
 
   Order getOrderById (Integer orderId);
 
-//  OrderItem getOrderItemById (Integer orderItemId);
+  OrderItem getOrderItemById (Integer orderItemId);
 }

@@ -8,5 +8,5 @@ public interface OrderService {
 
   Integer createOrder (Integer userId, CreateOrderRequestDto createOrderRequestDto);
 
-  Order getOrderById (Integer orderId);
+  Order getOrderById (Integer orderItemId);
 }

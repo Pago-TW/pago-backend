@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.util.Date;
 import tw.pago.pagobackend.constant.CurrencyEnum;
@@ -7,8 +8,13 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PackagingEnum;
 
 public class Order {
+
+  // Order
   private Integer orderId;
+
+  @JsonIgnore
   private Integer orderItemId;
+
   private Integer shopperId;
   private Date createDate;
   private Date updateDate;
@@ -23,6 +29,16 @@ public class Order {
   private String note;
   private OrderStatusEnum orderStatus;
 
+  // OrderItem
+  private OrderItem orderItem;
+//  private String name;
+//  private String imageUrl;
+//  private String description;
+//  private Integer quantity;
+//  private BigDecimal unitPrice;
+//  private String purchaseLocation;
+
+  // Order
   public Integer getOrderId() {
     return orderId;
   }
@@ -142,4 +158,18 @@ public class Order {
   public void setOrderStatus(OrderStatusEnum orderStatus) {
     this.orderStatus = orderStatus;
   }
+
+
+
+  // OrderItem
+
+  public OrderItem getOrderItem() {
+    return orderItem;
+  }
+
+  public void setOrderItem(OrderItem orderItem) {
+    this.orderItem = orderItem;
+  }
+
+
 }

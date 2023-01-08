@@ -29,6 +29,14 @@ public class OrderRowMapper implements RowMapper<Order> {
     order.setOrderStatus(OrderStatusEnum.valueOf(resultSet.getString("order_status")));
     order.setUpdateDate(resultSet.getTimestamp("update_date"));
 
+    // OrderItem
+//    order.setName(resultSet.getString("name"));
+//    order.setImageUrl(resultSet.getString("image_url"));
+//    order.setDescription(resultSet.getString("description"));
+//    order.setQuantity(resultSet.getInt("quantity"));
+//    order.setUnitPrice(resultSet.getBigDecimal("unit_price"));
+//    order.setPurchaseLocation(resultSet.getString("purchase_location"));
+
     return order;
   }
 }
