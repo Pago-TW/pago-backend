@@ -43,4 +43,9 @@ public class OrderServiceImpl implements OrderService {
   public void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto) {
     orderDao.updateOrderById(updateOrderRequestDto);
   }
+
+  @Override
+  public void deleteOrderById(Integer orderId) {
+    orderDao.deleteOrderById(orderId);
+  }
 }

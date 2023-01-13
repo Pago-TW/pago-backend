@@ -12,4 +12,6 @@ public interface OrderService {
   Order getOrderById (Integer orderItemId);
 
   void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto);
+
+  void deleteOrderById(Integer orderId);
 }

@@ -17,4 +17,6 @@ public interface OrderDao {
   OrderItem getOrderItemById (Integer orderItemId);
 
   void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto);
+
+  void deleteOrderById(Integer orderId);
 }
