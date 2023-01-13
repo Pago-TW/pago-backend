@@ -77,7 +77,7 @@ public class TripController {
   @DeleteMapping("user/{userId}/trip/{tripId}")
   public ResponseEntity<?> delete(@PathVariable Integer userId, @PathVariable Integer tripId)
       throws SQLException {
-    tripService.delete(tripId);
+    tripService.deleteTripById(tripId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.rowmapper.OrderItemRowMapper;
@@ -33,7 +34,6 @@ public class OrderDaoImpl implements OrderDao {
             + "VALUES (:orderItemId, :shopperId, :createDate, :updateDate, :packaging, :verification, "
             + ":destination, :travelerFee, :currency, :platformFeePercent, :tariffFeePercent, "
             + ":latestReceiveItemDate, :note, :orderStatus)";
-
 
     Map<String, Object> map = new HashMap<>();
     map.put("orderItemId", orderItemId);
@@ -127,5 +127,44 @@ public class OrderDaoImpl implements OrderDao {
     } else {
       return null;
     }
+  }
+
+
+  @Override
+  public void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto) {
+    String sql = "UPDATE order_main "
+        + "SET oi.name = :name, oi.image_url = :imageUrl, oi.description = :description, "
+        + "oi.quantity = :quantity, oi.unit_price = :unitPrice, oi.purchase_location = :purchaseLocation, "
+        + "om.packaging = :packaging, om.verification = :verification, om.destination = :destination, "
+        + "om.traveler_fee = :travelerFee, om.currency = :currency, om.latest_receive_item_date = :latestReceiveItemDate, "
+        + "om.note = :note, om.update_date = :updateDate "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
+        + "WHERE om.orderId = :orderId";
+
+    System.out.println("SQL: " + sql);
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("name", updateOrderRequestDto.getCreateOrderItemDto().getName());
+    map.put("imageUrl", updateOrderRequestDto.getCreateOrderItemDto().getImageUrl());
+    map.put("description", updateOrderRequestDto.getCreateOrderItemDto().getDescription());
+    map.put("quantity", updateOrderRequestDto.getCreateOrderItemDto().getQuantity());
+    map.put("unitPrice", updateOrderRequestDto.getCreateOrderItemDto().getUnitPrice());
+    map.put("purchaseLocation", updateOrderRequestDto.getCreateOrderItemDto().getPurchaseLocation());
+    map.put("packaging", updateOrderRequestDto.getPackaging());
+    map.put("verification", updateOrderRequestDto.getVerification());
+    map.put("destination", updateOrderRequestDto.getDestination());
+    map.put("travelerFee", updateOrderRequestDto.getTravelerFee());
+    map.put("currency", updateOrderRequestDto.getCurrency().toString());
+    map.put("latestReceiveItemDate", updateOrderRequestDto.getLatestReceiveItemDate());
+    map.put("note", updateOrderRequestDto.getNote());
+
+    Date now = new Date();
+    map.put("updateDate", now);
+    map.put("orderId", updateOrderRequestDto.getOrderId());
+    System.out.println("OrderId = " + updateOrderRequestDto.getOrderId());
+
+    namedParameterJdbcTemplate.update(sql, map);
   }
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.service.OrderService;
@@ -35,5 +36,11 @@ public class OrderServiceImpl implements OrderService {
     order.setOrderItem(orderItem);
 
     return order;
+  }
+
+
+  @Override
+  public void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto) {
+    orderDao.updateOrderById(updateOrderRequestDto);
   }
 }
