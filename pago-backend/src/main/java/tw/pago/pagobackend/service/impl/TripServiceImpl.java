@@ -38,7 +38,7 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
-    public void delete(Integer tripId) throws SQLException {
+    public void deleteTripById(Integer tripId) throws SQLException {
         tripDAO.delete(tripId);
     }
 

@@ -16,5 +16,5 @@ public interface TripService {
 
     void updateTrip(UpdateTripRequestDto updateTripRequestDto);
 
-    void delete(Integer tripId) throws SQLException;
+    void deleteTripById(Integer tripId) throws SQLException;
 }
