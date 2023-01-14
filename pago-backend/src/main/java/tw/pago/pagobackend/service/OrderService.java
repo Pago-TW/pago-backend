@@ -9,7 +9,7 @@ public interface OrderService {
 
   Integer createOrder (Integer userId, CreateOrderRequestDto createOrderRequestDto);
 
-  Order getOrderById (Integer orderItemId);
+  Order getOrderById (Integer orderId);
 
   void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto);
 
