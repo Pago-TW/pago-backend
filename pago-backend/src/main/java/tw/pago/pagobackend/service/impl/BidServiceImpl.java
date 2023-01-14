@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
+import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.service.BidService;
 
 
@@ -19,5 +20,12 @@ public class BidServiceImpl implements BidService {
     Integer bidId = bidDao.createBid(createBidRequestDto);
 
     return bidId;
+  }
+
+  @Override
+  public Bid getBidById(Integer bidId) {
+    Bid bid = bidDao.getBidById(bidId);
+    return bid;
+
   }
 }
