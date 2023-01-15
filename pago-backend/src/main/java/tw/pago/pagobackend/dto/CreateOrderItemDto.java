@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 public class CreateOrderItemDto {
 
   @NotNull
-  private Integer orderItemId;
+  private String orderItemId;
 
   @NotNull
   private String name;
@@ -23,12 +23,11 @@ public class CreateOrderItemDto {
   @NotNull
   private String purchaseLocation;
 
-
-  public Integer getOrderItemId() {
+  public String getOrderItemId() {
     return orderItemId;
   }
 
-  public void setOrderItemId(Integer orderItemId) {
+  public void setOrderItemId(String orderItemId) {
     this.orderItemId = orderItemId;
   }
 

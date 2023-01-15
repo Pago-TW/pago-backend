@@ -1,15 +1,14 @@
 package tw.pago.pagobackend.service;
 
-import tw.pago.pagobackend.dto.CreateOrderItemDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 
 public interface OrderService {
 
-  Integer createOrder (Integer userId, CreateOrderRequestDto createOrderRequestDto);
+  Order createOrder (Integer userId, CreateOrderRequestDto createOrderRequestDto);
 
-  Order getOrderById (Integer orderId);
+  Order getOrderById (String orderId);
 
   void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto);
 

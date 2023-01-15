@@ -9,28 +9,39 @@ import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
 public class OrderServiceImpl implements OrderService {
 
   @Autowired
   private OrderDao orderDao;
+  @Autowired
+  private UuidGenerator uuidGenerator;
 
   @Transactional
   @Override
-  public Integer createOrder(Integer userId, CreateOrderRequestDto createOrderRequestDto) {
+  public Order createOrder(Integer userId, CreateOrderRequestDto createOrderRequestDto) {
 
-    Integer orderItemId = orderDao.createOrderItem(createOrderRequestDto);
-    Integer orderId = orderDao.createOrder(userId, createOrderRequestDto, orderItemId);
+    String orderItemUuid = uuidGenerator.getUuid();
+    String orderUuid = uuidGenerator.getUuid();
 
-    return orderId;
+    createOrderRequestDto.getCreateOrderItemDto().setOrderItemId(orderItemUuid);
+    createOrderRequestDto.setOrderId(orderUuid);
+
+    orderDao.createOrderItem(createOrderRequestDto);
+    orderDao.createOrder(userId, createOrderRequestDto);
+
+    Order order = getOrderById(orderUuid);
+
+    return order;
   }
 
   @Override
-  public Order getOrderById(Integer orderId) {
+  public Order getOrderById(String orderId) {
     Order order = orderDao.getOrderById(orderId);
 
-    Integer orderItemId = order.getOrderItemId();
+    String orderItemId = order.getOrderItemId();
     OrderItem orderItem = orderDao.getOrderItemById(orderItemId);
 
     order.setOrderItem(orderItem);

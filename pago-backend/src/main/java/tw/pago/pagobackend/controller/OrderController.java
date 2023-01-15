@@ -27,16 +27,16 @@ public class OrderController {
   public ResponseEntity<Order> createOrder(@PathVariable Integer userId,
       @RequestBody @Valid CreateOrderRequestDto createOrderRequestDto) {
 
-    Integer orderId = orderService.createOrder(userId, createOrderRequestDto);
+    Order order = orderService.createOrder(userId, createOrderRequestDto);
 
-    Order order = orderService.getOrderById(orderId);
+//    Order order = orderService.getOrderById(orderId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(order);
   }
 
 
   @PutMapping("/users/{userId}/orders/{orderId}")
-  public ResponseEntity<Order> updateOrderById(@PathVariable Integer userId, @PathVariable Integer orderId, @RequestBody @Valid
+  public ResponseEntity<Order> updateOrderById(@PathVariable Integer userId, @PathVariable String orderId, @RequestBody @Valid
       UpdateOrderRequestDto updateOrderRequestDto) {
 
     // Check if the Order to be updated exists
@@ -64,7 +64,7 @@ public class OrderController {
 
 
   @GetMapping("/orders/{orderId}")
-  public ResponseEntity<Order> getOrderById(@PathVariable Integer orderId) {
+  public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
 
     Order order = orderService.getOrderById(orderId);
 

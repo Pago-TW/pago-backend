@@ -7,14 +7,13 @@ import tw.pago.pagobackend.model.OrderItem;
 
 public interface OrderDao {
 
-  Integer createOrder(Integer userId, CreateOrderRequestDto createOrderRequestDto,
-      Integer orderItemId);
+  void createOrder(Integer userId, CreateOrderRequestDto createOrderRequestDto);
 
-  Integer createOrderItem(CreateOrderRequestDto createOrderRequestDto);
+  void createOrderItem(CreateOrderRequestDto createOrderRequestDto);
 
-  Order getOrderById (Integer orderId);
+  Order getOrderById (String orderId);
 
-  OrderItem getOrderItemById (Integer orderItemId);
+  OrderItem getOrderItemById (String orderItemId);
 
   void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto);
 

@@ -7,8 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -25,18 +23,18 @@ public class OrderDaoImpl implements OrderDao {
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   @Override
-  public Integer createOrder(Integer userId, CreateOrderRequestDto createOrderRequestDto,
-      Integer orderItemId) {
+  public void createOrder(Integer userId, CreateOrderRequestDto createOrderRequestDto) {
     String sql =
-        "INSERT INTO order_main (order_item_id, shopper_id, create_date, update_date, packaging, "
+        "INSERT INTO order_main (order_id, order_item_id, shopper_id, create_date, update_date, packaging, "
             + "verification, destination, traveler_fee, currency, platform_fee_percent, "
             + "tariff_fee_percent, latest_receive_item_date, note, order_status) "
-            + "VALUES (:orderItemId, :shopperId, :createDate, :updateDate, :packaging, :verification, "
+            + "VALUES (:orderId, :orderItemId, :shopperId, :createDate, :updateDate, :packaging, :verification, "
             + ":destination, :travelerFee, :currency, :platformFeePercent, :tariffFeePercent, "
             + ":latestReceiveItemDate, :note, :orderStatus)";
 
     Map<String, Object> map = new HashMap<>();
-    map.put("orderItemId", orderItemId);
+    map.put("orderId", createOrderRequestDto.getOrderId());
+    map.put("orderItemId", createOrderRequestDto.getCreateOrderItemDto().getOrderItemId());
     map.put("shopperId", userId);
     Date now = new Date();
     map.put("createDate", now);
@@ -52,20 +50,18 @@ public class OrderDaoImpl implements OrderDao {
     map.put("note", createOrderRequestDto.getNote());
     map.put("orderStatus", createOrderRequestDto.getOrderStatus().toString());
 
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
-    int orderId = keyHolder.getKey().intValue();
-    return orderId;
   }
 
   @Override
-  public Integer createOrderItem(CreateOrderRequestDto createOrderRequestDto) {
-    String sql = "INSERT INTO order_item (`name`, image_url, description, quantity, unit_price, "
+  public void createOrderItem(CreateOrderRequestDto createOrderRequestDto) {
+    String sql = "INSERT INTO order_item (order_item_id ,`name`, image_url, description, quantity, unit_price, "
         + "purchase_location) "
-        + "VALUES (:name, :imageUrl, :description, :quantity, :unitPrice, :purchaseLocation)";
+        + "VALUES (:orderItemId ,:name, :imageUrl, :description, :quantity, :unitPrice, :purchaseLocation)";
 
     Map<String, Object> map = new HashMap<>();
+    map.put("orderItemId", createOrderRequestDto.getCreateOrderItemDto().getOrderItemId());
     map.put("name", createOrderRequestDto.getCreateOrderItemDto().getName());
     map.put("imageUrl", createOrderRequestDto.getCreateOrderItemDto().getImageUrl());
     map.put("description", createOrderRequestDto.getCreateOrderItemDto().getDescription());
@@ -74,19 +70,12 @@ public class OrderDaoImpl implements OrderDao {
     map.put("purchaseLocation",
         createOrderRequestDto.getCreateOrderItemDto().getPurchaseLocation());
 
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-
-    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
-
-    int orderItemId = keyHolder.getKey().intValue();
-
-    return orderItemId;
-
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
   }
 
 
   @Override
-  public Order getOrderById(Integer orderId) {
+  public Order getOrderById(String orderId) {
     String sql =
         "SELECT om.order_id, om.order_item_id, om.shopper_id, om.create_date, om.update_date, om.packaging, "
             + "om.verification, om.destination, om.traveler_fee, om.currency, om.platform_fee_percent, "
@@ -110,7 +99,7 @@ public class OrderDaoImpl implements OrderDao {
 
 
   @Override
-  public OrderItem getOrderItemById(Integer orderItemId) {
+  public OrderItem getOrderItemById(String orderItemId) {
     String sql = "SELECT order_item_id, `name`, image_url, description, "
         + "quantity, unit_price, purchase_location "
         + "FROM order_item "

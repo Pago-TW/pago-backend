@@ -10,10 +10,10 @@ import tw.pago.pagobackend.constant.PackagingEnum;
 public class Order {
 
   // Order
-  private Integer orderId;
+  private String orderId;
 
   @JsonIgnore
-  private Integer orderItemId;
+  private String orderItemId;
 
   private Integer shopperId;
   private Date createDate;
@@ -39,19 +39,19 @@ public class Order {
 //  private String purchaseLocation;
 
   // Order
-  public Integer getOrderId() {
+  public String getOrderId() {
     return orderId;
   }
 
-  public void setOrderId(Integer orderId) {
+  public void setOrderId(String orderId) {
     this.orderId = orderId;
   }
 
-  public Integer getOrderItemId() {
+  public String getOrderItemId() {
     return orderItemId;
   }
 
-  public void setOrderItemId(Integer orderItemId) {
+  public void setOrderItemId(String orderItemId) {
     this.orderItemId = orderItemId;
   }
 

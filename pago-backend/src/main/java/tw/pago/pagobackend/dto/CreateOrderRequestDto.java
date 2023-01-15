@@ -19,6 +19,8 @@ public class CreateOrderRequestDto {
   @JsonProperty(value = "orderItem")
   private CreateOrderItemDto createOrderItemDto;
 
+  private String orderId;
+
   @NotNull
   private PackagingEnum packaging;
 
@@ -49,6 +51,14 @@ public class CreateOrderRequestDto {
   @Value("REQUESTED")
   private OrderStatusEnum orderStatus;
 
+
+  public String getOrderId() {
+    return orderId;
+  }
+
+  public void setOrderId(String orderId) {
+    this.orderId = orderId;
+  }
 
   public CreateOrderItemDto getCreateOrderItemDto() {
     return createOrderItemDto;
