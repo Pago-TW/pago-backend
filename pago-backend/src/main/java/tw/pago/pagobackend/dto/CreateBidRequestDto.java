@@ -7,7 +7,7 @@ import tw.pago.pagobackend.constant.CurrencyEnum;
 
 public class CreateBidRequestDto {
 
-
+  private String bidId;
   private Integer orderId;
   private Integer tripId;
 
@@ -16,6 +16,14 @@ public class CreateBidRequestDto {
 
   private CurrencyEnum currency;
 
+
+  public String getBidId() {
+    return bidId;
+  }
+
+  public void setBidId(String bidId) {
+    this.bidId = bidId;
+  }
 
   public Integer getOrderId() {
     return orderId;

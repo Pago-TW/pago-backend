@@ -12,9 +12,10 @@ public class BidRowMapper implements RowMapper<Bid> {
   @Override
   public Bid mapRow(ResultSet resultSet, int rowNum) throws SQLException {
     Bid bid = new Bid();
-    bid.setBidId(resultSet.getInt("bid_id"));
+    bid.setBidId(resultSet.getString("bid_id"));
     bid.setOrderId(resultSet.getInt("order_id"));
     bid.setTripId(resultSet.getInt("trip_id"));
+
     bid.setBidAmount(resultSet.getBigDecimal("bid_amount"));
     bid.setCurrency(CurrencyEnum.valueOf(resultSet.getString("currency")));
     bid.setCreateDate(resultSet.getTimestamp("create_date"));

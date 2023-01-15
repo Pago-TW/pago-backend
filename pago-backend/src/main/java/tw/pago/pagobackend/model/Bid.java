@@ -5,19 +5,18 @@ import java.util.Date;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 
 public class Bid {
-  private Integer bidId;
+  private String bidId;
   private Integer orderId;
   private Integer tripId;
   private BigDecimal bidAmount;
   private CurrencyEnum currency;
   private Date createDate;
 
-
-  public Integer getBidId() {
+  public String getBidId() {
     return bidId;
   }
 
-  public void setBidId(Integer bidId) {
+  public void setBidId(String bidId) {
     this.bidId = bidId;
   }
 
