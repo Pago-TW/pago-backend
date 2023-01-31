@@ -9,4 +9,6 @@ import tw.pago.pagobackend.model.Matching;
 public interface MatchingService {
 
   Matching chooseTraveler(ChooseTravelerDto chooseTravelerDto);
+
+  Matching getMatching(String matchingId);
 }

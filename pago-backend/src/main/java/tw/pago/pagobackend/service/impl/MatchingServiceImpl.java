@@ -29,7 +29,12 @@ public class MatchingServiceImpl implements MatchingService {
 
     matchingDao.createMatching(chooseTravelerDto);
 
+    Matching matching = matchingDao.getMatching(matchingUuid);
+    return matching;
+  }
 
-    return null;
+  @Override
+  public Matching getMatching(String matchingId) {
+    return matchingDao.getMatching(matchingId);
   }
 }
