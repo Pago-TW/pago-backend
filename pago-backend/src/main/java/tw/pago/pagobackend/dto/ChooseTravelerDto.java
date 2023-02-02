@@ -5,9 +5,18 @@ import tw.pago.pagobackend.constant.MatchingStatusEnum;
 public class ChooseTravelerDto {
 
 
-  String matchingId;
-  String bidId;
-  MatchingStatusEnum matchingStatus;
+  private String orderId;
+  private String matchingId;
+  private String bidId;
+  private MatchingStatusEnum matchingStatus;
+
+  public String getOrderId() {
+    return orderId;
+  }
+
+  public void setOrderId(String orderId) {
+    this.orderId = orderId;
+  }
 
   public String getMatchingId() {
     return matchingId;

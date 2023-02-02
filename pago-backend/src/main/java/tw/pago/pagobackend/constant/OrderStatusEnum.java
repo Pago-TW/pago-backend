@@ -2,8 +2,8 @@ package tw.pago.pagobackend.constant;
 
 public enum OrderStatusEnum {
   REQUESTED,
-  PURCHASING,
-  DELIVERY,
+  TO_BE_PURCHASED,
+  TO_BE_DELIVERED,
   FINISHED,
   CANCELED
 }

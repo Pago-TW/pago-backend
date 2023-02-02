@@ -19,8 +19,11 @@ public class MatchingController {
   @Autowired
   private MatchingService matchingService;
 
-  @PostMapping("/matchings")
-  public ResponseEntity<Matching> chooseTraveler(@RequestBody ChooseTravelerDto chooseTravelerDto) {
+  @PostMapping("/orders/{orderId}/matchings")
+  public ResponseEntity<Matching> chooseTraveler(@PathVariable String orderId, @RequestBody ChooseTravelerDto chooseTravelerDto) {
+
+    chooseTravelerDto.setOrderId(orderId);
+
     Matching matching = matchingService.chooseTraveler(chooseTravelerDto);
 
 
@@ -30,7 +33,7 @@ public class MatchingController {
   @GetMapping ("/matchings/{matchingId}")
   public ResponseEntity<Matching> getMatching(@PathVariable String matchingId) {
     Matching matching = matchingService.getMatching(matchingId);
-    
+
     return ResponseEntity.status(HttpStatus.OK).body(matching);
   }
 }
