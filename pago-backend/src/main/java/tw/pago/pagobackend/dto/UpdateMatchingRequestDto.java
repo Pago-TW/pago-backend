@@ -1,15 +1,18 @@
-package tw.pago.pagobackend.model;
+package tw.pago.pagobackend.dto;
 
 import java.util.Date;
 import tw.pago.pagobackend.constant.MatchingStatusEnum;
 
-public class Matching {
+public class UpdateMatchingRequestDto {
 
   String matchingId;
   String bidId;
   Date createDate;
   MatchingStatusEnum matchingStatus;
-  Date updateDate;
+
+  public UpdateMatchingRequestDto() {
+
+  };
 
   public String getMatchingId() {
     return matchingId;
@@ -41,13 +44,5 @@ public class Matching {
 
   public void setMatchingStatus(MatchingStatusEnum matchingStatus) {
     this.matchingStatus = matchingStatus;
-  }
-
-  public Date getUpdateDate() {
-    return updateDate;
-  }
-
-  public void setUpdateDate(Date updateDate) {
-    this.updateDate = updateDate;
   }
 }

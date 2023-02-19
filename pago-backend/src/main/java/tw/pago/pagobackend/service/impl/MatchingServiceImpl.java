@@ -1,14 +1,14 @@
 package tw.pago.pagobackend.service.impl;
 
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tw.pago.pagobackend.constant.MatchingStatusEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.MatchingDao;
 import tw.pago.pagobackend.dto.ChooseTravelerDto;
+import tw.pago.pagobackend.dto.UpdateMatchingRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Matching;
 import tw.pago.pagobackend.model.Order;
@@ -42,16 +42,13 @@ public class MatchingServiceImpl implements MatchingService {
     Matching matching = matchingDao.getMatching(matchingUuid);
 
     // Update Order Status
-
     UpdateOrderRequestDto updateOrderRequestDto = new UpdateOrderRequestDto();
 
     Order order = orderService.getOrderById(chooseTravelerDto.getOrderId());
-    setOrderToOrderRequetDto(order, updateOrderRequestDto);
+    updateOrderRequestDto = setOrderToUpdateOrderRequestDto(order,
+        updateOrderRequestDto);
 
-    if (updateOrderRequestDto == null) {
-      System.out.println("NULL");
-    }
-    orderService.updateOrderById(updateOrderRequestDto);
+    orderService.updateOrder(updateOrderRequestDto);
 
     return matching;
   }
@@ -63,19 +60,9 @@ public class MatchingServiceImpl implements MatchingService {
 
 
   @Override
-  public void setOrderToOrderRequetDto(Order order, UpdateOrderRequestDto updateOrderRequestDto) {
-
+  public UpdateOrderRequestDto setOrderToUpdateOrderRequestDto(Order order, UpdateOrderRequestDto updateOrderRequestDto) {
     updateOrderRequestDto.setOrderId(order.getOrderId());
     updateOrderRequestDto.setShopperId(order.getShopperId());
-    updateOrderRequestDto.getCreateOrderItemDto().setOrderItemId(order.getOrderItemId());
-    updateOrderRequestDto.getCreateOrderItemDto().setName(order.getOrderItem().getName());
-    updateOrderRequestDto.getCreateOrderItemDto().setImageUrl(order.getOrderItem().getImageUrl());
-    updateOrderRequestDto.getCreateOrderItemDto()
-        .setDescription(order.getOrderItem().getDescription());
-    updateOrderRequestDto.getCreateOrderItemDto().setQuantity(order.getOrderItem().getQuantity());
-    updateOrderRequestDto.getCreateOrderItemDto().setUnitPrice(order.getOrderItem().getUnitPrice());
-    updateOrderRequestDto.getCreateOrderItemDto()
-        .setPurchaseLocation(order.getOrderItem().getPurchaseLocation());
     updateOrderRequestDto.setPackaging(order.getPackaging());
     updateOrderRequestDto.setVerification(order.getVerification());
     updateOrderRequestDto.setDestination(order.getDestination());
@@ -87,5 +74,25 @@ public class MatchingServiceImpl implements MatchingService {
     updateOrderRequestDto.setNote(order.getNote());
     updateOrderRequestDto.setOrderStatus(order.getOrderStatus());
 
+    return updateOrderRequestDto;
+  }
+
+  @Override
+  public Matching updateMatching(String orderId,
+      UpdateMatchingRequestDto updateMatchingRequestDto) {
+
+    // Update Matching
+    matchingDao.updateMatching(updateMatchingRequestDto);
+
+    // Update Order Status
+    Order order = orderService.getOrderById(orderId);
+    UpdateOrderRequestDto updateOrderRequestDto = new UpdateOrderRequestDto();
+    updateOrderRequestDto = setOrderToUpdateOrderRequestDto(order,
+        updateOrderRequestDto);
+
+    updateOrderRequestDto.setOrderStatus(OrderStatusEnum.valueOf(updateMatchingRequestDto.getMatchingStatus().toString()));
+    orderService.updateOrder(updateOrderRequestDto);
+
+    return null;
   }
 }

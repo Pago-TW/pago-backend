@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
@@ -120,7 +121,7 @@ public class OrderDaoImpl implements OrderDao {
 
 
   @Override
-  public void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto) {
+  public void updateOrderAndOrderItemByOrderId(UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
     String sql = "UPDATE order_main "
         + "SET oi.name = :name, oi.image_url = :imageUrl, oi.description = :description, "
         + "oi.quantity = :quantity, oi.unit_price = :unitPrice, oi.purchase_location = :purchaseLocation, "
@@ -130,18 +131,54 @@ public class OrderDaoImpl implements OrderDao {
         + "FROM order_main AS om "
         + "LEFT JOIN order_item AS oi "
         + "ON om.order_item_id = oi.order_item_id "
-        + "WHERE om.orderId = :orderId";
+        + "WHERE om.order_Id = :orderId";
 
     System.out.println("SQL: " + sql);
 
     Map<String, Object> map = new HashMap<>();
-    map.put("name", updateOrderRequestDto.getCreateOrderItemDto().getName());
-    map.put("imageUrl", updateOrderRequestDto.getCreateOrderItemDto().getImageUrl());
-    map.put("description", updateOrderRequestDto.getCreateOrderItemDto().getDescription());
-    map.put("quantity", updateOrderRequestDto.getCreateOrderItemDto().getQuantity());
-    map.put("unitPrice", updateOrderRequestDto.getCreateOrderItemDto().getUnitPrice());
-    map.put("purchaseLocation", updateOrderRequestDto.getCreateOrderItemDto().getPurchaseLocation());
-    map.put("packaging", updateOrderRequestDto.getPackaging());
+    map.put("name", updateOrderAndOrderItemRequestDto.getCreateOrderItemDto().getName());
+    map.put("imageUrl", updateOrderAndOrderItemRequestDto.getCreateOrderItemDto().getImageUrl());
+    map.put("description", updateOrderAndOrderItemRequestDto.getCreateOrderItemDto().getDescription());
+    map.put("quantity", updateOrderAndOrderItemRequestDto.getCreateOrderItemDto().getQuantity());
+    map.put("unitPrice", updateOrderAndOrderItemRequestDto.getCreateOrderItemDto().getUnitPrice());
+    map.put("purchaseLocation", updateOrderAndOrderItemRequestDto.getCreateOrderItemDto().getPurchaseLocation());
+    map.put("packaging", updateOrderAndOrderItemRequestDto.getPackaging());
+    map.put("verification", updateOrderAndOrderItemRequestDto.getVerification());
+    map.put("destination", updateOrderAndOrderItemRequestDto.getDestination());
+    map.put("travelerFee", updateOrderAndOrderItemRequestDto.getTravelerFee());
+    map.put("currency", updateOrderAndOrderItemRequestDto.getCurrency().toString());
+    map.put("latestReceiveItemDate", updateOrderAndOrderItemRequestDto.getLatestReceiveItemDate());
+    map.put("note", updateOrderAndOrderItemRequestDto.getNote());
+
+    Date now = new Date();
+    map.put("updateDate", now);
+    map.put("orderId", updateOrderAndOrderItemRequestDto.getOrderId());
+    System.out.println("OrderId = " + updateOrderAndOrderItemRequestDto.getOrderId());
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+
+  @Override
+  public void deleteOrderById(String orderId) {
+    String sql = "DELETE FROM order_main WHERE order_id = :orderId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderId", orderId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
+  public void updateOrder(UpdateOrderRequestDto updateOrderRequestDto) {
+    String sql = "UPDATE order_main "
+        + "SET packaging = :packaging, verification = :verification, destination = :destination, "
+        + "traveler_fee = :travelerFee, currency = :currency, latest_receive_item_date = :latestReceiveItemDate, "
+        + "note = :note, update_date = :updateDate, order_status = :orderStatus "
+        + "WHERE order_Id = :orderId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("packaging", updateOrderRequestDto.getPackaging().toString());
     map.put("verification", updateOrderRequestDto.getVerification());
     map.put("destination", updateOrderRequestDto.getDestination());
     map.put("travelerFee", updateOrderRequestDto.getTravelerFee());
@@ -151,19 +188,8 @@ public class OrderDaoImpl implements OrderDao {
 
     Date now = new Date();
     map.put("updateDate", now);
+    map.put("orderStatus", updateOrderRequestDto.getOrderStatus().toString());
     map.put("orderId", updateOrderRequestDto.getOrderId());
-    System.out.println("OrderId = " + updateOrderRequestDto.getOrderId());
-
-    namedParameterJdbcTemplate.update(sql, map);
-  }
-
-
-  @Override
-  public void deleteOrderById(Integer orderId) {
-    String sql = "DELETE FROM order_main WHERE order_id = :orderId";
-
-    Map<String, Object> map = new HashMap<>();
-    map.put("orderId", orderId);
 
     namedParameterJdbcTemplate.update(sql, map);
   }

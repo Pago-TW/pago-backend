@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service;
 
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 
@@ -10,7 +11,10 @@ public interface OrderService {
 
   Order getOrderById (String orderId);
 
-  void updateOrderById(UpdateOrderRequestDto updateOrderRequestDto);
+  void updateOrderAndOrderItemByOrderId(
+      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
 
-  void deleteOrderById(Integer orderId);
+  void deleteOrderById(String orderId);
+
+  void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

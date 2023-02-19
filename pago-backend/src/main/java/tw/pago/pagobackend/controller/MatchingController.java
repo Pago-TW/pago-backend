@@ -5,11 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.ChooseTravelerDto;
+import tw.pago.pagobackend.dto.UpdateMatchingRequestDto;
 import tw.pago.pagobackend.model.Matching;
 import tw.pago.pagobackend.service.MatchingService;
 
@@ -35,5 +37,16 @@ public class MatchingController {
     Matching matching = matchingService.getMatching(matchingId);
 
     return ResponseEntity.status(HttpStatus.OK).body(matching);
+  }
+
+  @PatchMapping("orders/{orderId}/matchings/{matchingId}")
+  public ResponseEntity<?> updateMatching(@PathVariable String orderId, @PathVariable String matchingId, @RequestBody
+      UpdateMatchingRequestDto updateMatchingRequestDto) {
+
+    updateMatchingRequestDto.setMatchingId(matchingId);
+    Matching matching = matchingService.updateMatching(orderId, updateMatchingRequestDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body("update Matching");
+
   }
 }

@@ -1,32 +1,53 @@
 package tw.pago.pagobackend.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PackagingEnum;
 
-public class UpdateOrderRequestDto {
+public class UpdateOrderAndOrderItemRequestDto {
+
 
   private String orderId;
 
-  @JsonIgnore
-  private String orderItemId;
-
   private Integer shopperId;
-  private Date createDate;
-  private Date updateDate;
+
+  @JsonProperty(value = "orderItem")
+  private CreateOrderItemDto createOrderItemDto;
+
+
   private PackagingEnum packaging;
+
+
   private String verification;
+
+
   private String destination;
+
+
   private BigDecimal travelerFee;
+
+
   private CurrencyEnum currency;
+
+  @Value("4.5")
   private Double platformFeePercent;
+
+  @Value("2.5")
   private Double tariffFeePercent;
+
+
+  @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
   private Date latestReceiveItemDate;
+
   private String note;
+
   private OrderStatusEnum orderStatus;
+
 
   public String getOrderId() {
     return orderId;
@@ -34,14 +55,6 @@ public class UpdateOrderRequestDto {
 
   public void setOrderId(String orderId) {
     this.orderId = orderId;
-  }
-
-  public String getOrderItemId() {
-    return orderItemId;
-  }
-
-  public void setOrderItemId(String orderItemId) {
-    this.orderItemId = orderItemId;
   }
 
   public Integer getShopperId() {
@@ -52,20 +65,12 @@ public class UpdateOrderRequestDto {
     this.shopperId = shopperId;
   }
 
-  public Date getCreateDate() {
-    return createDate;
+  public CreateOrderItemDto getCreateOrderItemDto() {
+    return createOrderItemDto;
   }
 
-  public void setCreateDate(Date createDate) {
-    this.createDate = createDate;
-  }
-
-  public Date getUpdateDate() {
-    return updateDate;
-  }
-
-  public void setUpdateDate(Date updateDate) {
-    this.updateDate = updateDate;
+  public void setCreateOrderItemDto(CreateOrderItemDto createOrderItemDto) {
+    this.createOrderItemDto = createOrderItemDto;
   }
 
   public PackagingEnum getPackaging() {

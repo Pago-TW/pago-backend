@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.MatchingDao;
 import tw.pago.pagobackend.dto.ChooseTravelerDto;
+import tw.pago.pagobackend.dto.UpdateMatchingRequestDto;
 import tw.pago.pagobackend.model.Matching;
 import tw.pago.pagobackend.rowmapper.MatchingRowMapper;
 
@@ -52,5 +53,21 @@ public class MatchingDaoImpl implements MatchingDao {
     } else {
       return null;
     }
+  }
+
+  @Override
+  public void updateMatching(UpdateMatchingRequestDto updateMatchingRequestDto) {
+    String sql = "UPDATE matching "
+        + "SET matching_status = :matchingStatus, update_date = :updateDate "
+        + "WHERE matching_id = :matchingId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("matchingStatus", updateMatchingRequestDto.getMatchingStatus().toString());
+
+    Date now = new Date();
+    map.put("updateDate", now);
+    map.put("matchingId", updateMatchingRequestDto.getMatchingId());
+
+    namedParameterJdbcTemplate.update(sql, map);
   }
 }
