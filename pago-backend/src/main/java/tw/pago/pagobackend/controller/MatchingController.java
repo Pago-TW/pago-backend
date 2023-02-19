@@ -43,8 +43,12 @@ public class MatchingController {
   public ResponseEntity<?> updateMatching(@PathVariable String orderId, @PathVariable String matchingId, @RequestBody
       UpdateMatchingRequestDto updateMatchingRequestDto) {
 
-    updateMatchingRequestDto.setMatchingId(matchingId);
-    Matching matching = matchingService.updateMatching(orderId, updateMatchingRequestDto);
+    try {
+      updateMatchingRequestDto.setMatchingId(matchingId);
+      Matching matching = matchingService.updateMatching(orderId, updateMatchingRequestDto);
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
 
     return ResponseEntity.status(HttpStatus.OK).body("update Matching");
 

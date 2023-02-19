@@ -3,6 +3,8 @@ package tw.pago.pagobackend.service.impl;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tw.pago.pagobackend.constant.MatchingStatusEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
@@ -79,17 +81,50 @@ public class MatchingServiceImpl implements MatchingService {
 
   @Override
   public Matching updateMatching(String orderId,
-      UpdateMatchingRequestDto updateMatchingRequestDto) {
+      UpdateMatchingRequestDto updateMatchingRequestDto) throws RuntimeException {
+
+
+
+
+    Order order = orderService.getOrderById(orderId);
+
+    // Check the current status of order and API call Value
+    switch (order.getOrderStatus()) {
+      case REQUESTED:
+        if (updateMatchingRequestDto.getMatchingStatus() != MatchingStatusEnum.TO_BE_PURCHASED) {
+          throw new RuntimeException("Current Status is " + order.getOrderStatus() + ", But your value is " + updateMatchingRequestDto.getMatchingStatus().toString());
+        }
+      case TO_BE_PURCHASED:
+        if (updateMatchingRequestDto.getMatchingStatus() != MatchingStatusEnum.TO_BE_DELIVERED) {
+          throw new RuntimeException("Current Status is " + order.getOrderStatus() + ", But your value is " + updateMatchingRequestDto.getMatchingStatus().toString());
+        }
+      case TO_BE_DELIVERED:
+        if ((updateMatchingRequestDto.getMatchingStatus() != MatchingStatusEnum.SHOPPER_HAS_CONFIRMED) || updateMatchingRequestDto.getMatchingStatus() != MatchingStatusEnum.CONSUMER_HAS_CONFIRMED) {
+          throw new RuntimeException("Current Status is " + order.getOrderStatus() + ", But your value is " + updateMatchingRequestDto.getMatchingStatus().toString());
+        }
+      case CONSUMER_HAS_CONFIRMED:
+        if (updateMatchingRequestDto.getMatchingStatus() != MatchingStatusEnum.SHOPPER_HAS_CONFIRMED) {
+          throw new RuntimeException("Current Status is " + order.getOrderStatus() + ", But your value is " + updateMatchingRequestDto.getMatchingStatus().toString());
+        }
+      case SHOPPER_HAS_CONFIRMED:
+        if (updateMatchingRequestDto.getMatchingStatus() != MatchingStatusEnum.CONSUMER_HAS_CONFIRMED) {
+          throw new RuntimeException("Current Status is " + order.getOrderStatus() + ", But your value is " + updateMatchingRequestDto.getMatchingStatus().toString());
+        }
+      case FINISHED:
+        if (updateMatchingRequestDto.getMatchingStatus() == MatchingStatusEnum.FINISHED) {
+          throw new RuntimeException("Current Status is " + order.getOrderStatus() + ", But your value is " + updateMatchingRequestDto.getMatchingStatus().toString());
+        }
+      case CANCELED:
+    }
 
     // Update Matching
     matchingDao.updateMatching(updateMatchingRequestDto);
 
-    // Update Order Status
-    Order order = orderService.getOrderById(orderId);
     UpdateOrderRequestDto updateOrderRequestDto = new UpdateOrderRequestDto();
     updateOrderRequestDto = setOrderToUpdateOrderRequestDto(order,
         updateOrderRequestDto);
 
+    // Update Order Status
     updateOrderRequestDto.setOrderStatus(OrderStatusEnum.valueOf(updateMatchingRequestDto.getMatchingStatus().toString()));
     orderService.updateOrder(updateOrderRequestDto);
 
