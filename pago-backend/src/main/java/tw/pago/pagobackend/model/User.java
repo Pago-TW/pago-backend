@@ -23,6 +23,7 @@ public class User {
   private String aboutMe;
   private String country;
   private Date lastLogin;
+  private Integer persent;
 
   public Integer getUserId() {
     return userId;
