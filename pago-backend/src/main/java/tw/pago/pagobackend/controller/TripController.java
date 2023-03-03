@@ -25,8 +25,8 @@ public class TripController {
   @Autowired
   private TripService tripService;
 
-  @GetMapping("/trip/{tripId}")
-  public ResponseEntity<Trip> getTripById(@PathVariable Integer tripId) {
+  @GetMapping("/users/{userId}/trips/{tripId}")
+  public ResponseEntity<Trip> getTripById(@PathVariable String userId ,@PathVariable String tripId) {
     Trip trip = tripService.getTripById(tripId);
 
     if (trip != null) {
@@ -43,11 +43,11 @@ public class TripController {
 //  }
 
   @PostMapping("/users/{userId}/trips")
-  public ResponseEntity<Trip> createTrip(@PathVariable Integer userId,
+  public ResponseEntity<Trip> createTrip(@PathVariable String userId,
       @RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
 
     createTripRequestDto.setTravelerId(userId);
-    Integer tripId = tripService.createTrip(createTripRequestDto);
+    String tripId = tripService.createTrip(createTripRequestDto);
     Trip trip = tripService.getTripById(tripId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(trip);
@@ -55,8 +55,8 @@ public class TripController {
   }
 
   @PutMapping("/users/{userId}/trips/{tripId}")
-  public ResponseEntity<Trip> updateTrip(@PathVariable Integer userId,
-      @PathVariable Integer tripId,
+  public ResponseEntity<Trip> updateTrip(@PathVariable String userId,
+      @PathVariable String tripId,
       @RequestBody @Valid UpdateTripRequestDto updateTripRequestDto) {
 
 
@@ -75,7 +75,7 @@ public class TripController {
   }
 
   @DeleteMapping("user/{userId}/trip/{tripId}")
-  public ResponseEntity<?> delete(@PathVariable Integer userId, @PathVariable Integer tripId)
+  public ResponseEntity<?> delete(@PathVariable String userId, @PathVariable String tripId)
       throws SQLException {
     tripService.deleteTripById(tripId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

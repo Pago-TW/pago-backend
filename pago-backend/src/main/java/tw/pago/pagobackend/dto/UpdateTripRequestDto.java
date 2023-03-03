@@ -8,9 +8,9 @@ import javax.validation.constraints.NotNull;
 public class UpdateTripRequestDto {
 
 
-  private Integer tripId;
+  private String tripId;
 
-  private Integer travelerId;
+  private String travelerId;
 
   @NotNull
   private String fromLocation;
@@ -27,20 +27,19 @@ public class UpdateTripRequestDto {
   private Date updateDate;
 
 
-
-  public Integer getTripId() {
+  public String getTripId() {
     return tripId;
   }
 
-  public void setTripId(Integer tripId) {
+  public void setTripId(String tripId) {
     this.tripId = tripId;
   }
 
-  public Integer getTravelerId() {
+  public String getTravelerId() {
     return travelerId;
   }
 
-  public void setTravelerId(Integer travelerId) {
+  public void setTravelerId(String travelerId) {
     this.travelerId = travelerId;
   }
 

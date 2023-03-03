@@ -7,13 +7,13 @@ import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 
 public interface TripDao {
-    Trip getTripById(Integer tripId);
+    Trip getTripById(String tripId);
 
 //    public List<Trip> findAll() throws SQLException;
 
-    Integer createTrip(CreateTripRequestDto createTripRequestDto);
+    String createTrip(CreateTripRequestDto createTripRequestDto);
 
     void updateTrip(UpdateTripRequestDto updateTripRequestDto);
 
-    void delete(Integer tripId) throws SQLException;
+    void delete(String tripId) throws SQLException;
 }

@@ -4,10 +4,12 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class Trip {
-    private Integer tripId;
-    private Integer travelerId;
-    private String fromLocation;
-    private String toLocation;
+    private String tripId;
+    private String travelerId;
+    private String fromCountry;
+    private String fromCity;
+    private String toCountry;
+    private String toCity;
     private Date arrivalDate;
     private BigDecimal profit;
     private Date createDate;
@@ -17,36 +19,52 @@ public class Trip {
 
     }
 
-    public Integer getTripId() {
+    public String getTripId() {
         return tripId;
     }
 
-    public void setTripId(Integer tripId) {
+    public void setTripId(String tripId) {
         this.tripId = tripId;
     }
 
-    public Integer getTravelerId() {
+    public String getTravelerId() {
         return travelerId;
     }
 
-    public void setTravelerId(Integer travelerId) {
+    public void setTravelerId(String travelerId) {
         this.travelerId = travelerId;
     }
 
-    public String getFromLocation() {
-        return fromLocation;
+    public String getFromCountry() {
+        return fromCountry;
     }
 
-    public void setFromLocation(String fromLocation) {
-        this.fromLocation = fromLocation;
+    public void setFromCountry(String fromCountry) {
+        this.fromCountry = fromCountry;
     }
 
-    public String getToLocation() {
-        return toLocation;
+    public String getFromCity() {
+        return fromCity;
     }
 
-    public void setToLocation(String toLocation) {
-        this.toLocation = toLocation;
+    public void setFromCity(String fromCity) {
+        this.fromCity = fromCity;
+    }
+
+    public String getToCountry() {
+        return toCountry;
+    }
+
+    public void setToCountry(String toCountry) {
+        this.toCountry = toCountry;
+    }
+
+    public String getToCity() {
+        return toCity;
+    }
+
+    public void setToCity(String toCity) {
+        this.toCity = toCity;
     }
 
     public Date getArrivalDate() {

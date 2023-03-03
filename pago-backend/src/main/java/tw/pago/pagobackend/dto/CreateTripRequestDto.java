@@ -10,7 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class CreateTripRequestDto {
 
   @NotNull
-  private Integer travelerId;
+  private String travelerId;
 
   @NotBlank
   private String fromLocation;
@@ -22,11 +22,12 @@ public class CreateTripRequestDto {
   @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
   private Date arrivalDate;
 
-  public Integer getTravelerId() {
+
+  public String getTravelerId() {
     return travelerId;
   }
 
-  public void setTravelerId(Integer travelerId) {
+  public void setTravelerId(String travelerId) {
     this.travelerId = travelerId;
   }
 

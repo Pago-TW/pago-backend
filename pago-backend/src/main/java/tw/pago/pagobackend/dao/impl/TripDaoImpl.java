@@ -32,8 +32,10 @@ public class TripDaoImpl implements TripDao {
   private DataSource dataSource;
 
   @Override
-  public Trip getTripById(Integer tripId) {
-    String sql = "SELECT trip_id, traveler_id, from_location, to_location, arrival_date, profit, create_date, update_date FROM trip WHERE trip_id = :tripId";
+  public Trip getTripById(String tripId) {
+    String sql = "SELECT trip_id, traveler_id, from_location, to_location, arrival_date, profit, create_date, update_date "
+        + "FROM trip "
+        + "WHERE trip_id = :tripId";
 
     Map<String, Object> map = new HashMap<>();
     map.put("tripId", tripId);
@@ -72,7 +74,7 @@ public class TripDaoImpl implements TripDao {
 //    }
 
   @Override
-  public Integer createTrip(CreateTripRequestDto createTripRequestDto) {
+  public String createTrip(CreateTripRequestDto createTripRequestDto) {
     String sql =
         "INSERT INTO trip (traveler_id, from_location, to_location, arrival_date, create_date, update_date) "
             + "VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate )";
@@ -92,7 +94,7 @@ public class TripDaoImpl implements TripDao {
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
 
-    int tripId = keyHolder.getKey().intValue();
+    String tripId = keyHolder.getKey().toString();
     System.out.println(sql);
     return tripId;
   }
@@ -119,12 +121,12 @@ public class TripDaoImpl implements TripDao {
   }
 
 
-  public void delete(Integer tripId) throws SQLException {
+  public void delete(String tripId) throws SQLException {
     String sql = "DELETE FROM trip WHERE trip_id=?";
     try (
         Connection conn = dataSource.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql);) {
-      stmt.setInt(1, tripId);
+      stmt.setString(1, tripId);
       stmt.executeUpdate();
     } catch (SQLException e) {
       throw e;

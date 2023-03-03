@@ -8,13 +8,13 @@ import tw.pago.pagobackend.model.Trip;
 
 public interface TripService {
     
-    Trip getTripById(Integer tripId);
+    Trip getTripById(String tripId);
 
 //    public List<Trip> findAll() throws SQLException;
 
-    Integer createTrip(CreateTripRequestDto createTripRequestDto);
+    String createTrip(CreateTripRequestDto createTripRequestDto);
 
     void updateTrip(UpdateTripRequestDto updateTripRequestDto);
 
-    void deleteTripById(Integer tripId) throws SQLException;
+    void deleteTripById(String tripId) throws SQLException;
 }
