@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
-import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
+// import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.service.OrderService;
@@ -22,13 +22,18 @@ public class OrderServiceImpl implements OrderService {
 
   @Transactional
   @Override
-  public Order createOrder(Integer userId, CreateOrderRequestDto createOrderRequestDto) {
+  public Order createOrder(String userId, CreateOrderRequestDto createOrderRequestDto) {
 
     String orderItemUuid = uuidGenerator.getUuid();
     String orderUuid = uuidGenerator.getUuid();
 
+    Double platformFeePercent = 4.5;
+    Double tariffFeePercent = 2.5;
+
     createOrderRequestDto.getCreateOrderItemDto().setOrderItemId(orderItemUuid);
     createOrderRequestDto.setOrderId(orderUuid);
+    createOrderRequestDto.setPlatformFeePercent(platformFeePercent);
+    createOrderRequestDto.setTariffFeePercent(tariffFeePercent);
 
     orderDao.createOrderItem(createOrderRequestDto);
     orderDao.createOrder(userId, createOrderRequestDto);
@@ -52,9 +57,9 @@ public class OrderServiceImpl implements OrderService {
 
 
   @Override
-  public void updateOrderAndOrderItemByOrderId(
+  public void updateOrderAndOrderItemByOrderId(Order order,
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
-    orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
+    orderDao.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
   }
 
   @Override
@@ -62,8 +67,8 @@ public class OrderServiceImpl implements OrderService {
     orderDao.deleteOrderById(orderId);
   }
 
-  @Override
-  public void updateOrder(UpdateOrderRequestDto updateOrderRequestDto) {
-    orderDao.updateOrder(updateOrderRequestDto);
-  }
+  // @Override
+  // public void updateOrder(UpdateOrderRequestDto updateOrderRequestDto) {
+  //   orderDao.updateOrder(updateOrderRequestDto);
+  // }
 }

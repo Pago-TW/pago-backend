@@ -17,7 +17,10 @@ public class OrderItemRowMapper implements RowMapper<OrderItem> {
     orderItem.setDescription(resultSet.getString("description"));
     orderItem.setQuantity(resultSet.getInt("quantity"));
     orderItem.setUnitPrice(resultSet.getBigDecimal("unit_price"));
-    orderItem.setPurchaseLocation(resultSet.getString("purchase_location"));
+    orderItem.setPurchaseCountry(resultSet.getString("purchase_country"));
+    orderItem.setPurchaseCity(resultSet.getString("purchase_city"));
+    orderItem.setPurchaseDistrict(resultSet.getString("purchase_district"));
+    orderItem.setPurchaseRoad(resultSet.getString("purchase_road"));
 
     return orderItem;
   }

@@ -4,26 +4,28 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
-import tw.pago.pagobackend.constant.PackagingEnum;
+// import tw.pago.pagobackend.constant.PackagingEnum;
 
 public class UpdateOrderAndOrderItemRequestDto {
 
 
   private String orderId;
 
-  private Integer shopperId;
+  private String consumerId;
 
   @JsonProperty(value = "orderItem")
-  private CreateOrderItemDto createOrderItemDto;
+  private Optional<UpdateOrderItemDto> updateOrderItemDto;
 
 
-  private PackagingEnum packaging;
+  private boolean packaging;
 
 
-  private String verification;
+  private boolean verification;
 
 
   private String destination;
@@ -57,35 +59,35 @@ public class UpdateOrderAndOrderItemRequestDto {
     this.orderId = orderId;
   }
 
-  public Integer getShopperId() {
-    return shopperId;
+  public String getConsumerId() {
+    return consumerId;
   }
 
-  public void setShopperId(Integer shopperId) {
-    this.shopperId = shopperId;
+  public void setConsumerId(String consumerId) {
+    this.consumerId = consumerId;
   }
 
-  public CreateOrderItemDto getCreateOrderItemDto() {
-    return createOrderItemDto;
+  public Optional<UpdateOrderItemDto> getUpdateOrderItemDto() {
+    return updateOrderItemDto;
   }
 
-  public void setCreateOrderItemDto(CreateOrderItemDto createOrderItemDto) {
-    this.createOrderItemDto = createOrderItemDto;
+  public void setUpdateOrderItemDto(Optional<UpdateOrderItemDto> updateOrderItemDto) {
+    this.updateOrderItemDto = updateOrderItemDto;
   }
 
-  public PackagingEnum getPackaging() {
+  public boolean getPackaging() {
     return packaging;
   }
 
-  public void setPackaging(PackagingEnum packaging) {
+  public void setPackaging(boolean packaging) {
     this.packaging = packaging;
   }
 
-  public String getVerification() {
+  public boolean getVerification() {
     return verification;
   }
 
-  public void setVerification(String verification) {
+  public void setVerification(boolean verification) {
     this.verification = verification;
   }
 

@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
-import tw.pago.pagobackend.constant.PackagingEnum;
+// import tw.pago.pagobackend.constant.PackagingEnum;
 
 public class Order {
 
@@ -15,11 +15,11 @@ public class Order {
   @JsonIgnore
   private String orderItemId;
 
-  private Integer shopperId;
+  private String consumerId;
   private Date createDate;
   private Date updateDate;
-  private PackagingEnum packaging;
-  private String verification;
+  private boolean packaging;
+  private boolean verification;
   private String destination;
   private BigDecimal travelerFee;
   private CurrencyEnum currency;
@@ -55,12 +55,12 @@ public class Order {
     this.orderItemId = orderItemId;
   }
 
-  public Integer getShopperId() {
-    return shopperId;
+  public String getConsumerId() {
+    return consumerId;
   }
 
-  public void setShopperId(Integer shopperId) {
-    this.shopperId = shopperId;
+  public void setConsumerId(String consumerId) {
+    this.consumerId = consumerId;
   }
 
   public Date getCreateDate() {
@@ -71,8 +71,12 @@ public class Order {
     this.createDate = createDate;
   }
 
-  public PackagingEnum getPackaging() {
+  public boolean getPackaging() {
     return packaging;
+  }
+
+  public void setPackaging(boolean packaging) {
+    this.packaging = packaging;
   }
 
   public Date getUpdateDate() {
@@ -83,15 +87,11 @@ public class Order {
     this.updateDate = updateDate;
   }
 
-  public void setPackaging(PackagingEnum packaging) {
-    this.packaging = packaging;
-  }
-
-  public String getVerification() {
+  public boolean getVerification() {
     return verification;
   }
 
-  public void setVerification(String verification) {
+  public void setVerification(boolean verification) {
     this.verification = verification;
   }
 

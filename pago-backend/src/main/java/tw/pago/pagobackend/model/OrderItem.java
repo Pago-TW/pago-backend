@@ -10,7 +10,10 @@ public class OrderItem {
   private String description;
   private Integer quantity;
   private BigDecimal unitPrice;
-  private String purchaseLocation;
+  private String purchaseCountry;
+  private String purchaseCity;
+  private String purchaseDistrict;
+  private String purchaseRoad;
 
   public String getOrderItemId() {
     return orderItemId;
@@ -60,11 +63,36 @@ public class OrderItem {
     this.unitPrice = unitPrice;
   }
 
-  public String getPurchaseLocation() {
-    return purchaseLocation;
+  public String getPurchaseCountry() {
+    return purchaseCountry;
   }
 
-  public void setPurchaseLocation(String purchaseLocation) {
-    this.purchaseLocation = purchaseLocation;
+  public void setPurchaseCountry(String purchaseCountry) {
+    this.purchaseCountry = purchaseCountry;
   }
+
+  public String getPurchaseCity() {
+    return purchaseCity;
+  }
+
+  public void setPurchaseCity(String purchaseCity) {
+    this.purchaseCity = purchaseCity;
+  }
+
+  public String getPurchaseDistrict() {
+    return purchaseDistrict;
+  }
+
+  public void setPurchaseDistrict(String purchaseDistrict) {
+    this.purchaseDistrict = purchaseDistrict;
+  }
+
+  public String getPurchaseRoad() {
+    return purchaseRoad;
+  }
+
+  public void setPurchaseRoad(String purchaseRoad) {
+    this.purchaseRoad = purchaseRoad;
+  }
+
 }

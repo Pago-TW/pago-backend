@@ -1,12 +1,10 @@
 package tw.pago.pagobackend.dto;
 
 import java.math.BigDecimal;
-import javax.validation.constraints.NotNull;
 
 public class UpdateOrderItemDto {
 
-  private Integer orderItemId;
-
+  private String orderItemId;
 
   private String name;
 
@@ -14,21 +12,23 @@ public class UpdateOrderItemDto {
 
   private String description;
 
-
   private Integer quantity;
-
 
   private BigDecimal unitPrice;
 
+  private String purchaseCountry;
 
-  private String purchaseLocation;
+  private String purchaseCity;
 
+  private String purchaseDistrict;
 
-  public Integer getOrderItemId() {
+  private String purchaseRoad;
+
+  public String getOrderItemId() {
     return orderItemId;
   }
 
-  public void setOrderItemId(Integer orderItemId) {
+  public void setOrderItemId(String orderItemId) {
     this.orderItemId = orderItemId;
   }
 
@@ -72,11 +72,35 @@ public class UpdateOrderItemDto {
     this.unitPrice = unitPrice;
   }
 
-  public String getPurchaseLocation() {
-    return purchaseLocation;
+  public String getPurchaseCountry() {
+    return purchaseCountry;
   }
 
-  public void setPurchaseLocation(String purchaseLocation) {
-    this.purchaseLocation = purchaseLocation;
+  public void setPurchaseCountry(String purchaseCountry) {
+    this.purchaseCountry = purchaseCountry;
+  }
+
+  public String getPurchaseCity() {
+    return purchaseCity;
+  }
+
+  public void setPurchaseCity(String purchaseCity) {
+    this.purchaseCity = purchaseCity;
+  }
+
+  public String getPurchaseDistrict() {
+    return purchaseDistrict;
+  }
+
+  public void setPurchaseDistrict(String purchaseDistrict) {
+    this.purchaseDistrict = purchaseDistrict;
+  }
+
+  public String getPurchaseRoad() {
+    return purchaseRoad;
+  }
+
+  public void setPurchaseRoad(String purchaseRoad) {
+    this.purchaseRoad = purchaseRoad;
   }
 }

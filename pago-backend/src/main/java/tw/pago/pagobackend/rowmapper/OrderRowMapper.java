@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
-import tw.pago.pagobackend.constant.PackagingEnum;
+// import tw.pago.pagobackend.constant.PackagingEnum;
 import tw.pago.pagobackend.model.Order;
 
 public class OrderRowMapper implements RowMapper<Order> {
@@ -15,10 +15,10 @@ public class OrderRowMapper implements RowMapper<Order> {
     Order order = new Order();
     order.setOrderId(resultSet.getString("order_id"));
     order.setOrderItemId(resultSet.getString("order_item_id"));
-    order.setShopperId(resultSet.getInt("shopper_id"));
+    order.setConsumerId(resultSet.getString("consumer_id"));
     order.setCreateDate(resultSet.getTimestamp("create_date"));
-    order.setPackaging(PackagingEnum.valueOf(resultSet.getString("packaging")));
-    order.setVerification(resultSet.getString("verification"));
+    order.setPackaging(resultSet.getBoolean("packaging"));
+    order.setVerification(resultSet.getBoolean("verification"));
     order.setDestination(resultSet.getString("destination"));
     order.setTravelerFee(resultSet.getBigDecimal("traveler_fee"));
     order.setCurrency(CurrencyEnum.valueOf(resultSet.getString("currency")));

@@ -1,17 +1,13 @@
 package tw.pago.pagobackend.dto;
 
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
-import tw.pago.pagobackend.constant.PackagingEnum;
+
 
 public class CreateOrderRequestDto {
 
@@ -22,10 +18,10 @@ public class CreateOrderRequestDto {
   private String orderId;
 
   @NotNull
-  private PackagingEnum packaging;
+  private boolean packaging;
 
   @NotNull
-  private String verification;
+  private boolean verification;
 
   @NotNull
   private String destination;
@@ -36,10 +32,10 @@ public class CreateOrderRequestDto {
   @NotNull
   private CurrencyEnum currency;
 
-  @Value("4.5")
+  // @Value("4.5")
   private Double platformFeePercent;
 
-  @Value("2.5")
+  // @Value("2.5")
   private Double tariffFeePercent;
 
   @NotNull
@@ -48,7 +44,7 @@ public class CreateOrderRequestDto {
 
   private String note;
 
-  @Value("REQUESTED")
+  // @Value("REQUESTED")
   private OrderStatusEnum orderStatus;
 
 
@@ -68,19 +64,19 @@ public class CreateOrderRequestDto {
     this.createOrderItemDto = createOrderItemDto;
   }
 
-  public PackagingEnum getPackaging() {
+  public boolean getPackaging() {
     return packaging;
   }
 
-  public void setPackaging(PackagingEnum packaging) {
+  public void setPackaging(boolean packaging) {
     this.packaging = packaging;
   }
 
-  public String getVerification() {
+  public boolean getVerification() {
     return verification;
   }
 
-  public void setVerification(String verification) {
+  public void setVerification(boolean verification) {
     this.verification = verification;
   }
 
