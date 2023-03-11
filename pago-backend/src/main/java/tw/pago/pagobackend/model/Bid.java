@@ -2,16 +2,20 @@ package tw.pago.pagobackend.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 
 public class Bid {
   private String bidId;
-  private Integer orderId;
-  private Integer tripId;
+  private String orderId;
+  private String tripId;
   private BigDecimal bidAmount;
   private CurrencyEnum currency;
   private Date createDate;
-
+  private Date updateDate;
+  private BidStatusEnum bidStatus;
+  
   public String getBidId() {
     return bidId;
   }
@@ -20,19 +24,19 @@ public class Bid {
     this.bidId = bidId;
   }
 
-  public Integer getOrderId() {
+  public String getOrderId() {
     return orderId;
   }
 
-  public void setOrderId(Integer orderId) {
+  public void setOrderId(String orderId) {
     this.orderId = orderId;
   }
 
-  public Integer getTripId() {
+  public String getTripId() {
     return tripId;
   }
 
-  public void setTripId(Integer tripId) {
+  public void setTripId(String tripId) {
     this.tripId = tripId;
   }
 
@@ -58,5 +62,21 @@ public class Bid {
 
   public void setCreateDate(Date createDate) {
     this.createDate = createDate;
+  }
+
+  public Date getUpdateDate() {
+    return updateDate;
+  }
+
+  public void setUpdateDate(Date updateDate) {
+    this.updateDate = updateDate;
+  }
+
+  public BidStatusEnum getBidStatus() {
+    return bidStatus;
+  }
+
+  public void setBidStatus(BidStatusEnum bidStatus) {
+    this.bidStatus = bidStatus;
   }
 }
