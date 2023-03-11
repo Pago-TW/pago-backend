@@ -31,13 +31,15 @@ public class TripServiceImpl implements TripService {
 //    }
 
     @Override
-    public String createTrip(CreateTripRequestDto createTripRequestDto) {
-        return tripDAO.createTrip(createTripRequestDto);
+    public String createTrip(String userId, CreateTripRequestDto createTripRequestDto) {
+        String tripUuid = uuidGenerator.getUuid();
+        createTripRequestDto.setTripId(tripUuid);
+        return tripDAO.createTrip(userId, createTripRequestDto);
     }
 
     @Override
-    public void updateTrip(UpdateTripRequestDto updateTripRequestDto) {
-        tripDAO.updateTrip(updateTripRequestDto);
+    public void updateTrip(Trip trip, UpdateTripRequestDto updateTripRequestDto) {
+        tripDAO.updateTrip(trip, updateTripRequestDto);
     }
 
     @Override

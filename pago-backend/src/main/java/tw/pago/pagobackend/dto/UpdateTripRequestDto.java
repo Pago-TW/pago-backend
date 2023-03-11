@@ -3,22 +3,22 @@ package tw.pago.pagobackend.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.util.Date;
-import javax.validation.constraints.NotNull;
 
 public class UpdateTripRequestDto {
 
 
   private String tripId;
 
-  private String travelerId;
+  private String shopperId;
 
-  @NotNull
-  private String fromLocation;
+  private String fromCountry;
 
-  @NotNull
-  private String toLocation;
+  private String toCountry;
 
-  @NotNull
+  private String fromCity;
+
+  private String toCity;
+
   @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
   private Date arrivalDate;
 
@@ -35,28 +35,44 @@ public class UpdateTripRequestDto {
     this.tripId = tripId;
   }
 
-  public String getTravelerId() {
-    return travelerId;
+  public String getShopperId() {
+    return shopperId;
   }
 
-  public void setTravelerId(String travelerId) {
-    this.travelerId = travelerId;
+  public void setShopperId(String shopperId) {
+    this.shopperId = shopperId;
   }
 
-  public String getFromLocation() {
-    return fromLocation;
+  public String getFromCountry() {
+    return fromCountry;
   }
 
-  public void setFromLocation(String fromLocation) {
-    this.fromLocation = fromLocation;
+  public void setFromCountry(String fromCountry) {
+    this.fromCountry = fromCountry;
   }
 
-  public String getToLocation() {
-    return toLocation;
+  public String getToCountry() {
+    return toCountry;
   }
 
-  public void setToLocation(String toLocation) {
-    this.toLocation = toLocation;
+  public void setToCountry(String toCountry) {
+    this.toCountry = toCountry;
+  }
+
+  public String getFromCity() {
+    return fromCity;
+  }
+
+  public void setFromCity(String fromCity) {
+    this.fromCity = fromCity;
+  }
+
+  public String getToCity() {
+    return toCity;
+  }
+
+  public void setToCity(String toCity) {
+    this.toCity = toCity;
   }
 
   public Date getArrivalDate() {

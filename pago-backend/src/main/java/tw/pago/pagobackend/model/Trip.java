@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class Trip {
     private String tripId;
-    private String travelerId;
+    private String shopperId;
     private String fromCountry;
     private String fromCity;
     private String toCountry;
@@ -27,12 +27,12 @@ public class Trip {
         this.tripId = tripId;
     }
 
-    public String getTravelerId() {
-        return travelerId;
+    public String getShopperId() {
+        return shopperId;
     }
 
-    public void setTravelerId(String travelerId) {
-        this.travelerId = travelerId;
+    public void setShopperId(String shopperId) {
+        this.shopperId = shopperId;
     }
 
     public String getFromCountry() {

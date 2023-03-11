@@ -11,9 +11,9 @@ public interface TripDao {
 
 //    public List<Trip> findAll() throws SQLException;
 
-    String createTrip(CreateTripRequestDto createTripRequestDto);
+    String createTrip(String userId, CreateTripRequestDto createTripRequestDto);
 
-    void updateTrip(UpdateTripRequestDto updateTripRequestDto);
+    void updateTrip(Trip trip, UpdateTripRequestDto updateTripRequestDto);
 
     void delete(String tripId) throws SQLException;
 }

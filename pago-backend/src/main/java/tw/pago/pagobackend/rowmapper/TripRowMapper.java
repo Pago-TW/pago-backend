@@ -11,10 +11,10 @@ public class TripRowMapper implements RowMapper<Trip> {
   public Trip mapRow(ResultSet resultSet, int rowNum) throws SQLException {
     Trip trip = new Trip();
     trip.setTripId(resultSet.getString("trip_id"));
-    trip.setTravelerId(resultSet.getString("traveler_id"));
-    trip.setFromCountry(resultSet.getString("from_location"));
+    trip.setShopperId(resultSet.getString("shopper_id"));
+    trip.setFromCountry(resultSet.getString("from_country"));
     trip.setFromCity(resultSet.getString("from_city"));
-    trip.setToCountry(resultSet.getString("to_location"));
+    trip.setToCountry(resultSet.getString("to_country"));
     trip.setToCity(resultSet.getString("to_city"));
     trip.setArrivalDate(resultSet.getTimestamp("arrival_date"));
     trip.setProfit(resultSet.getBigDecimal("profit"));

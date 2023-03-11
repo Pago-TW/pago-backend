@@ -12,9 +12,9 @@ public interface TripService {
 
 //    public List<Trip> findAll() throws SQLException;
 
-    String createTrip(CreateTripRequestDto createTripRequestDto);
+    String createTrip(String userId, CreateTripRequestDto createTripRequestDto);
 
-    void updateTrip(UpdateTripRequestDto updateTripRequestDto);
+    void updateTrip(Trip trip, UpdateTripRequestDto updateTripRequestDto);
 
     void deleteTripById(String tripId) throws SQLException;
 }

@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,17 +44,16 @@ public class TripController {
 
   @PostMapping("/users/{userId}/trips")
   public ResponseEntity<Trip> createTrip(@PathVariable String userId,
-      @RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
+    @RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
 
-    createTripRequestDto.setTravelerId(userId);
-    String tripId = tripService.createTrip(createTripRequestDto);
+    String tripId = tripService.createTrip(userId, createTripRequestDto);
     Trip trip = tripService.getTripById(tripId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(trip);
 
   }
 
-  @PutMapping("/users/{userId}/trips/{tripId}")
+  @PatchMapping("/users/{userId}/trips/{tripId}")
   public ResponseEntity<Trip> updateTrip(@PathVariable String userId,
       @PathVariable String tripId,
       @RequestBody @Valid UpdateTripRequestDto updateTripRequestDto) {
@@ -66,15 +65,15 @@ public class TripController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(trip);
     }
     // Update Trip
-    updateTripRequestDto.setTravelerId(userId);
+    updateTripRequestDto.setShopperId(userId);
     updateTripRequestDto.setTripId(tripId);
-    tripService.updateTrip(updateTripRequestDto);
+    tripService.updateTrip(trip, updateTripRequestDto);
     Trip updatedTrip = tripService.getTripById(tripId);
 
     return ResponseEntity.status(HttpStatus.OK).body(updatedTrip);
   }
 
-  @DeleteMapping("user/{userId}/trip/{tripId}")
+  @DeleteMapping("users/{userId}/trips/{tripId}")
   public ResponseEntity<?> delete(@PathVariable String userId, @PathVariable String tripId)
       throws SQLException {
     tripService.deleteTripById(tripId);

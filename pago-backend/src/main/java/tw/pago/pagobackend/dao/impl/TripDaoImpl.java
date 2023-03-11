@@ -33,7 +33,7 @@ public class TripDaoImpl implements TripDao {
 
   @Override
   public Trip getTripById(String tripId) {
-    String sql = "SELECT trip_id, traveler_id, from_location, to_location, arrival_date, profit, create_date, update_date "
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, arrival_date, profit, create_date, update_date "
         + "FROM trip "
         + "WHERE trip_id = :tripId";
 
@@ -74,44 +74,45 @@ public class TripDaoImpl implements TripDao {
 //    }
 
   @Override
-  public String createTrip(CreateTripRequestDto createTripRequestDto) {
+  public String createTrip(String userId, CreateTripRequestDto createTripRequestDto) {
     String sql =
-        "INSERT INTO trip (traveler_id, from_location, to_location, arrival_date, create_date, update_date) "
-            + "VALUES (:travelerId, :fromLocation, :toLocation, :arrivalDate, :createDate, :updateDate )";
-    System.out.println(sql);
+        "INSERT INTO trip (trip_id, shopper_id, from_country, to_country, from_city, to_city, arrival_date, create_date, update_date) "
+            + "VALUES (:tripId, :shopperId, :fromCountry, :toCountry, :fromCity, :toCity, :arrivalDate, :createDate, :updateDate)";
 
     Map<String, Object> map = new HashMap<>();
-    map.put("travelerId", createTripRequestDto.getTravelerId());
-    map.put("fromLocation", createTripRequestDto.getFromLocation());
-    map.put("toLocation", createTripRequestDto.getToLocation());
+    map.put("shopperId", userId);
+    map.put("tripId", createTripRequestDto.getTripId());
+    map.put("fromCountry", createTripRequestDto.getFromCountry());
+    map.put("toCountry", createTripRequestDto.getToCountry());
+    map.put("fromCity", createTripRequestDto.getFromCity());
+    map.put("toCity", createTripRequestDto.getToCity());
     map.put("arrivalDate", createTripRequestDto.getArrivalDate());
-
     Date now = new Date();
     map.put("createDate", now);
     map.put("updateDate", now);
-    System.out.println(sql);
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
 
-    String tripId = keyHolder.getKey().toString();
-    System.out.println(sql);
+    String tripId = createTripRequestDto.getTripId();
     return tripId;
   }
 
 
   @Override
-  public void updateTrip(UpdateTripRequestDto updateTripRequestDto) {
+  public void updateTrip(Trip trip, UpdateTripRequestDto updateTripRequestDto) {
     String sql = "UPDATE trip "
-        + "SET traveler_id = :travelerId, from_location = :fromLocation, to_location = :toLocation, "
-        + "arrival_date = :arrivalDate, update_date = :updateDate "
+        + "SET shopper_id = :shopperId, from_country = :fromCountry, to_country = :toCountry, "
+        + "from_city = :fromCity, to_city = :toCity, arrival_date = :arrivalDate, update_date = :updateDate "
         + "WHERE trip_id = :tripId";
 
     Map<String, Object> map = new HashMap<>();
-    map.put("travelerId", updateTripRequestDto.getTravelerId());
-    map.put("fromLocation", updateTripRequestDto.getFromLocation());
-    map.put("toLocation", updateTripRequestDto.getToLocation());
-    map.put("arrivalDate", updateTripRequestDto.getArrivalDate());
+    map.put("shopperId", updateTripRequestDto.getShopperId() != null ? updateTripRequestDto.getShopperId() : trip.getShopperId());
+    map.put("fromCountry", updateTripRequestDto.getFromCountry() != null ? updateTripRequestDto.getFromCountry() : trip.getFromCountry());
+    map.put("toCountry", updateTripRequestDto.getToCountry() != null ? updateTripRequestDto.getToCountry() : trip.getToCountry());
+    map.put("fromCity", updateTripRequestDto.getFromCity() != null ? updateTripRequestDto.getFromCity() : trip.getFromCity());
+    map.put("toCity", updateTripRequestDto.getToCity() != null ? updateTripRequestDto.getToCity() : trip.getToCity());
+    map.put("arrivalDate", updateTripRequestDto.getArrivalDate() != null ? updateTripRequestDto.getArrivalDate() : trip.getArrivalDate());
 
     Date now = new Date();
     map.put("updateDate", now);
