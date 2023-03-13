@@ -6,8 +6,8 @@ import tw.pago.pagobackend.constant.ReviewTypeEnum;
 public class Review {
   private String reviewId;
   private String orderId;
-  private String travelerId;
   private String shopperId;
+  private String consumerId;
   private String content;
   private String reviewImagePath;
   private Integer rating;
@@ -31,20 +31,20 @@ public class Review {
     this.orderId = orderId;
   }
 
-  public String getTravelerId() {
-    return travelerId;
-  }
-
-  public void setTravelerId(String travelerId) {
-    this.travelerId = travelerId;
-  }
-
   public String getShopperId() {
     return shopperId;
   }
 
   public void setShopperId(String shopperId) {
     this.shopperId = shopperId;
+  }
+
+  public String getConsumerId() {
+    return consumerId;
+  }
+
+  public void setConsumerId(String consumerId) {
+    this.consumerId = consumerId;
   }
 
   public String getContent() {
