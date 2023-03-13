@@ -25,8 +25,8 @@ public class TripController {
   @Autowired
   private TripService tripService;
 
-  @GetMapping("/users/{userId}/trips/{tripId}")
-  public ResponseEntity<Trip> getTripById(@PathVariable String userId ,@PathVariable String tripId) {
+  @GetMapping("/trips/{tripId}")
+  public ResponseEntity<Trip> getTripById(@PathVariable String tripId) {
     Trip trip = tripService.getTripById(tripId);
 
     if (trip != null) {
