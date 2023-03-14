@@ -1,22 +1,22 @@
-package tw.pago.pagobackend.service;
+// package tw.pago.pagobackend.service;
 
 
-import org.springframework.stereotype.Component;
-import tw.pago.pagobackend.dto.ChooseTravelerDto;
-import tw.pago.pagobackend.dto.UpdateMatchingRequestDto;
-import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
-import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
-import tw.pago.pagobackend.model.Matching;
-import tw.pago.pagobackend.model.Order;
+// import org.springframework.stereotype.Component;
+// import tw.pago.pagobackend.dto.ChooseTravelerDto;
+// import tw.pago.pagobackend.dto.UpdateMatchingRequestDto;
+// import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
+// import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
+// import tw.pago.pagobackend.model.Matching;
+// import tw.pago.pagobackend.model.Order;
 
-@Component
-public interface MatchingService {
+// @Component
+// public interface MatchingService {
 
-  Matching chooseTraveler(ChooseTravelerDto chooseTravelerDto);
+//   Matching chooseTraveler(ChooseTravelerDto chooseTravelerDto);
 
-  Matching getMatching(String matchingId);
+//   Matching getMatching(String matchingId);
 
-  UpdateOrderRequestDto setOrderToUpdateOrderRequestDto(Order order, UpdateOrderRequestDto updateOrderRequestDto);
+//   UpdateOrderRequestDto setOrderToUpdateOrderRequestDto(Order order, UpdateOrderRequestDto updateOrderRequestDto);
 
-  Matching updateMatching(String orderId, UpdateMatchingRequestDto updateMatchingRequestDto);
-}
+//   Matching updateMatching(String orderId, UpdateMatchingRequestDto updateMatchingRequestDto);
+// }
