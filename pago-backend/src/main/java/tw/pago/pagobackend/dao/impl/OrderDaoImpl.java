@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
@@ -53,8 +52,6 @@ public class OrderDaoImpl implements OrderDao {
     map.put("tariffFeePercent", createOrderRequestDto.getTariffFeePercent());
     map.put("latestReceiveItemDate", createOrderRequestDto.getLatestReceiveItemDate());
     map.put("note", createOrderRequestDto.getNote());
-    createOrderRequestDto.setOrderStatus(OrderStatusEnum.REQUESTED);
-    System.out.println(createOrderRequestDto.getOrderStatus());
     map.put("orderStatus", createOrderRequestDto.getOrderStatus().toString());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));

@@ -3,6 +3,8 @@ package tw.pago.pagobackend.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
@@ -34,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
     createOrderRequestDto.setOrderId(orderUuid);
     createOrderRequestDto.setPlatformFeePercent(platformFeePercent);
     createOrderRequestDto.setTariffFeePercent(tariffFeePercent);
+    createOrderRequestDto.setOrderStatus(OrderStatusEnum.REQUESTED);
 
     orderDao.createOrderItem(createOrderRequestDto);
     orderDao.createOrder(userId, createOrderRequestDto);
