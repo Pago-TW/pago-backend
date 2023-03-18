@@ -94,7 +94,10 @@ public class UserServiceImpl implements UserService {
     User existUser = userDao.getUserByEmail(userEmail);
 
     if (existUser == null) {
+      String newUserId = uuidGenerator.getUuid();
       UserRegisterRequestDto newUser = UserRegisterRequestDto.builder()
+          .userId(newUserId)
+          .account(userEmail)
           .email(userEmail)
           .provider(UserProviderEnum.GOOGLE)
           .enabled(true)

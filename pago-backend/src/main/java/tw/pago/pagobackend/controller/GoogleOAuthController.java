@@ -32,7 +32,7 @@ public class GoogleOAuthController {
       throw new RuntimeException("Error encoding redirect URI", e);
     }
 
-    String googleAuthorizationUrl = String.format("https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=%s&redirect_uri=%s&scope=email%%20profile%%20openid&state=%s", clientId, encodedRedirectUri, state);
+    String googleAuthorizationUrl = String.format("https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=%s&redirect_uri=%s&scope=email%%20profile%%20openid&", clientId, encodedRedirectUri);
     return ResponseEntity.status(HttpStatus.OK).body(googleAuthorizationUrl);
   }
 }
