@@ -4,11 +4,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
@@ -17,20 +16,23 @@ import tw.pago.pagobackend.rowmapper.UserRowMapper;
 
 @Component
 public class UserDaoImpl implements UserDao {
+  private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
+
 
   @Autowired
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   @Override
-  public Integer createUser(UserRegisterRequestDto userRegisterRequestDto) {
-    String sql = "INSERT INTO user(account, password, first_name, last_name, "
+  public void createUser(UserRegisterRequestDto userRegisterRequestDto) {
+    String sql = "INSERT INTO user(user_id, account, password, first_name, last_name, "
         + "phone, email, gender, google_id, account_status, update_date, "
-        + "create_date, avatar_url, about_me, country, last_login) "
-        + "VALUES (:account, :password, :firstName, :lastName, :phone, "
+        + "create_date, avatar_url, about_me, country, last_login, provider) "
+        + "VALUES (:userId, :account, :password, :firstName, :lastName, :phone, "
         + ":email, :gender, :googleId, :accountStatus, :updateDate, "
-        + ":createDate, :avatarUrl, :aboutMe, :country, :lastLogin)";
+        + ":createDate, :avatarUrl, :aboutMe, :country, :lastLogin, :provider)";
 
     Map<String, Object> map = new HashMap<>();
+    map.put("userId", userRegisterRequestDto.getUserId());
     map.put("account", userRegisterRequestDto.getAccount());
     map.put("password", userRegisterRequestDto.getPassword());
     map.put("firstName", userRegisterRequestDto.getFirstName());
@@ -48,21 +50,18 @@ public class UserDaoImpl implements UserDao {
     map.put("aboutMe", userRegisterRequestDto.getAboutMe());
     map.put("country", userRegisterRequestDto.getCountry());
     map.put("lastLogin", now);
+    map.put("provider", userRegisterRequestDto.getProvider().toString());
 
-    KeyHolder keyHolder = new GeneratedKeyHolder();
+    log.debug("userRegisterRequestDto: {}", userRegisterRequestDto);
 
-    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
-
-    int userId = keyHolder.getKey().intValue();
-
-    return userId;
+    namedParameterJdbcTemplate.update(sql, map);
   }
 
   @Override
-  public User getUserById(Integer userId) {
+  public User getUserById(String userId) {
     String sql = "SELECT user_id, account, password, first_name, last_name,"
         + "phone, email, gender, google_id, account_status, update_date,"
-        + "create_date, avatar_url, about_me, country, last_login "
+        + "create_date, avatar_url, about_me, country, last_login, provider "
         + "FROM user "
         + "WHERE user_id = :userId ";
 
@@ -82,7 +81,7 @@ public class UserDaoImpl implements UserDao {
   public User getUserByEmail(String email) {
     String sql = "SELECT user_id, account, password, first_name, last_name,"
         + "phone, email, gender, google_id, account_status, update_date,"
-        + "create_date, avatar_url, about_me, country, last_login "
+        + "create_date, avatar_url, about_me, country, last_login, provider "
         + "FROM user "
         + "WHERE email = :email ";
 

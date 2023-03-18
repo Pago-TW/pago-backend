@@ -1,31 +1,33 @@
 package tw.pago.pagobackend.service.impl;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.server.ResponseStatusException;
+import tw.pago.pagobackend.constant.UserProviderEnum;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.UserService;
+import tw.pago.pagobackend.util.UuidGenerator;
 
-@Component
+@Service
 public class UserServiceImpl implements UserService {
 
   private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
   @Autowired
+  private UuidGenerator uuidGenerator;
+  @Autowired
   private UserDao userDao;
 
   @Override
-  public Integer register(UserRegisterRequestDto userRegisterRequestDto) {
+  public User register(UserRegisterRequestDto userRegisterRequestDto) throws UsernameNotFoundException {
 
     // Get User By Email, will be used to check isExist?
     User user = userDao.getUserByEmail(userRegisterRequestDto.getEmail());
@@ -36,16 +38,30 @@ public class UserServiceImpl implements UserService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
+    String userId = uuidGenerator.getUuid();
+    userRegisterRequestDto.setUserId(userId);
+    userRegisterRequestDto.setProvider(UserProviderEnum.LOCAL);
+
     // Hash user's register password (MD5)
     String hashedPassword = DigestUtils.md5DigestAsHex(userRegisterRequestDto.getPassword().getBytes());
     userRegisterRequestDto.setPassword(hashedPassword);
 
     // register
-    return userDao.createUser(userRegisterRequestDto);
+    userDao.createUser(userRegisterRequestDto);
+
+
+    user = userDao.getUserById(userId);
+
+    if (user == null) {
+      throw new UsernameNotFoundException(userId);
+    } else {
+      return user;
+    }
+
   }
 
   @Override
-  public User getUserById(Integer userId) {
+  public User getUserById(String userId) {
     return userDao.getUserById(userId);
   }
 
@@ -70,6 +86,21 @@ public class UserServiceImpl implements UserService {
     } else {
       log.warn("email {} 的密碼不正確", userLoginRequestDto.getEmail());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Override
+  public void processOAuth2PostLogin(String userEmail) {
+    User existUser = userDao.getUserByEmail(userEmail);
+
+    if (existUser == null) {
+      UserRegisterRequestDto newUser = UserRegisterRequestDto.builder()
+          .email(userEmail)
+          .provider(UserProviderEnum.GOOGLE)
+          .enabled(true)
+          .build();
+
+      userDao.createUser(newUser);
     }
   }
 }

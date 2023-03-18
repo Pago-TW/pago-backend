@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,16 +21,26 @@ public class UserController {
 
   @PostMapping("/users/register")
   public ResponseEntity<User> register(@RequestBody @Valid UserRegisterRequestDto userRegisterRequestDto) {
-    Integer userId = userService.register(userRegisterRequestDto);
 
-    User user = userService.getUserById(userId);
+    try {
+      User user = userService.register(userRegisterRequestDto);
+      return ResponseEntity.status(HttpStatus.CREATED).body(user);
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    } catch (UsernameNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User());
+    }
+
   }
   @PostMapping("/users/login")
   public ResponseEntity<User> login(@RequestBody @Valid UserLoginRequestDto userLoginRequestDto) {
     User user = userService.login(userLoginRequestDto);
 
     return ResponseEntity.status(HttpStatus.OK).body(user);
+  }
+
+  @PostMapping()
+  public ResponseEntity<?> googleLogin() {
+
+    return null;
   }
 }

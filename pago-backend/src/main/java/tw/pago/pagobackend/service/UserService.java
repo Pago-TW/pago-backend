@@ -5,9 +5,11 @@ import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
 
 public interface UserService {
-  Integer register(UserRegisterRequestDto userRegisterRequestDto);
+  User register(UserRegisterRequestDto userRegisterRequestDto);
 
-  User getUserById(Integer userId);
+  User getUserById(String userId);
 
   User login(UserLoginRequestDto userLoginRequestDto);
+
+  void processOAuth2PostLogin(String userEmail);
 }

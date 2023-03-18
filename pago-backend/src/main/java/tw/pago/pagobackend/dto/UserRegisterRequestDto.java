@@ -2,14 +2,23 @@ package tw.pago.pagobackend.dto;
 
 import java.util.Date;
 import javax.validation.constraints.NotBlank;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import tw.pago.pagobackend.constant.UserProviderEnum;
 
+
+@Getter
+@Setter
+@Builder
 public class UserRegisterRequestDto {
 
 
-  @NotBlank
+
+  private String userId;
   private String account;
 
-  @NotBlank
+
   private String password;
 
   private String firstName;
@@ -28,6 +37,19 @@ public class UserRegisterRequestDto {
   private String aboutMe;
   private String country;
   private Date lastLogin;
+
+  // For Spring Security use
+  private UserProviderEnum provider; // GOOGLE, LOCAL
+  private String role;
+  private boolean enabled;
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
 
   public String getAccount() {
     return account;
@@ -147,5 +169,29 @@ public class UserRegisterRequestDto {
 
   public void setLastLogin(Date lastLogin) {
     this.lastLogin = lastLogin;
+  }
+
+  public UserProviderEnum getProvider() {
+    return provider;
+  }
+
+  public void setProvider(UserProviderEnum provider) {
+    this.provider = provider;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 }

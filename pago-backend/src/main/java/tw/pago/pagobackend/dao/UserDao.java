@@ -4,9 +4,9 @@ import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
 
 public interface UserDao {
-  Integer createUser(UserRegisterRequestDto userRegisterRequestDto);
+  void createUser(UserRegisterRequestDto userRegisterRequestDto);
 
-  User getUserById(Integer userId);
+  User getUserById(String userId);
 
   User getUserByEmail(String email);
 }
