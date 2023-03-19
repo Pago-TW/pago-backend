@@ -11,7 +11,6 @@ public class CreateOrderItemDto {
   @NotNull
   private String name;
 
-  private String imageUrl;
   private String description;
 
   @NotNull
@@ -46,14 +45,6 @@ public class CreateOrderItemDto {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getImageUrl() {
-    return imageUrl;
-  }
-
-  public void setImageUrl(String imageUrl) {
-    this.imageUrl = imageUrl;
   }
 
   public String getDescription() {

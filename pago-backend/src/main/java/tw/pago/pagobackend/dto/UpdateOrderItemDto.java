@@ -8,8 +8,6 @@ public class UpdateOrderItemDto {
 
   private String name;
 
-  private String imageUrl;
-
   private String description;
 
   private Integer quantity;
@@ -38,14 +36,6 @@ public class UpdateOrderItemDto {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getImageUrl() {
-    return imageUrl;
-  }
-
-  public void setImageUrl(String imageUrl) {
-    this.imageUrl = imageUrl;
   }
 
   public String getDescription() {

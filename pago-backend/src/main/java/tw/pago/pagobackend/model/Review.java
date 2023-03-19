@@ -9,7 +9,6 @@ public class Review {
   private String shopperId;
   private String consumerId;
   private String content;
-  private String reviewImagePath;
   private Integer rating;
   private Date createDate;
   private ReviewTypeEnum reviewType;
@@ -53,14 +52,6 @@ public class Review {
 
   public void setContent(String content) {
     this.content = content;
-  }
-
-  public String getReviewImagePath() {
-    return reviewImagePath;
-  }
-
-  public void setReviewImagePath(String reviewImagePath) {
-    this.reviewImagePath = reviewImagePath;
   }
 
   public Integer getRating() {

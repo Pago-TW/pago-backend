@@ -16,14 +16,11 @@ public class ReviewRowMapper implements RowMapper<Review> {
     review.setConsumerId(resultSet.getString("consumer_id"));
     review.setShopperId(resultSet.getString("shopper_id"));
     review.setContent(resultSet.getString("content"));
-    review.setReviewImagePath(resultSet.getString("review_image_path"));
     review.setRating(resultSet.getInt("rating"));
     review.setCreateDate(resultSet.getTimestamp("create_date"));
     review.setReviewType(ReviewTypeEnum.valueOf(resultSet.getString("review_type")));
     review.setUpdateDate(resultSet.getTimestamp("update_date"));
-
-
-
+    
     return review;
   }
 }

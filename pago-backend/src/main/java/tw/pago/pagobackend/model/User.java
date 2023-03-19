@@ -19,11 +19,10 @@ public class User {
   private String accountStatus;
   private Date updateDate;
   private Date createDate;
-  private String avatarUrl;
   private String aboutMe;
   private String country;
   private Date lastLogin;
-  private Integer persent;
+  // private Integer persent;
 
   public Integer getUserId() {
     return userId;
@@ -119,14 +118,6 @@ public class User {
 
   public void setCreateDate(Date createDate) {
     this.createDate = createDate;
-  }
-
-  public String getAvatarUrl() {
-    return avatarUrl;
-  }
-
-  public void setAvatarUrl(String avatarUrl) {
-    this.avatarUrl = avatarUrl;
   }
 
   public String getAboutMe() {

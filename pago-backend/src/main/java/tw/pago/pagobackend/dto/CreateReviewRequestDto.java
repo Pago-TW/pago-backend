@@ -8,7 +8,6 @@ public class CreateReviewRequestDto {
   private String shopperId;
   private String consumerId;
   private String content;
-  private String reviewImagePath;
   private Integer rating;
   private ReviewTypeEnum reviewType;
 
@@ -55,14 +54,6 @@ public class CreateReviewRequestDto {
 
   public void setContent(String content) {
     this.content = content;
-  }
-
-  public String getReviewImagePath() {
-    return reviewImagePath;
-  }
-
-  public void setReviewImagePath(String reviewImagePath) {
-    this.reviewImagePath = reviewImagePath;
   }
 
   public Integer getRating() {

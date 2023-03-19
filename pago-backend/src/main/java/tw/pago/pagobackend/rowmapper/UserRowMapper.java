@@ -23,7 +23,6 @@ public class UserRowMapper implements RowMapper<User> {
     user.setAccountStatus(resultSet.getString("account_status"));
     user.setUpdateDate(resultSet.getTimestamp("update_date"));
     user.setCreateDate(resultSet.getTimestamp("create_date"));
-    user.setAvatarUrl(resultSet.getString("avatar_url"));
     user.setAboutMe(resultSet.getString("about_me"));
     user.setCountry(resultSet.getString("country"));
     user.setLastLogin(resultSet.getTimestamp("last_login"));

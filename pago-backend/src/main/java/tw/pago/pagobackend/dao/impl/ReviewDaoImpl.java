@@ -23,8 +23,8 @@ public class ReviewDaoImpl implements ReviewDao {
   @Override
   public void createReview(CreateReviewRequestDto createReviewRequestDto) {
     String sql = "INSERT INTO review (review_id, order_id, shopper_id, consumer_id, content, "
-        + "review_image_path, rating, create_date, review_type, update_date) "
-        + "VALUES (:reviewId, :orderId, :shopperId, :consumerId, :content, :reviewImagePath, "
+        + "rating, create_date, review_type, update_date) "
+        + "VALUES (:reviewId, :orderId, :shopperId, :consumerId, :content, "
         + ":rating, :createDate, :reviewType, :updateDate)";
 
     Map<String, Object> map = new HashMap<>();
@@ -33,7 +33,6 @@ public class ReviewDaoImpl implements ReviewDao {
     map.put("shopperId", createReviewRequestDto.getShopperId());
     map.put("consumerId", createReviewRequestDto.getConsumerId());
     map.put("content", createReviewRequestDto.getContent());
-    map.put("reviewImagePath", createReviewRequestDto.getReviewImagePath());
     map.put("rating", createReviewRequestDto.getRating());
 
     Date now = new Date();
@@ -46,7 +45,7 @@ public class ReviewDaoImpl implements ReviewDao {
 
   @Override
   public Review getReviewById(String reviewId) {
-    String sql = "SELECT review_id, order_id, shopper_id, consumer_id, content, review_image_path, "
+    String sql = "SELECT review_id, order_id, shopper_id, consumer_id, content, "
         + "rating, create_date, review_type, update_date "
         + "FROM review "
         + "WHERE review_id = :reviewId";

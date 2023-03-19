@@ -60,15 +60,14 @@ public class OrderDaoImpl implements OrderDao {
 
   @Override
   public void createOrderItem(CreateOrderRequestDto createOrderRequestDto) {
-    String sql = "INSERT INTO order_item (order_item_id ,`name`, image_url, description, quantity, unit_price, "
+    String sql = "INSERT INTO order_item (order_item_id ,`name`, description, quantity, unit_price, "
         + "purchase_country, purchase_city, purchase_district, purchase_road) "
-        + "VALUES (:orderItemId ,:name, :imageUrl, :description, :quantity, :unitPrice, :purchaseCountry, :purchaseCity,"
+        + "VALUES (:orderItemId ,:name, :description, :quantity, :unitPrice, :purchaseCountry, :purchaseCity,"
         + ":purchaseDistrict, :purchaseRoad)";
 
     Map<String, Object> map = new HashMap<>();
     map.put("orderItemId", createOrderRequestDto.getCreateOrderItemDto().getOrderItemId());
     map.put("name", createOrderRequestDto.getCreateOrderItemDto().getName());
-    map.put("imageUrl", createOrderRequestDto.getCreateOrderItemDto().getImageUrl());
     map.put("description", createOrderRequestDto.getCreateOrderItemDto().getDescription());
     map.put("quantity", createOrderRequestDto.getCreateOrderItemDto().getQuantity());
     map.put("unitPrice", createOrderRequestDto.getCreateOrderItemDto().getUnitPrice());
@@ -91,7 +90,7 @@ public class OrderDaoImpl implements OrderDao {
         "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
             + "om.verification, om.destination, om.traveler_fee, om.currency, om.platform_fee_percent, "
             + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
-            + "oi.name, oi.image_url, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
+            + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
             + "oi.purchase_district, oi.purchase_road "
             + "FROM order_main as om "
             + "LEFT JOIN order_item as oi ON om.order_item_id = oi.order_item_id "
@@ -112,7 +111,7 @@ public class OrderDaoImpl implements OrderDao {
 
   @Override
   public OrderItem getOrderItemById(String orderItemId) {
-    String sql = "SELECT order_item_id, `name`, image_url, description, "
+    String sql = "SELECT order_item_id, `name`, description, "
         + "quantity, unit_price, purchase_country, purchase_city, purchase_district, purchase_road "
         + "FROM order_item "
         + "WHERE order_item_id = :orderItemId";
@@ -136,7 +135,7 @@ public class OrderDaoImpl implements OrderDao {
     String sql = "UPDATE order_main AS om "
         + "LEFT JOIN order_item AS oi "
         + "ON om.order_item_id = oi.order_item_id "
-        + "SET oi.name = :name, oi.image_url = :imageUrl, oi.description = :description, "
+        + "SET oi.name = :name, oi.description = :description, "
         + "oi.quantity = :quantity, oi.unit_price = :unitPrice, "
         + "oi.purchase_country = :purchaseCountry, oi.purchase_city = :purchaseCity, "
         + "oi.purchase_district = :purchaseDistrict, oi.purchase_road = :purchaseRoad, "
@@ -151,10 +150,6 @@ public class OrderDaoImpl implements OrderDao {
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getName() != null ? 
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getName() : order.getOrderItem().getName());
-    map.put("imageUrl", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getImageUrl() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getImageUrl() : order.getOrderItem().getImageUrl());
     map.put("description", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getDescription() != null ? 
