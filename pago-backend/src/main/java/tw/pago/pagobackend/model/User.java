@@ -1,10 +1,16 @@
 package tw.pago.pagobackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.security.Provider;
 import java.util.Date;
+import lombok.Getter;
+import lombok.Setter;
+import tw.pago.pagobackend.constant.UserProviderEnum;
 
+@Getter
+@Setter
 public class User {
-  private Integer userId;
+  private String userId;
   private String account;
 
   @JsonIgnore
@@ -24,11 +30,17 @@ public class User {
   private Date lastLogin;
   // private Integer persent;
 
-  public Integer getUserId() {
+  // For Spring Security use
+  private UserProviderEnum provider; // GOOGLE, LOCAL
+  private String role;
+  private boolean enabled;
+
+
+  public String getUserId() {
     return userId;
   }
 
-  public void setUserId(Integer userId) {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 
@@ -143,4 +155,38 @@ public class User {
   public void setLastLogin(Date lastLogin) {
     this.lastLogin = lastLogin;
   }
+
+  public Integer getPersent() {
+    return persent;
+  }
+
+  public void setPersent(Integer persent) {
+    this.persent = persent;
+  }
+
+  public UserProviderEnum getProvider() {
+    return provider;
+  }
+
+  public void setProvider(UserProviderEnum provider) {
+    this.provider = provider;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
 }
+
+
