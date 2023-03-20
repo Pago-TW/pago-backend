@@ -12,38 +12,38 @@ public class OrderWithOrderItemRowMapper implements RowMapper<Order> {
 
   @Override
   public Order mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-    Order order = new Order();
-    order.setOrderId(resultSet.getString("order_id"));
-    order.setOrderItemId(resultSet.getString("order_item_id"));
-    order.setConsumerId(resultSet.getString("consumer_id"));
-    order.setCreateDate(resultSet.getTimestamp("create_date"));
-    order.setPackaging(resultSet.getBoolean("packaging"));
-    order.setVerification(resultSet.getBoolean("verification"));
-    order.setDestination(resultSet.getString("destination"));
-    order.setTravelerFee(resultSet.getBigDecimal("traveler_fee"));
-    order.setCurrency(CurrencyEnum.valueOf(resultSet.getString("currency")));
-    order.setPlatformFeePercent(resultSet.getDouble("platform_fee_percent"));
-    order.setTariffFeePercent(resultSet.getDouble("tariff_fee_percent"));
-    order.setLatestReceiveItemDate(resultSet.getTimestamp("latest_receive_item_date"));
-    order.setNote(resultSet.getString("note"));
-    order.setOrderStatus(OrderStatusEnum.valueOf(resultSet.getString("order_status")));
-    order.setUpdateDate(resultSet.getTimestamp("update_date"));
+    OrderItem orderItem = OrderItem.builder()
+        .orderItemId(resultSet.getString("order_item_id"))
+        .name(resultSet.getString("name"))
+        .description(resultSet.getString("description"))
+        .quantity(resultSet.getInt("quantity"))
+        .unitPrice(resultSet.getBigDecimal("unit_price"))
+        .purchaseCountry(resultSet.getString("purchase_country"))
+        .purchaseCity(resultSet.getString("purchase_city"))
+        .purchaseDistrict(resultSet.getString("purchase_district"))
+        .purchaseRoad(resultSet.getString("purchase_road"))
+        .build();
 
-    // OrderItem
-    OrderItem orderItem = new OrderItem();
-    orderItem.setOrderItemId(resultSet.getString("order_item_id"));
-    orderItem.setName(resultSet.getString("name"));
-    orderItem.setDescription(resultSet.getString("description"));
-    orderItem.setQuantity(resultSet.getInt("quantity"));
-    orderItem.setUnitPrice(resultSet.getBigDecimal("unit_price"));
-    orderItem.setPurchaseCountry(resultSet.getString("purchase_country"));
-    orderItem.setPurchaseCity(resultSet.getString("purchase_city"));
-    orderItem.setPurchaseDistrict(resultSet.getString("purchase_district"));
-    orderItem.setPurchaseRoad(resultSet.getString("purchase_road"));
-
-    // Set OrderItem to Order
-    order.setOrderItem(orderItem);
+    Order order = Order.builder()
+        .orderId(resultSet.getString("order_id"))
+        .orderItemId(resultSet.getString("order_item_id"))
+        .consumerId(resultSet.getString("consumer_id"))
+        .createDate(resultSet.getTimestamp("create_date"))
+        .isPackagingRequired(resultSet.getBoolean("packaging"))
+        .isVerificationRequired(resultSet.getBoolean("verification"))
+        .destination(resultSet.getString("destination"))
+        .travelerFee(resultSet.getBigDecimal("traveler_fee"))
+        .currency(CurrencyEnum.valueOf(resultSet.getString("currency")))
+        .platformFeePercent(resultSet.getDouble("platform_fee_percent"))
+        .tariffFeePercent(resultSet.getDouble("tariff_fee_percent"))
+        .latestReceiveItemDate(resultSet.getTimestamp("latest_receive_item_date"))
+        .note(resultSet.getString("note"))
+        .orderStatus(OrderStatusEnum.valueOf(resultSet.getString("order_status")))
+        .updateDate(resultSet.getTimestamp("update_date"))
+        .orderItem(orderItem)
+        .build();
 
     return order;
+
   }
 }

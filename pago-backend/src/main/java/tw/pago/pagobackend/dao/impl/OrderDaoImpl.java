@@ -181,11 +181,11 @@ public class OrderDaoImpl implements OrderDao {
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseRoad() != null ? 
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseRoad() : order.getOrderItem().getPurchaseRoad());
     
-    Boolean packaging = updateOrderAndOrderItemRequestDto.getPackaging();
-    map.put("packaging", packaging != null ? packaging : order.getPackaging());
+    Boolean packaging = updateOrderAndOrderItemRequestDto.isPackagingRequired();
+    map.put("packaging", packaging != null ? packaging : order.isPackagingRequired());
 
-    Boolean verification = updateOrderAndOrderItemRequestDto.getVerification();
-    map.put("verification", verification != null ? verification : order.getVerification());
+    Boolean verification = updateOrderAndOrderItemRequestDto.isVerificationRequired();
+    map.put("verification", verification != null ? verification : order.isVerificationRequired());
 
     map.put("destination", updateOrderAndOrderItemRequestDto.getDestination() != null ? updateOrderAndOrderItemRequestDto.getDestination() : order.getDestination());
     map.put("travelerFee", updateOrderAndOrderItemRequestDto.getTravelerFee() != null ? updateOrderAndOrderItemRequestDto.getTravelerFee() : order.getTravelerFee());

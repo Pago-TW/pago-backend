@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.rowmapper;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
@@ -9,18 +10,19 @@ public class OrderItemRowMapper implements RowMapper<OrderItem> {
 
   @Override
   public OrderItem mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-
-    OrderItem orderItem = new OrderItem();
-    orderItem.setOrderItemId(resultSet.getString("order_item_id"));
-    orderItem.setName(resultSet.getString("name"));
-    orderItem.setDescription(resultSet.getString("description"));
-    orderItem.setQuantity(resultSet.getInt("quantity"));
-    orderItem.setUnitPrice(resultSet.getBigDecimal("unit_price"));
-    orderItem.setPurchaseCountry(resultSet.getString("purchase_country"));
-    orderItem.setPurchaseCity(resultSet.getString("purchase_city"));
-    orderItem.setPurchaseDistrict(resultSet.getString("purchase_district"));
-    orderItem.setPurchaseRoad(resultSet.getString("purchase_road"));
+    OrderItem orderItem = OrderItem.builder()
+        .orderItemId(resultSet.getString("order_item_id"))
+        .name(resultSet.getString("name"))
+        .description(resultSet.getString("description"))
+        .quantity(resultSet.getInt("quantity"))
+        .unitPrice(resultSet.getBigDecimal("unit_price"))
+        .purchaseCountry(resultSet.getString("purchase_country"))
+        .purchaseCity(resultSet.getString("purchase_city"))
+        .purchaseDistrict(resultSet.getString("purchase_district"))
+        .purchaseRoad(resultSet.getString("purchase_road"))
+        .build();
 
     return orderItem;
+
   }
 }
