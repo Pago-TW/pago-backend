@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
-// import tw.pago.pagobackend.constant.PackagingEnum;
 
 @Getter
 @Setter
@@ -29,9 +28,10 @@ public class Order {
   private boolean isPackagingRequired;
   private boolean isVerificationRequired;
   private String destination;
-  private BigDecimal travelerFee;
   private CurrencyEnum currency;
+  @JsonIgnore
   private Double platformFeePercent;
+  @JsonIgnore
   private Double tariffFeePercent;
   private Date latestReceiveItemDate;
   private String note;
@@ -40,5 +40,11 @@ public class Order {
   // OrderItem
   private OrderItem orderItem;
 
+  // For programing use
+  private BigDecimal travelerFee;
+  private BigDecimal tariffFee;
+  private BigDecimal platformFee;
+  private BigDecimal totalAmount;
+  private boolean hasNewActivity;
 
 }

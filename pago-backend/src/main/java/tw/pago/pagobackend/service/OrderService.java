@@ -2,6 +2,7 @@ package tw.pago.pagobackend.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
@@ -25,7 +26,7 @@ public interface OrderService {
 
   Integer countOrder(ListQueryParametersDto listQueryParametersDto);
 
-  BigDecimal calculateOrderTotalAmount(Order order);
+  Map<String, BigDecimal> calculateOrderEachAmount(Order order);
 
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }
