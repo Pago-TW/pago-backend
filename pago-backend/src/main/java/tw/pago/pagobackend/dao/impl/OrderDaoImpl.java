@@ -219,13 +219,20 @@ public class OrderDaoImpl implements OrderDao {
         + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
         + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
         + "oi.purchase_district, oi.purchase_road "
-        + "FROM order_main as om "
-        + "LEFT JOIN order_item as oi ON om.order_item_id = oi.order_item_id "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
         + "WHERE 1=1 ";
 
     Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // Order by {column} & sort by {DESC/ASC}
     sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
 
+    // Pagination
     sql = sql + " LIMIT :size OFFSET :startIndex ";
     map.put("size", listQueryParametersDto.getSize());
     map.put("startIndex", listQueryParametersDto.getStartIndex());
@@ -240,10 +247,15 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public Integer countOrder(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT COUNT(order_id) "
-        + "FROM order_main "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
         + "WHERE 1=1 ";
 
     Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
 
     Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
 
@@ -274,4 +286,19 @@ public class OrderDaoImpl implements OrderDao {
 
   //   namedParameterJdbcTemplate.update(sql, map);
   // }
+
+  private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+    if (listQueryParametersDto.getOrderStatus() != null) {
+      sql = sql + " AND order_status = :orderStatus ";
+      map.put("orderStatus", listQueryParametersDto.getOrderStatus().name());
+    }
+
+    if (listQueryParametersDto.getSearch() != null) {
+      sql = sql + " AND oi.name LIKE :search ";
+      map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+    return sql;
+  }
+
 }
