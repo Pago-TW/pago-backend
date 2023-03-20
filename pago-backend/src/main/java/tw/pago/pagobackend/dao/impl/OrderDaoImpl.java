@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
 
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.rowmapper.OrderItemRowMapper;
 import tw.pago.pagobackend.rowmapper.OrderRowMapper;
+import tw.pago.pagobackend.rowmapper.OrderWithOrderItemRowMapper;
 
 @Component
 public class OrderDaoImpl implements OrderDao {
@@ -208,6 +210,44 @@ public class OrderDaoImpl implements OrderDao {
     map.put("orderId", orderId);
 
     namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
+  public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+        + "om.verification, om.destination, om.traveler_fee, om.currency, om.platform_fee_percent, "
+        + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
+        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
+        + "oi.purchase_district, oi.purchase_road "
+        + "FROM order_main as om "
+        + "LEFT JOIN order_item as oi ON om.order_item_id = oi.order_item_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderWithOrderItemRowMapper());
+
+
+    return orderList;
+
+  }
+
+  @Override
+  public Integer countOrder(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(order_id) "
+        + "FROM order_main "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
   }
 
   // @Override

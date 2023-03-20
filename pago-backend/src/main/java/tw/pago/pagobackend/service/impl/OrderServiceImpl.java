@@ -1,12 +1,16 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
@@ -16,6 +20,11 @@ import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
 public class OrderServiceImpl implements OrderService {
+
+  @Value("${platform_fee_percent}")
+  private static BigDecimal PLATFORM_FEE_PERCENT;
+  @Value("${tariff_fee_percent}")
+  private static BigDecimal TARIFF_FEE_PERCENT;
 
   @Autowired
   private OrderDao orderDao;
@@ -66,8 +75,27 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
+  public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
+
+    List<Order> orderList = orderDao.getOrderList(listQueryParametersDto);
+    return orderList;
+  }
+
+  @Override
   public void deleteOrderById(String orderId) {
     orderDao.deleteOrderById(orderId);
+  }
+
+  @Override
+  public Integer countOrder(ListQueryParametersDto listQueryParametersDto) {
+    Integer total = orderDao.countOrder(listQueryParametersDto);
+    return total;
+  }
+
+  @Override
+  public BigDecimal calculateOrderTotalAmount(Order order) {
+
+    return null;
   }
 
   // @Override
