@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.TripRowMapper;
@@ -132,5 +133,59 @@ public class TripDaoImpl implements TripDao {
     } catch (SQLException e) {
       throw e;
     }
+  }
+
+
+  @Override
+  public List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+        + "arrival_date, profit, create_date, update_date "
+        + "FROM trip "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+
+    List<Trip> tripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return tripList;
+  }
+
+
+  @Override
+  public Integer countTrip(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(trip_id) "
+        + "FROM trip "
+        + "WHERE 1=1";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
+  private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+
+    if (listQueryParametersDto.getSearch() != null) {
+      sql = sql + " AND oi.name LIKE :search ";
+      map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+    return  sql;
   }
 }
