@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
 
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.rowmapper.OrderItemRowMapper;
 import tw.pago.pagobackend.rowmapper.OrderRowMapper;
+import tw.pago.pagobackend.rowmapper.OrderWithOrderItemRowMapper;
 
 @Component
 public class OrderDaoImpl implements OrderDao {
@@ -179,11 +181,11 @@ public class OrderDaoImpl implements OrderDao {
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseRoad() != null ? 
     updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseRoad() : order.getOrderItem().getPurchaseRoad());
     
-    Boolean packaging = updateOrderAndOrderItemRequestDto.getPackaging();
-    map.put("packaging", packaging != null ? packaging : order.getPackaging());
+    Boolean packaging = updateOrderAndOrderItemRequestDto.isPackagingRequired();
+    map.put("packaging", packaging != null ? packaging : order.isPackagingRequired());
 
-    Boolean verification = updateOrderAndOrderItemRequestDto.getVerification();
-    map.put("verification", verification != null ? verification : order.getVerification());
+    Boolean verification = updateOrderAndOrderItemRequestDto.isVerificationRequired();
+    map.put("verification", verification != null ? verification : order.isVerificationRequired());
 
     map.put("destination", updateOrderAndOrderItemRequestDto.getDestination() != null ? updateOrderAndOrderItemRequestDto.getDestination() : order.getDestination());
     map.put("travelerFee", updateOrderAndOrderItemRequestDto.getTravelerFee() != null ? updateOrderAndOrderItemRequestDto.getTravelerFee() : order.getTravelerFee());
@@ -210,6 +212,56 @@ public class OrderDaoImpl implements OrderDao {
     namedParameterJdbcTemplate.update(sql, map);
   }
 
+  @Override
+  public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+        + "om.verification, om.destination, om.traveler_fee, om.currency, om.platform_fee_percent, "
+        + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
+        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
+        + "oi.purchase_district, oi.purchase_road "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderWithOrderItemRowMapper());
+
+
+    return orderList;
+
+  }
+
+  @Override
+  public Integer countOrder(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(order_id) "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
   // @Override
   // public void updateOrder(UpdateOrderRequestDto updateOrderRequestDto) {
   //   String sql = "UPDATE order_main "
@@ -234,4 +286,19 @@ public class OrderDaoImpl implements OrderDao {
 
   //   namedParameterJdbcTemplate.update(sql, map);
   // }
+
+  private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+    if (listQueryParametersDto.getOrderStatus() != null) {
+      sql = sql + " AND order_status = :orderStatus ";
+      map.put("orderStatus", listQueryParametersDto.getOrderStatus().name());
+    }
+
+    if (listQueryParametersDto.getSearch() != null) {
+      sql = sql + " AND oi.name LIKE :search ";
+      map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+    return sql;
+  }
+
 }

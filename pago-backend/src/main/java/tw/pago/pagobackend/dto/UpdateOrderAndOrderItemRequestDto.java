@@ -6,11 +6,17 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Optional;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 // import tw.pago.pagobackend.constant.PackagingEnum;
 
+@Getter
+@Setter
+@Builder
 public class UpdateOrderAndOrderItemRequestDto {
 
 
@@ -22,10 +28,10 @@ public class UpdateOrderAndOrderItemRequestDto {
   private Optional<UpdateOrderItemDto> updateOrderItemDto;
 
 
-  private boolean packaging;
+  private boolean isPackagingRequired;
 
 
-  private boolean verification;
+  private boolean isVerificationRequired;
 
 
   private String destination;
@@ -51,107 +57,4 @@ public class UpdateOrderAndOrderItemRequestDto {
   private OrderStatusEnum orderStatus;
 
 
-  public String getOrderId() {
-    return orderId;
-  }
-
-  public void setOrderId(String orderId) {
-    this.orderId = orderId;
-  }
-
-  public String getConsumerId() {
-    return consumerId;
-  }
-
-  public void setConsumerId(String consumerId) {
-    this.consumerId = consumerId;
-  }
-
-  public Optional<UpdateOrderItemDto> getUpdateOrderItemDto() {
-    return updateOrderItemDto;
-  }
-
-  public void setUpdateOrderItemDto(Optional<UpdateOrderItemDto> updateOrderItemDto) {
-    this.updateOrderItemDto = updateOrderItemDto;
-  }
-
-  public boolean getPackaging() {
-    return packaging;
-  }
-
-  public void setPackaging(boolean packaging) {
-    this.packaging = packaging;
-  }
-
-  public boolean getVerification() {
-    return verification;
-  }
-
-  public void setVerification(boolean verification) {
-    this.verification = verification;
-  }
-
-  public String getDestination() {
-    return destination;
-  }
-
-  public void setDestination(String destination) {
-    this.destination = destination;
-  }
-
-  public BigDecimal getTravelerFee() {
-    return travelerFee;
-  }
-
-  public void setTravelerFee(BigDecimal travelerFee) {
-    this.travelerFee = travelerFee;
-  }
-
-  public CurrencyEnum getCurrency() {
-    return currency;
-  }
-
-  public void setCurrency(CurrencyEnum currency) {
-    this.currency = currency;
-  }
-
-  public Double getPlatformFeePercent() {
-    return platformFeePercent;
-  }
-
-  public void setPlatformFeePercent(Double platformFeePercent) {
-    this.platformFeePercent = platformFeePercent;
-  }
-
-  public Double getTariffFeePercent() {
-    return tariffFeePercent;
-  }
-
-  public void setTariffFeePercent(Double tariffFeePercent) {
-    this.tariffFeePercent = tariffFeePercent;
-  }
-
-  public Date getLatestReceiveItemDate() {
-    return latestReceiveItemDate;
-  }
-
-  public void setLatestReceiveItemDate(Date latestReceiveItemDate) {
-    this.latestReceiveItemDate = latestReceiveItemDate;
-  }
-
-  public String getNote() {
-    return note;
-  }
-
-  public void setNote(String note) {
-    this.note = note;
-  }
-
-  public OrderStatusEnum getOrderStatus() {
-    return orderStatus;
-  }
-
-  public void setOrderStatus(OrderStatusEnum orderStatus) {
-    this.orderStatus = orderStatus;
-  }
 }

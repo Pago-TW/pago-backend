@@ -9,17 +9,18 @@ public class TripRowMapper implements RowMapper<Trip> {
 
   @Override
   public Trip mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-    Trip trip = new Trip();
-    trip.setTripId(resultSet.getString("trip_id"));
-    trip.setShopperId(resultSet.getString("shopper_id"));
-    trip.setFromCountry(resultSet.getString("from_country"));
-    trip.setFromCity(resultSet.getString("from_city"));
-    trip.setToCountry(resultSet.getString("to_country"));
-    trip.setToCity(resultSet.getString("to_city"));
-    trip.setArrivalDate(resultSet.getTimestamp("arrival_date"));
-    trip.setProfit(resultSet.getBigDecimal("profit"));
-    trip.setCreateDate(resultSet.getTimestamp("create_date"));
-    trip.setUpdateDate(resultSet.getTimestamp("update_date"));
+    Trip trip = Trip.builder()
+        .tripId(resultSet.getString("trip_id"))
+        .shopperId(resultSet.getString("shopper_id"))
+        .fromCountry(resultSet.getString("from_country"))
+        .fromCity(resultSet.getString("from_city"))
+        .toCountry(resultSet.getString("to_country"))
+        .toCity(resultSet.getString("to_city"))
+        .arrivalDate(resultSet.getTimestamp("arrival_date"))
+        .profit(resultSet.getBigDecimal("profit"))
+        .createDate(resultSet.getTimestamp("create_date"))
+        .updateDate(resultSet.getTimestamp("update_date"))
+        .build();
 
     return trip;
   }
