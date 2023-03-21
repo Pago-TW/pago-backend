@@ -10,6 +10,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.server.ResponseStatusException;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
@@ -87,6 +88,23 @@ public class UserServiceImpl implements UserService {
       log.warn("email {} 的密碼不正確", userLoginRequestDto.getEmail());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @Override
+  public void updateUser(UpdateUserRequestDto updateUserRequestDto) {
+
+    // Get old data by id
+    User oldUser = userDao.getUserById(updateUserRequestDto.getUserId());
+
+//    if (oldUser.getUserId() == null) {
+//      throw new UsernameNotFoundException("The User you want to update not found");
+//    }
+
+    // Check frontend update data, or set old data
+    updateUserRequestDto.fillEmptyFieldsWithOldData(oldUser);
+
+    // update user
+    userDao.updateUser(updateUserRequestDto);
   }
 
   @Override

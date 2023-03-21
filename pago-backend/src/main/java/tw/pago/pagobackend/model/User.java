@@ -2,12 +2,14 @@ package tw.pago.pagobackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 @Getter
 @Setter
+@Builder
 public class User {
   private String userId;
   private String account;

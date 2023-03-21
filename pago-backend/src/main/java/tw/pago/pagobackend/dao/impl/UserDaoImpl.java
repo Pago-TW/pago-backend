@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.rowmapper.UserRowMapper;
@@ -95,5 +96,45 @@ public class UserDaoImpl implements UserDao {
     } else {
       return null;
     }
+  }
+
+
+  @Override
+  public void updateUser(UpdateUserRequestDto updateUserRequestDto) {
+    String sql = "UPDATE user "
+        + "SET account = :account, "
+        + "    password = :password, "
+        + "    first_name = :firstName, "
+        + "    last_name = :lastName, "
+        + "    phone = :phone, "
+        + "    email = :email, "
+        + "    gender = :gender, "
+        + "    google_id = :googleId, "
+        + "    account_status = :accountStatus, "
+        + "    update_date = :updateDate, "
+        + "    about_me = :aboutMe, "
+        + "    country = :country, "
+        + "    last_login = :lastLogin, "
+        + "    avatar_url = :avatarUrl "
+        + "WHERE user_id = :userId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("account", updateUserRequestDto.getAccount());
+    map.put("password", updateUserRequestDto.getPassword());
+    map.put("firstName", updateUserRequestDto.getFirstName());
+    map.put("lastName", updateUserRequestDto.getLastName());
+    map.put("phone", updateUserRequestDto.getPhone());
+    map.put("email", updateUserRequestDto.getEmail());
+    map.put("gender", updateUserRequestDto.getGender());
+    map.put("googleId", updateUserRequestDto.getGoogleId());
+    map.put("accountStatus", updateUserRequestDto.getAccountStatus());
+    map.put("updateDate", new Date());
+    map.put("aboutMe", updateUserRequestDto.getAboutMe());
+    map.put("country", updateUserRequestDto.getCountry());
+    map.put("lastLogin", updateUserRequestDto.getLastLogin());
+    map.put("avatarUrl", updateUserRequestDto.getAvatarUrl());
+    map.put("userId", updateUserRequestDto.getUserId());
+
+    namedParameterJdbcTemplate.update(sql, map);
   }
 }

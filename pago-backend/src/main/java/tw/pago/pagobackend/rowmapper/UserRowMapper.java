@@ -1,6 +1,5 @@
 package tw.pago.pagobackend.rowmapper;
 
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
@@ -11,25 +10,23 @@ public class UserRowMapper implements RowMapper<User> {
 
   @Override
   public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-    User user = new User();
-    user.setUserId(resultSet.getString("user_id"));
-    user.setAccount(resultSet.getString("account"));
-    user.setPassword(resultSet.getString("password"));
-    user.setFirstName(resultSet.getString("first_name"));
-    user.setLastName(resultSet.getString("last_name"));
-    user.setPhone(resultSet.getString("phone"));
-    user.setEmail(resultSet.getString("email"));
-    user.setGender(resultSet.getString("gender"));
-    user.setGoogleId(resultSet.getString("google_id"));
-    user.setAccountStatus(resultSet.getString("account_status"));
-    user.setUpdateDate(resultSet.getTimestamp("update_date"));
-    user.setCreateDate(resultSet.getTimestamp("create_date"));
-    user.setAboutMe(resultSet.getString("about_me"));
-    user.setCountry(resultSet.getString("country"));
-    user.setLastLogin(resultSet.getTimestamp("last_login"));
-    user.setProvider(UserAuthProviderEnum.valueOf(resultSet.getString("provider")));
-
-
-    return user;
+    return User.builder()
+        .userId(resultSet.getString("user_id"))
+        .account(resultSet.getString("account"))
+        .password(resultSet.getString("password"))
+        .firstName(resultSet.getString("first_name"))
+        .lastName(resultSet.getString("last_name"))
+        .phone(resultSet.getString("phone"))
+        .email(resultSet.getString("email"))
+        .gender(resultSet.getString("gender"))
+        .googleId(resultSet.getString("google_id"))
+        .accountStatus(resultSet.getString("account_status"))
+        .updateDate(resultSet.getTimestamp("update_date"))
+        .createDate(resultSet.getTimestamp("create_date"))
+        .aboutMe(resultSet.getString("about_me"))
+        .country(resultSet.getString("country"))
+        .lastLogin(resultSet.getTimestamp("last_login"))
+        .provider(UserAuthProviderEnum.valueOf(resultSet.getString("provider")))
+        .build();
   }
 }
