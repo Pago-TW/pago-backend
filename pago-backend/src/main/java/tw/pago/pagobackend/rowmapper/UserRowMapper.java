@@ -4,7 +4,7 @@ package tw.pago.pagobackend.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
-import tw.pago.pagobackend.constant.UserProviderEnum;
+import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.model.User;
 
 public class UserRowMapper implements RowMapper<User> {
@@ -27,7 +27,7 @@ public class UserRowMapper implements RowMapper<User> {
     user.setAboutMe(resultSet.getString("about_me"));
     user.setCountry(resultSet.getString("country"));
     user.setLastLogin(resultSet.getTimestamp("last_login"));
-    user.setProvider(UserProviderEnum.valueOf(resultSet.getString("provider")));
+    user.setProvider(UserAuthProviderEnum.valueOf(resultSet.getString("provider")));
 
 
     return user;

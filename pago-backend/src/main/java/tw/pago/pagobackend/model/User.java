@@ -1,11 +1,10 @@
 package tw.pago.pagobackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.security.Provider;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
-import tw.pago.pagobackend.constant.UserProviderEnum;
+import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 @Getter
 @Setter
@@ -28,10 +27,11 @@ public class User {
   private String aboutMe;
   private String country;
   private Date lastLogin;
+  private String avatarUrl;
   // private Integer persent;
 
   // For Spring Security use
-  private UserProviderEnum provider; // GOOGLE, LOCAL
+  private UserAuthProviderEnum provider; // GOOGLE, LOCAL
   private String role;
   private boolean enabled;
 

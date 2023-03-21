@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.server.ResponseStatusException;
-import tw.pago.pagobackend.constant.UserProviderEnum;
+import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     String userId = uuidGenerator.getUuid();
     userRegisterRequestDto.setUserId(userId);
-    userRegisterRequestDto.setProvider(UserProviderEnum.LOCAL);
+    userRegisterRequestDto.setProvider(UserAuthProviderEnum.LOCAL);
 
     // Hash user's register password (MD5)
     String hashedPassword = DigestUtils.md5DigestAsHex(userRegisterRequestDto.getPassword().getBytes());
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
           .userId(newUserId)
           .account(userEmail)
           .email(userEmail)
-          .provider(UserProviderEnum.GOOGLE)
+          .provider(UserAuthProviderEnum.GOOGLE)
           .enabled(true)
           .build();
 

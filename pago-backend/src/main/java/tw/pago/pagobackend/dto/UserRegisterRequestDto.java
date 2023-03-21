@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import tw.pago.pagobackend.constant.UserProviderEnum;
+import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 
 @Getter
@@ -39,7 +39,7 @@ public class UserRegisterRequestDto {
   private Date lastLogin;
 
   // For Spring Security use
-  private UserProviderEnum provider; // GOOGLE, LOCAL
+  private UserAuthProviderEnum provider; // GOOGLE, LOCAL
   private String role;
   private boolean enabled;
 
@@ -171,11 +171,11 @@ public class UserRegisterRequestDto {
     this.lastLogin = lastLogin;
   }
 
-  public UserProviderEnum getProvider() {
+  public UserAuthProviderEnum getProvider() {
     return provider;
   }
 
-  public void setProvider(UserProviderEnum provider) {
+  public void setProvider(UserAuthProviderEnum provider) {
     this.provider = provider;
   }
 
