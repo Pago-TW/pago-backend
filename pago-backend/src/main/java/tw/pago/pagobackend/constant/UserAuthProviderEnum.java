@@ -1,6 +1,6 @@
 package tw.pago.pagobackend.constant;
 
-public enum UserProviderEnum {
+public enum UserAuthProviderEnum {
   LOCAL,
   GOOGLE
 }
