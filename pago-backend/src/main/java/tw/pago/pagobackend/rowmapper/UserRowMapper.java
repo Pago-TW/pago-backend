@@ -27,6 +27,7 @@ public class UserRowMapper implements RowMapper<User> {
         .country(resultSet.getString("country"))
         .lastLogin(resultSet.getTimestamp("last_login"))
         .provider(UserAuthProviderEnum.valueOf(resultSet.getString("provider")))
+        .role(resultSet.getString("role"))
         .build();
   }
 }
