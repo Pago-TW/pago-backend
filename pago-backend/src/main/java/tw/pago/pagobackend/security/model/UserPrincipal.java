@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.model.User;
 
 public class UserPrincipal implements OAuth2User, UserDetails {
@@ -16,12 +17,14 @@ public class UserPrincipal implements OAuth2User, UserDetails {
   private String password;
   private Collection<? extends GrantedAuthority> authorities;
   private Map<String, Object> attributes;
+  private UserAuthProviderEnum provider;
 
-  public UserPrincipal(String id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+  public UserPrincipal(String id, String email, String password, Collection<? extends GrantedAuthority> authorities, UserAuthProviderEnum provider) {
     this.id = id;
     this.email = email;
     this.password = password;
     this.authorities = authorities;
+    this.provider = provider;
   }
 
   public static UserPrincipal create(User user) {
@@ -32,7 +35,8 @@ public class UserPrincipal implements OAuth2User, UserDetails {
         user.getUserId(),
         user.getEmail(),
         user.getPassword(),
-        authorities
+        authorities,
+        user.getProvider()
     );
   }
 
@@ -97,5 +101,14 @@ public class UserPrincipal implements OAuth2User, UserDetails {
   @Override
   public String getName() {
     return String.valueOf(id);
+  }
+
+
+  public UserAuthProviderEnum getProvider() {
+    return provider;
+  }
+
+  public void setProvider(UserAuthProviderEnum provider) {
+    this.provider = provider;
   }
 }

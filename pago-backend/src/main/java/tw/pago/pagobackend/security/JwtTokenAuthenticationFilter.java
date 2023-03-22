@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import tw.pago.pagobackend.security.userdetails.impl.CustomUserDetailsServiceImpl;
-import tw.pago.pagobackend.service.impl.CustomOAuth2UserServiceImpl;
 import tw.pago.pagobackend.util.JwtTokenProvider;
 
 public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
@@ -32,7 +31,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     try {
-      String jwt = getJwtFromRequest(request);
+      String jwt = getJwtFromRequestHeader(request);
 
       if (StringUtils.hasText(jwt) && jwtTokenProvider.validateJwtToken(jwt)) {
         String userId = jwtTokenProvider.getUserIdFromJwtToken(jwt);
@@ -50,7 +49,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  private String getJwtFromRequest(HttpServletRequest request) {
+  private String getJwtFromRequestHeader(HttpServletRequest request) {
     String bearerToken = request.getHeader("Authorization");
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7, bearerToken.length());
