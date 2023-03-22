@@ -1,10 +1,8 @@
 package tw.pago.pagobackend.security.oauth2;
 
-import com.example.springsocial.exception.OAuth2AuthenticationProcessingException;
-import com.example.springsocial.model.AuthProvider;
-
 import java.util.Map;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
+import tw.pago.pagobackend.exception.OAuth2AuthenticationProcessingException;
 
 public class OAuth2UserInfoFactory {
 

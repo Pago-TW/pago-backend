@@ -1,4 +1,4 @@
-package tw.pago.pagobackend.model;
+package tw.pago.pagobackend.security.model;
 
 import java.util.ArrayList;
 import java.util.List;
