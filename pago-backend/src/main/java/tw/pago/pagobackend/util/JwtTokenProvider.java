@@ -3,11 +3,14 @@ package tw.pago.pagobackend.util;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Component;
 import java.util.Date;
+import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.security.model.AppProperties;
 import tw.pago.pagobackend.security.model.UserPrincipal;
 
@@ -17,6 +20,9 @@ public class JwtTokenProvider {
   private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
   private AppProperties appProperties;
+
+  @Autowired
+  private UserDao userDao;
 
 
   public JwtTokenProvider (AppProperties appProperties) {
@@ -33,7 +39,8 @@ public class JwtTokenProvider {
     } else if (userPrincipal instanceof DefaultOidcUser) {
       // Convert DefaultOidcUser to UserPrincipal or extract the required data
       // For example, you can extract the user's ID (subject) like this:
-      userId = ((DefaultOidcUser) userPrincipal).getSubject();
+      User user = userDao.getUserByEmail(((DefaultOidcUser) userPrincipal).getEmail().toString());
+      userId = user.getUserId();
     } else {
       throw new IllegalArgumentException("Unsupported principal type");
     }

@@ -35,7 +35,6 @@ import tw.pago.pagobackend.util.JwtTokenProvider;
 public class UserController {
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-
   @Autowired
   private UserService userService;
   @Autowired
@@ -55,6 +54,7 @@ public class UserController {
     }
 
   }
+
   @PostMapping("/users/login")
   public ResponseEntity<User> login(@RequestBody @Valid UserLoginRequestDto userLoginRequestDto) {
     User user = userService.login(userLoginRequestDto);
@@ -96,9 +96,7 @@ public class UserController {
     Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
             userLoginRequestDto.getEmail(),
-            userLoginRequestDto.getPassword()
-        )
-    );
+            userLoginRequestDto.getPassword()));
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -110,16 +108,12 @@ public class UserController {
 
     return ResponseEntity.status(HttpStatus.OK).body(jwtAuthenticationResponseDto);
 
-
   }
 
   @GetMapping("/test")
   public ResponseEntity<String> test() {
     return ResponseEntity.ok("Hello World");
   }
-
-
-
 
   @PostMapping()
   public ResponseEntity<?> googleLogin() {

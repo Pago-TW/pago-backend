@@ -23,6 +23,7 @@ public class UserRowMapper implements RowMapper<User> {
         .accountStatus(resultSet.getString("account_status"))
         .updateDate(resultSet.getTimestamp("update_date"))
         .createDate(resultSet.getTimestamp("create_date"))
+        .avatarUrl(resultSet.getString("avatar_url"))
         .aboutMe(resultSet.getString("about_me"))
         .country(resultSet.getString("country"))
         .lastLogin(resultSet.getTimestamp("last_login"))
