@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Builder;
@@ -25,7 +26,9 @@ public class Order {
   private String consumerId;
   private Date createDate;
   private Date updateDate;
+  @JsonProperty("isPackagingRequired")
   private boolean isPackagingRequired;
+  @JsonProperty("isVerificationRequired")
   private boolean isVerificationRequired;
   private String destination;
   private CurrencyEnum currency;
