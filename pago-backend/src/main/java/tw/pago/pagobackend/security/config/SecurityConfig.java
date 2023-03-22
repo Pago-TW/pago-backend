@@ -14,8 +14,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import tw.pago.pagobackend.security.JwtTokenAuthenticationFilter;
+import tw.pago.pagobackend.security.RestAuthenticationEntryPoint;
+import tw.pago.pagobackend.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
+import tw.pago.pagobackend.security.oauth2.OAuth2AuthenticationFailureHandler;
 import tw.pago.pagobackend.security.oauth2.OAuth2AuthenticationSuccessHandler;
-import tw.pago.pagobackend.service.UserService;
+import tw.pago.pagobackend.security.userdetails.impl.CustomUserDetailsServiceImpl;
 import tw.pago.pagobackend.service.impl.CustomOAuth2UserServiceImpl;
 
 @Configuration
@@ -27,20 +31,11 @@ import tw.pago.pagobackend.service.impl.CustomOAuth2UserServiceImpl;
 )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-  private final CustomOAuth2UserServiceImpl customOAuth2UserService;
-  private final UserService userService;
+  @Autowired
+  private CustomUserDetailsServiceImpl customUserDetailsService;
 
   @Autowired
-  public SecurityConfig(CustomOAuth2UserServiceImpl customOAuth2UserService, UserService userService) {
-    this.customOAuth2UserService = customOAuth2UserService;
-    this.userService = userService;
-  }
-
-  @Autowired
-  private CustomUserDetailsService customUserDetailsService;
-
-  @Autowired
-  private CustomOAuth2UserService customOAuth2UserService;
+  private CustomOAuth2UserServiceImpl customOAuth2UserService;
 
   @Autowired
   private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
@@ -57,8 +52,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public TokenAuthenticationFilter tokenAuthenticationFilter() {
-    return new TokenAuthenticationFilter();
+  public JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter() {
+    return new JwtTokenAuthenticationFilter();
+  }
+
+  @Bean
+  public CustomOAuth2UserServiceImpl customOAuth2UserService() {
+    return new CustomOAuth2UserServiceImpl();
   }
 
   @Override
@@ -120,18 +120,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
           .and()
         .oauth2Login()
         .authorizationEndpoint()
-        .baseUri("/oauth2/authorize")
+          .baseUri("/oauth2/authorize")
         .authorizationRequestRepository(cookieAuthorizationRequestRepository())
           .and()
         .redirectionEndpoint()
-        .baseUri("/oauth2/callback/*")
+          .baseUri("/oauth2/callback/*")
           .and()
         .userInfoEndpoint()
-        .userService(customOAuth2UserService)
+          .userService(customOAuth2UserService)
           .and()
-        .successHandler(OAuth2AuthenticationSuccessHandler)
+        .successHandler(oAuth2AuthenticationSuccessHandler)
         .failureHandler(oAuth2AuthenticationFailureHandler);
 
-    http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(jwtTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
   }
 }
