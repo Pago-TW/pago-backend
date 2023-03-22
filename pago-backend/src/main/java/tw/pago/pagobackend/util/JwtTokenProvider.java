@@ -5,9 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Component;
 import java.util.Date;
 import tw.pago.pagobackend.security.model.AppProperties;
+import tw.pago.pagobackend.security.model.UserPrincipal;
 
 @Component
 public class JwtTokenProvider {
@@ -23,26 +25,37 @@ public class JwtTokenProvider {
 
   public String generateJwtToken(Authentication authentication) {
 
-    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    Object userPrincipal = authentication.getPrincipal();
+    String userId;
+
+    if (userPrincipal instanceof UserPrincipal) {
+      userId = ((UserPrincipal) userPrincipal).getId();
+    } else if (userPrincipal instanceof DefaultOidcUser) {
+      // Convert DefaultOidcUser to UserPrincipal or extract the required data
+      // For example, you can extract the user's ID (subject) like this:
+      userId = ((DefaultOidcUser) userPrincipal).getSubject();
+    } else {
+      throw new IllegalArgumentException("Unsupported principal type");
+    }
 
     Date now = new Date();
     Date expiryDate = new Date(now.getTime() + appProperties.getAuth().getTokenExpirationMsec());
 
     return Jwts.builder()
-        .setSubject(Long.toString(userPrincipal.getId()))
+        .setSubject(userId)
         .setIssuedAt(new Date())
         .setExpiration(expiryDate)
         .signWith(SignatureAlgorithm.HS512, appProperties.getAuth().getTokenSecret())
         .compact();
   }
 
-  public Long getUserIdFromJwtToken(String token) {
+  public String getUserIdFromJwtToken(String token) {
     Claims claims = Jwts.parser()
         .setSigningKey(appProperties.getAuth().getTokenSecret())
         .parseClaimsJws(token)
         .getBody();
 
-    return Long.parseLong(claims.getSubject());
+    return claims.getSubject();
   }
 
   public boolean validateJwtToken(String authToken) {
