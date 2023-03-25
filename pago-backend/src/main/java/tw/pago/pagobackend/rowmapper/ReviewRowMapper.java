@@ -10,17 +10,18 @@ public class ReviewRowMapper implements RowMapper<Review> {
 
   @Override
   public Review mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-    Review review = new Review();
-    review.setReviewId(resultSet.getString("review_Id"));
-    review.setOrderId(resultSet.getString("order_id"));
-    review.setConsumerId(resultSet.getString("consumer_id"));
-    review.setShopperId(resultSet.getString("shopper_id"));
-    review.setContent(resultSet.getString("content"));
-    review.setRating(resultSet.getInt("rating"));
-    review.setCreateDate(resultSet.getTimestamp("create_date"));
-    review.setReviewType(ReviewTypeEnum.valueOf(resultSet.getString("review_type")));
-    review.setUpdateDate(resultSet.getTimestamp("update_date"));
-    
+    Review review = Review.builder()
+        .reviewId(resultSet.getString("review_Id"))
+        .orderId(resultSet.getString("order_id"))
+        .creatorId(resultSet.getString("creator_id"))
+        .targetId(resultSet.getString("target_id"))
+        .content(resultSet.getString("content"))
+        .rating(resultSet.getInt("rating"))
+        .createDate(resultSet.getTimestamp("create_date"))
+        .reviewType(ReviewTypeEnum.valueOf(resultSet.getString("review_type")))
+        .updateDate(resultSet.getTimestamp("update_date"))
+        .build();
+
     return review;
   }
 }

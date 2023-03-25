@@ -1,74 +1,21 @@
 package tw.pago.pagobackend.dto;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 
+
+@Getter
+@Setter
+@Builder
 public class CreateReviewRequestDto {
   private String reviewId;
   private String orderId;
-  private String shopperId;
-  private String consumerId;
+  private String creatorId;
+  private String targetId;
   private String content;
   private Integer rating;
   private ReviewTypeEnum reviewType;
 
-
-  public CreateReviewRequestDto() {
-
-  }
-
-  public String getReviewId() {
-    return reviewId;
-  }
-
-  public void setReviewId(String reviewId) {
-    this.reviewId = reviewId;
-  }
-
-  public String getOrderId() {
-    return orderId;
-  }
-
-  public void setOrderId(String orderId) {
-    this.orderId = orderId;
-  }
-
-  public String getShopperId() {
-    return shopperId;
-  }
-
-  public void setShopperId(String shopperId) {
-    this.shopperId = shopperId;
-  }
-
-  public String getConsumerId() {
-    return consumerId;
-  }
-
-  public void setConsumerId(String consumerId) {
-    this.consumerId = consumerId;
-  }
-
-  public String getContent() {
-    return content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public Integer getRating() {
-    return rating;
-  }
-
-  public void setRating(Integer rating) {
-    this.rating = rating;
-  }
-
-  public ReviewTypeEnum getReviewType() {
-    return reviewType;
-  }
-
-  public void setReviewType(ReviewTypeEnum reviewType) {
-    this.reviewType = reviewType;
-  }
 }
