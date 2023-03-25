@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,9 +33,17 @@ public class User {
   private String avatarUrl;
   // private Integer persent;
 
+  // For programing use;
+  private String fullName;
+
+
+
   // For Spring Security use
   private UserAuthProviderEnum provider; // GOOGLE, LOCAL
   private String role;
   private boolean enabled;
 
+  public String getFullName() {
+    return firstName + " " + lastName;
+  }
 }
