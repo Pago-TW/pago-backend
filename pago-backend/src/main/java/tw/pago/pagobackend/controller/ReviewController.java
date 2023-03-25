@@ -1,7 +1,9 @@
 package tw.pago.pagobackend.controller;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import org.modelmapper.ModelMapper;
@@ -48,9 +50,9 @@ public class ReviewController {
   private ReviewAssembler reviewAssembler;
 
   @PostMapping("/orders/{orderId}/reviews")
-  public ResponseEntity<Review> createReview(
+  public ResponseEntity<ReviewResponseDto> createReview(
       @PathVariable String orderId,
-      @RequestBody CreateReviewRequestDto createReviewRequestDto) {
+      @RequestBody @Valid CreateReviewRequestDto createReviewRequestDto) {
 
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
@@ -62,7 +64,10 @@ public class ReviewController {
     // Create Review
     Review review = reviewService.createReview(createReviewRequestDto);
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(review);
+    // Convert to Dto by assembler
+    ReviewResponseDto reviewResponseDto = reviewAssembler.assemble(review);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(reviewResponseDto);
   }
 
   @GetMapping("/users/{userId}/reviews/{reviewId}")
@@ -74,36 +79,50 @@ public class ReviewController {
   }
 
 
-//  @GetMapping("/users/{userId}/reviews")
-//  public ResponseEntity<ListResponseDto<Review>> getReviewList(@PathVariable String userId,
-//      @RequestParam(required = false) String search,
-//      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
-//      @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
-//      @RequestParam(defaultValue = "create_date") String orderBy,
-//      @RequestParam(defaultValue = "DESC") String sort) {
-//
-//    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
-//        .search(search)
-//        .startIndex(startIndex)
-//        .size(size)
-//        .orderBy(orderBy)
-//        .sort(sort)
-//        .build();
-//
-//    List<Review> reviewList = reviewService.getReviewList(listQueryParametersDto);
-//
-//    Integer total = reviewList.countReview(listQueryParametersDto);
-//
-//    ListResponseDto<Review> reviewListResponseDto = ListResponseDto.<Review>builder()
-//        .total(total)
-//        .startIndex(startIndex)
-//        .size(size)
-//        .data(reviewList)
-//        .build();
-//
-//
-//    return ResponseEntity.status(HttpStatus.OK).body(reviewListResponseDto);
-//  }
+  @GetMapping("/users/{userId}/reviews")
+  public ResponseEntity<ListResponseDto<ReviewResponseDto>> getReviewList(@PathVariable String userId,
+      @RequestParam(required = true) String type,
+      @RequestParam(required = false) String search,
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "create_date") String orderBy,
+      @RequestParam(defaultValue = "DESC") String sort) {
+
+
+    // Set Query Parameters
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .reviewType(ReviewTypeEnum.valueOf(type))
+        .search(search)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
+        .build();
+
+    // Get ReviewList
+    List<Review> reviewList = reviewService.getReviewList(listQueryParametersDto);
+
+    // Convert to Dto by assembler
+    List<ReviewResponseDto> reviewResponseDtoList = new ArrayList<>();
+    for (Review review: reviewList) {
+      reviewResponseDtoList.add(reviewAssembler.assemble(review));
+    }
+
+    // Count total Review with Filter condition
+    Integer total = reviewService.countReview(listQueryParametersDto);
+
+
+    // Set data to ListResponseDto
+    ListResponseDto<ReviewResponseDto> reviewListResponseDto = ListResponseDto.<ReviewResponseDto>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .data(reviewResponseDtoList)
+        .build();
+
+
+    return ResponseEntity.status(HttpStatus.OK).body(reviewListResponseDto);
+  }
 
 
   // @PatchMapping("/users/{userId}/orders/{orderId}/reviews/{reviewId}")

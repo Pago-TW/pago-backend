@@ -9,8 +9,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.ReviewDao;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.model.Review;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.ReviewRowMapper;
+import tw.pago.pagobackend.rowmapper.TripRowMapper;
 
 @Component
 public class ReviewDaoImpl implements ReviewDao {
@@ -61,4 +64,64 @@ public class ReviewDaoImpl implements ReviewDao {
     }
 
   }
+
+
+  @Override
+  public List<Review> getReviewList(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT review_id, order_id, creator_id, target_id, content, "
+        + "rating, create_date, review_type, update_date "
+        + "FROM review "
+        + "WHERE 1=1 ";
+
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+
+    List<Review> reviewList = namedParameterJdbcTemplate.query(sql, map, new ReviewRowMapper());
+    return reviewList;
+  }
+
+  @Override
+  public Integer countReview(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(review_id) "
+        + "FROM review "
+        + "WHERE 1=1";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
+  private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+
+    if (listQueryParametersDto.getReviewType() != null) {
+      sql = sql + " AND review_type = :reviewType ";
+      map.put("reviewType", listQueryParametersDto.getReviewType().name());
+    }
+
+
+    if (listQueryParametersDto.getSearch() != null) {
+      sql = sql + " AND content LIKE :search ";
+      map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+    return sql;
+  }
+
 }

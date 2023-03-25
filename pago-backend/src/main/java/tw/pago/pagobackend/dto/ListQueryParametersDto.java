@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.constant.ReviewTypeEnum;
 
 @Getter
 @Setter
@@ -20,4 +21,7 @@ public class ListQueryParametersDto {
   // Order
   private OrderStatusEnum orderStatus;
 
+
+  // Review
+  private ReviewTypeEnum reviewType;
 }
