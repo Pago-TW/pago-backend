@@ -2,6 +2,7 @@ package tw.pago.pagobackend.service.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,15 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
+import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
+import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
@@ -33,10 +37,12 @@ public class OrderServiceImpl implements OrderService {
   private OrderDao orderDao;
   @Autowired
   private UuidGenerator uuidGenerator;
+  @Autowired
+  private FileService fileService;
 
   @Transactional
   @Override
-  public Order createOrder(String userId, CreateOrderRequestDto createOrderRequestDto) {
+  public Order createOrder(String userId, MultipartFile file, CreateOrderRequestDto createOrderRequestDto) {
 
     String orderItemUuid = uuidGenerator.getUuid();
     String orderUuid = uuidGenerator.getUuid();
@@ -53,6 +59,15 @@ public class OrderServiceImpl implements OrderService {
     orderDao.createOrderItem(createOrderRequestDto);
     orderDao.createOrder(userId, createOrderRequestDto);
 
+    //upload file
+    CreateFileRequestDto createFileRequestDto = new CreateFileRequestDto();
+    createFileRequestDto.setFileCreator(userId);
+    createFileRequestDto.setObjectId(orderUuid);
+    createFileRequestDto.setObjectType("order");
+
+    fileService.uploadFile(file, createFileRequestDto);
+    System.out.println("file uploaded");
+
     Order order = getOrderById(orderUuid);
 
     return order;
@@ -66,6 +81,11 @@ public class OrderServiceImpl implements OrderService {
     OrderItem orderItem = orderDao.getOrderItemById(orderItemId);
 
     order.setOrderItem(orderItem);
+
+    //get file url
+    String objectType = "order";
+    URL fileUrl = fileService.getFileUrlByObjectIdnType(orderId, objectType);
+    order.getOrderItem().setFileUrl(fileUrl);
 
     return order;
   }
@@ -94,6 +114,10 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public void deleteOrderById(String orderId) {
     orderDao.deleteOrderById(orderId);
+
+    //delete file
+    String objectType = "order";
+    fileService.deleteFileByObjectIdnType(orderId, objectType);
   }
 
   @Override

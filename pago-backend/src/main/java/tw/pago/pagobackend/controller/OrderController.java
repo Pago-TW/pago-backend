@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -33,10 +39,14 @@ public class OrderController {
   private OrderService orderService;
 
   @PostMapping("/users/{userId}/orders")
-  public ResponseEntity<Order> createOrder(@PathVariable String userId,
-      @RequestBody @Valid CreateOrderRequestDto createOrderRequestDto) {
+  public ResponseEntity<Order> createOrder(@PathVariable String userId, @RequestParam("file") MultipartFile file, 
+      @RequestParam("data") String createOrderRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
-    Order order = orderService.createOrder(userId, createOrderRequestDto);
+    // Create Order
+    ObjectMapper objectMapper = new ObjectMapper();
+    CreateOrderRequestDto createOrderRequestDto = objectMapper.readValue(createOrderRequestDtoString, CreateOrderRequestDto.class);
+
+    Order order = orderService.createOrder(userId, file, createOrderRequestDto);
 
 //    Order order = orderService.getOrderById(orderId);
 
