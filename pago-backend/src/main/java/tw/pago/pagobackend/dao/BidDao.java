@@ -12,6 +12,8 @@ public interface BidDao {
 
   Bid getBidById(String bidId);
 
+  Bid getBidByOrderIdAndBidId(String orderId, String bidId);
+
   void deleteBidById(String bidId);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);

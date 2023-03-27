@@ -49,9 +49,32 @@ public class BidDaoImpl implements BidDao {
     String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
         + "update_date,latest_delivery_date, bid_status "
         + "FROM bid "
-        + "WHERE bid_id = :bidId";
+        + "WHERE bid_id = :bidId ";
 
     Map<String, Object> map = new HashMap<>();
+    map.put("bidId", bidId);
+
+
+    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidRowMapper());
+
+    if (bidList.size() > 0) {
+      return bidList.get(0);
+    } else {
+      return null;
+    }
+  }
+
+
+  @Override
+  public Bid getBidByOrderIdAndBidId(String orderId, String bidId) {
+    String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
+        + "update_date,latest_delivery_date, bid_status "
+        + "FROM bid "
+        + "WHERE order_id = :orderId "
+        + "AND bid_id = :bidId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderId", orderId);
     map.put("bidId", bidId);
 
 
@@ -106,7 +129,8 @@ public class BidDaoImpl implements BidDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    // Filtering e.g. status, search
+
+    // Filtering e.g. status, search, orderId
     sql = addFilteringSql(sql, map, listQueryParametersDto);
 
     // Order by {column} & sort by {DESC/ASC}
@@ -146,8 +170,7 @@ public class BidDaoImpl implements BidDao {
 
   private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
     if (listQueryParametersDto.getSearch() != null) {
-      sql = sql + "AND "
-          + "("
+      sql = sql + "AND ( "
           + "   from_country LIKE :search "
           + "OR from_city LIKE :search "
           + "OR to_country LIKE :search "
@@ -156,6 +179,10 @@ public class BidDaoImpl implements BidDao {
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
 
+    if (listQueryParametersDto.getOrderId() != null) {
+      sql = sql + " AND order_id = :orderId ";
+      map.put("orderId", listQueryParametersDto.getOrderId());
+    }
 
     return sql;
   }

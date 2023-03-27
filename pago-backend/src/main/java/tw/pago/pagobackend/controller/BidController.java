@@ -54,13 +54,24 @@ public class BidController {
   }
 
 
+  @GetMapping("/bids/{bidId}")
+  public ResponseEntity<BidResponseDto> getBidById(
+      @PathVariable String bidId) {
+
+
+    // Get Bid
+    BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(bidResponseDto);
+  }
+
   @GetMapping("/orders/{orderId}/bids/{bidId}")
   public ResponseEntity<BidResponseDto> getBidById(@PathVariable String orderId,
       @PathVariable String bidId) {
 
 
     // Get Bid
-    BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
+    BidResponseDto bidResponseDto = bidService.getBidResponseByOrderIdAndBidId(orderId, bidId);
 
     return ResponseEntity.status(HttpStatus.OK).body(bidResponseDto);
   }
@@ -89,14 +100,17 @@ public class BidController {
 
 
   @GetMapping("/orders/{orderId}/bids")
-  public ResponseEntity<ListResponseDto<Bid>> getBidList(
+  public ResponseEntity<ListResponseDto<BidResponseDto>> getBidList(
+      @PathVariable String orderId,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
+    // Set query parameters
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .orderId(orderId)
         .search(search)
         .startIndex(startIndex)
         .size(size)
@@ -105,14 +119,17 @@ public class BidController {
         .build();
 
 
-    List<Bid> bidList = bidService.getBidList(listQueryParametersDto);
+    // Get BidResponseDto list with query parameters
+    List<BidResponseDto> bidResponseDtoList = bidService.getBidResponseDtoList(listQueryParametersDto);
+
+    // Calculate the total number of bids that meet the specified query parameters conditions
     Integer total = bidService.countBid(listQueryParametersDto);
 
-    ListResponseDto<Bid> bidListResponseDto = ListResponseDto.<Bid>builder()
+    ListResponseDto<BidResponseDto> bidListResponseDto = ListResponseDto.<BidResponseDto>builder()
         .total(total)
         .startIndex(startIndex)
         .size(size)
-        .data(bidList)
+        .data(bidResponseDtoList)
         .build();
 
     return ResponseEntity.status(HttpStatus.OK).body(bidListResponseDto);

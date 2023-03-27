@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,15 @@ public class BidServiceImpl implements BidService {
 
     return bid;
 
+  }
+
+
+  @Override
+  public Bid getBidByOrderIdAndBidId(String orderId, String bidId) {
+
+    Bid bid = bidDao.getBidByOrderIdAndBidId(orderId, bidId);
+
+    return bid;
   }
 
   @Override
@@ -131,4 +141,47 @@ public class BidServiceImpl implements BidService {
 
     return bidResponseDto;
   }
+
+  @Override
+  public BidResponseDto getBidResponseByOrderIdAndBidId(String orderId, String bidId) {
+    // Get related data
+    Bid bid = bidDao.getBidByOrderIdAndBidId(orderId, bidId);
+
+
+    Trip trip = tripService.getTripById(bid.getTripId());
+    User creator = userService.getUserById(trip.getShopperId());
+
+    // Get averageRating & totalReview
+    ReviewRatingResultDto reviewRatingResultDto = reviewService.calculateAverageRating(creator.getUserId(), ReviewTypeEnum.FOR_SHOPPER);
+
+    // Set value to bidCreatorReviewDto
+    BidCreatorReviewDto bidCreatorReviewDto = new BidCreatorReviewDto();
+    bidCreatorReviewDto.setAverageRating(reviewRatingResultDto.getAverageRating());
+    bidCreatorReviewDto.setTotalReview(reviewRatingResultDto.getTotalReviews());
+    bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+
+    // Convert to ResponseDTO
+    BidResponseDto bidResponseDto = bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto);
+
+    return bidResponseDto;
+  }
+
+
+
+  @Override
+  public List<BidResponseDto> getBidResponseDtoList(ListQueryParametersDto listQueryParametersDto) {
+
+    List<Bid> bidList = getBidList(listQueryParametersDto);
+
+    // Assemble bid list into BidResponseDto list
+    List<BidResponseDto> bidResponseDtoList = bidList.stream()
+        .map(bid -> getBidResponseById(bid.getBidId()))
+        .collect(Collectors.toList());
+
+
+
+    return bidResponseDtoList;
+  }
+
+
 }

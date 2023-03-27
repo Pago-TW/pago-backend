@@ -13,6 +13,8 @@ public interface BidService {
 
   Bid getBidById(String bidId);
 
+  Bid getBidByOrderIdAndBidId(String orderId, String bidId);
+
   void deleteBidById(String bidId);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
@@ -22,4 +24,8 @@ public interface BidService {
   Integer countBid(ListQueryParametersDto listQueryParametersDto);
 
   BidResponseDto getBidResponseById(String bidId);
+
+  BidResponseDto getBidResponseByOrderIdAndBidId(String orderId, String bidId);
+
+  List<BidResponseDto> getBidResponseDtoList(ListQueryParametersDto listQueryParametersDto);
 }

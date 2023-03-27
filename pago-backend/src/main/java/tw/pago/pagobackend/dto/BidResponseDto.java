@@ -16,8 +16,8 @@ import tw.pago.pagobackend.constant.CurrencyEnum;
 public class BidResponseDto {
 
   private String bidId;
-  private BidCreatorDto creator;
   private String orderId;
+  private BidCreatorDto creator;
   private BidTripDto trip;
   private BigDecimal bidAmount;
   private CurrencyEnum currency;
