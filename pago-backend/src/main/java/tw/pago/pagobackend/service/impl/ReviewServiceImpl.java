@@ -60,7 +60,6 @@ public class ReviewServiceImpl implements ReviewService {
 
 
 
-
     return reviewList;
   }
 
@@ -73,9 +72,29 @@ public class ReviewServiceImpl implements ReviewService {
   }
 
   @Override
-  public Integer calculateAverageRating(String userId, ReviewTypeEnum reviewTypeEnum) {
+  public double calculateAverageRating(String targetId, ReviewTypeEnum reviewType) {
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .targetId(targetId)
+        .reviewType(reviewType)
+        .orderBy("create_date")
+        .sort("DESC")
+        .build();
+
+    // Get review list for target user
+    List<Review> targetUserReviewList = reviewDao.getReviewList(listQueryParametersDto);
 
 
-    return null;
+    // Calculation
+    double totalRating = 0;
+    int numberOfReviews = targetUserReviewList.size();
+    for (Review review : targetUserReviewList) {
+      totalRating += review.getRating();
+    }
+
+    double averageRating = totalRating / numberOfReviews;
+    double roundedAverageRating = Math.round(averageRating * 10) / 10.0;
+
+    return roundedAverageRating;
   }
 }

@@ -23,5 +23,6 @@ public class ListQueryParametersDto {
 
 
   // Review
+  private String targetId;
   private ReviewTypeEnum reviewType;
 }

@@ -81,9 +81,7 @@ public class ReviewDaoImpl implements ReviewDao {
     sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
 
     // Pagination
-    sql = sql + " LIMIT :size OFFSET :startIndex ";
-    map.put("size", listQueryParametersDto.getSize());
-    map.put("startIndex", listQueryParametersDto.getStartIndex());
+    sql = addPaginationSql(sql, map, listQueryParametersDto);
 
 
     List<Review> reviewList = namedParameterJdbcTemplate.query(sql, map, new ReviewRowMapper());
@@ -123,6 +121,19 @@ public class ReviewDaoImpl implements ReviewDao {
       sql = sql + " AND content LIKE :search ";
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
+
+    return sql;
+  }
+
+
+  private String addPaginationSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+
+    if ((listQueryParametersDto.getSize() != null) && (listQueryParametersDto.getStartIndex() != null)) {
+      sql = sql + " LIMIT :size OFFSET :startIndex ";
+      map.put("size", listQueryParametersDto.getSize());
+      map.put("startIndex", listQueryParametersDto.getStartIndex());
+    }
+
 
     return sql;
   }

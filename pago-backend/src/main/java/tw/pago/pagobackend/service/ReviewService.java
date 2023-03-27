@@ -11,11 +11,12 @@ public interface ReviewService {
   Review createReview(CreateReviewRequestDto createReviewRequestDto);
 
   Review getReviewById(String reviewId);
+
   List<Review> getReviewList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countReview(ListQueryParametersDto listQueryParametersDto);
 
-  Integer calculateAverageRating(String userId, ReviewTypeEnum reviewTypeEnum);
+  double calculateAverageRating(String targetId, ReviewTypeEnum reviewTypeEnum);
 
 
 }
