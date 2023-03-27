@@ -60,11 +60,7 @@ public class BidController {
 
 
     // Get Bid
-    Bid bid = bidService.getBidById(bidId);
-
-    // Assemble DTO
-    BidResponseDto bidResponseDto = bidAssembler.assemble(bid);
-
+    BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
 
     return ResponseEntity.status(HttpStatus.OK).body(bidResponseDto);
   }

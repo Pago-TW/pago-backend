@@ -4,6 +4,7 @@ import java.util.List;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.model.Review;
 
 public interface ReviewService {
@@ -16,7 +17,8 @@ public interface ReviewService {
 
   Integer countReview(ListQueryParametersDto listQueryParametersDto);
 
-  double calculateAverageRating(String targetId, ReviewTypeEnum reviewTypeEnum);
+
+  ReviewRatingResultDto calculateAverageRating(String targetId, ReviewTypeEnum reviewTypeEnum);
 
 
 }

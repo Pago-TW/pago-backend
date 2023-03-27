@@ -4,18 +4,22 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tw.pago.pagobackend.assembler.BidAssembler;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dao.BidDao;
+import tw.pago.pagobackend.dto.BidCreatorReviewDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
-import tw.pago.pagobackend.dto.BidShopperDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
@@ -30,9 +34,13 @@ public class BidServiceImpl implements BidService {
   @Autowired
   private UuidGenerator uuidGenerator;
   @Autowired
+  private TripService tripService;
+  @Autowired
   private UserService userService;
   @Autowired
-  private TripService tripService;
+  private ReviewService reviewService;
+  @Autowired
+  private BidAssembler bidAssembler;
 
   @Override
   public Bid createBid(CreateBidRequestDto createBidRequestDto) {
@@ -52,30 +60,8 @@ public class BidServiceImpl implements BidService {
   public Bid getBidById(String bidId) {
 
 
-
     Bid bid = bidDao.getBidById(bidId);
-    Trip bidRelatedTrip = tripService.getTripById(bid.getTripId());
-    User bidder = userService.getUserById(bidRelatedTrip.getShopperId());
 
-    BidShopperDto bidShopperDto = BidShopperDto.builder()
-        .shopperId(bidder.getUserId())
-        .name(bidder.getFullName())
-        .avatarUrl(bidder.getAvatarUrl())
-//        .review()
-        .build();
-
-
-//    BidResponseDto bidResponseDto = BidResponseDto.builder()
-//        .bidId(bid.getBidId())
-////        .shopper()
-//        .orderId(bid.getOrderId())
-//        .tripId(bid.getTripId())
-//        .bidAmount(bid.getBidAmount())
-//        .currency(bid.getCurrency())
-//        .createDate(bid.getCreateDate())
-//        .updateDate(bid.getUpdateDate())
-//        .bidStatus(bid.getBidStatus())
-//        .build();
     return bid;
 
   }
@@ -118,5 +104,31 @@ public class BidServiceImpl implements BidService {
   public Integer countBid(ListQueryParametersDto listQueryParametersDto) {
     Integer total = bidDao.countBid(listQueryParametersDto);
     return total;
+  }
+
+
+  @Override
+  public BidResponseDto getBidResponseById(String bidId) {
+
+    // Get related data
+    Bid bid = getBidById(bidId);
+    Trip trip = tripService.getTripById(bid.getTripId());
+    User creator = userService.getUserById(trip.getShopperId());
+
+    // Get averageRating & totalReview
+    ReviewRatingResultDto reviewRatingResultDto = reviewService.calculateAverageRating(creator.getUserId(), ReviewTypeEnum.FOR_SHOPPER);
+
+
+    // Set value to bidCreatorReviewDto
+    BidCreatorReviewDto bidCreatorReviewDto = new BidCreatorReviewDto();
+    bidCreatorReviewDto.setAverageRating(reviewRatingResultDto.getAverageRating());
+    bidCreatorReviewDto.setTotalReview(reviewRatingResultDto.getTotalReviews());
+    bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+
+
+    // Convert to ResponseDTO
+    BidResponseDto bidResponseDto = bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto);
+
+    return bidResponseDto;
   }
 }

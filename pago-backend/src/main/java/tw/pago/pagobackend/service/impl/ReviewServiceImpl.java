@@ -8,9 +8,8 @@ import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dao.ReviewDao;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
-import tw.pago.pagobackend.dto.ReviewResponseDto;
+import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.model.Review;
-import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -71,8 +70,9 @@ public class ReviewServiceImpl implements ReviewService {
     return total;
   }
 
+
   @Override
-  public double calculateAverageRating(String targetId, ReviewTypeEnum reviewType) {
+  public ReviewRatingResultDto calculateAverageRating(String targetId, ReviewTypeEnum reviewType) {
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .targetId(targetId)
@@ -95,6 +95,11 @@ public class ReviewServiceImpl implements ReviewService {
     double averageRating = totalRating / numberOfReviews;
     double roundedAverageRating = Math.round(averageRating * 10) / 10.0;
 
-    return roundedAverageRating;
+    // Set result;
+    ReviewRatingResultDto reviewRatingResultDto = new ReviewRatingResultDto();
+    reviewRatingResultDto.setAverageRating(roundedAverageRating);
+    reviewRatingResultDto.setTotalReviews(numberOfReviews);
+
+    return reviewRatingResultDto;
   }
 }
