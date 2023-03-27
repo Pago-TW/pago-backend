@@ -6,11 +6,13 @@ import org.springframework.jdbc.core.RowMapper;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.model.Bid;
+import tw.pago.pagobackend.model.Trip;
 
-public class BidRowMapper implements RowMapper<Bid> {
+public class BidWithTripRowMapper implements RowMapper<Bid> {
 
   @Override
   public Bid mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+
     Bid bid = Bid.builder()
         .bidId(resultSet.getString("bid_id"))
         .orderId(resultSet.getString("order_id"))

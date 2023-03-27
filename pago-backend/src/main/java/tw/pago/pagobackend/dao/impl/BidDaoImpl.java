@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +11,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.rowmapper.BidRowMapper;
+import tw.pago.pagobackend.rowmapper.BidWithTripRowMapper;
 
 @Component
 public class BidDaoImpl implements BidDao {
@@ -22,8 +25,8 @@ public class BidDaoImpl implements BidDao {
 
   @Override
   public void createBid(CreateBidRequestDto createBidRequestDto) {
-    String sql = "INSERT INTO bid (bid_id, order_id, trip_id, bid_amount, currency, create_date, update_date, bid_status) "
-        + "VALUES (:bidId, :orderId, :tripId, :bidAmount, :currency, :createDate, :updateDate, :bidStatus)";
+    String sql = "INSERT INTO bid (bid_id, order_id, trip_id, bid_amount, currency, create_date, update_date,latest_delivery_date, bid_status) "
+        + "VALUES (:bidId, :orderId, :tripId, :bidAmount, :currency, :createDate, :updateDate,:latestDeliveryDate, :bidStatus)";
 
     Map<String, Object> map = new HashMap<>();
     map.put("bidId", createBidRequestDto.getBidId());
@@ -34,6 +37,7 @@ public class BidDaoImpl implements BidDao {
     Date now = new Date();
     map.put("createDate", now);
     map.put("updateDate", now);
+    map.put("latestDeliveryDate", createBidRequestDto.getLatestDeliveryDate());
     map.put("bidStatus", createBidRequestDto.getBidStatus().toString());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
@@ -42,7 +46,8 @@ public class BidDaoImpl implements BidDao {
 
   @Override
   public Bid getBidById(String bidId) {
-    String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, update_date, bid_status "
+    String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
+        + "update_date,latest_delivery_date, bid_status "
         + "FROM bid "
         + "WHERE bid_id = :bidId";
 
@@ -71,22 +76,87 @@ public class BidDaoImpl implements BidDao {
   }
 
   @Override
-  public void updateBid(Bid bid, UpdateBidRequestDto updateBidRequestDto) {
-    String sql = "UPDATE bid SET order_id = :orderId, trip_id = :tripId, bid_amount = :bidAmount, "
+  public void updateBid(UpdateBidRequestDto updateBidRequestDto) {
+    String sql = "UPDATE bid SET trip_id = :tripId, bid_amount = :bidAmount, "
     + "currency = :currency, update_date = :updateDate, bid_status = :bidStatus "
     + "WHERE bid_id = :bidId";
 
     Map<String, Object> map = new HashMap<>();
-    map.put("orderId", updateBidRequestDto.getOrderId() != null ? updateBidRequestDto.getOrderId() : bid.getOrderId());
-    map.put("tripId", updateBidRequestDto.getTripId() != null ? updateBidRequestDto.getTripId() : bid.getTripId());
-    map.put("bidAmount", updateBidRequestDto.getBidAmount() != null ? updateBidRequestDto.getBidAmount() : bid.getBidAmount());
-    map.put("currency", updateBidRequestDto.getCurrency() != null ? updateBidRequestDto.getCurrency().toString() : bid.getCurrency().toString());
+    map.put("tripId", updateBidRequestDto.getTripId());
+    map.put("bidAmount", updateBidRequestDto.getBidAmount());
+    map.put("currency", updateBidRequestDto.getCurrency().name());
     Date now = new Date();
     map.put("updateDate", now);
-    map.put("bidStatus", updateBidRequestDto.getBidStatus() != null ? updateBidRequestDto.getBidStatus().toString() : bid.getBidStatus().toString());
+    map.put("bidStatus", updateBidRequestDto.getBidStatus().name());
     map.put("bidId", updateBidRequestDto.getBidId());
 
-    System.out.println(sql);
     namedParameterJdbcTemplate.update(sql, map);
+  }
+
+
+  @Override
+  public List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT trip.shopper_id, "
+        + "bid_id, order_id, bid.trip_id, bid_amount, currency, bid.create_date, "
+        + "bid.update_date, latest_delivery_date, bid_status "
+        + "FROM bid  "
+        + "LEFT JOIN trip  "
+        + "ON bid.trip_id = trip.trip_id "
+        + "WHERE 1=1";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+
+
+
+
+    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidWithTripRowMapper());
+
+    return bidList;
+  }
+
+
+  @Override
+  public Integer countBid(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(bid_id) "
+        + "FROM bid "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+
+    return total;
+  }
+
+  private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+    if (listQueryParametersDto.getSearch() != null) {
+      sql = sql + "AND "
+          + "("
+          + "   from_country LIKE :search "
+          + "OR from_city LIKE :search "
+          + "OR to_country LIKE :search "
+          + "OR to_city LIKE :search"
+          + ") ";
+      map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+
+    return sql;
   }
 }

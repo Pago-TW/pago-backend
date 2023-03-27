@@ -3,9 +3,16 @@ package tw.pago.pagobackend.model;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 
+
+@Getter
+@Setter
+@Builder
 public class Bid {
   private String bidId;
   private String orderId;
@@ -14,69 +21,9 @@ public class Bid {
   private CurrencyEnum currency;
   private Date createDate;
   private Date updateDate;
+  private Date latestDeliveryDate;
   private BidStatusEnum bidStatus;
-  
-  public String getBidId() {
-    return bidId;
-  }
 
-  public void setBidId(String bidId) {
-    this.bidId = bidId;
-  }
 
-  public String getOrderId() {
-    return orderId;
-  }
 
-  public void setOrderId(String orderId) {
-    this.orderId = orderId;
-  }
-
-  public String getTripId() {
-    return tripId;
-  }
-
-  public void setTripId(String tripId) {
-    this.tripId = tripId;
-  }
-
-  public BigDecimal getBidAmount() {
-    return bidAmount;
-  }
-
-  public void setBidAmount(BigDecimal bidAmount) {
-    this.bidAmount = bidAmount;
-  }
-
-  public CurrencyEnum getCurrency() {
-    return currency;
-  }
-
-  public void setCurrency(CurrencyEnum currency) {
-    this.currency = currency;
-  }
-
-  public Date getCreateDate() {
-    return createDate;
-  }
-
-  public void setCreateDate(Date createDate) {
-    this.createDate = createDate;
-  }
-
-  public Date getUpdateDate() {
-    return updateDate;
-  }
-
-  public void setUpdateDate(Date updateDate) {
-    this.updateDate = updateDate;
-  }
-
-  public BidStatusEnum getBidStatus() {
-    return bidStatus;
-  }
-
-  public void setBidStatus(BidStatusEnum bidStatus) {
-    this.bidStatus = bidStatus;
-  }
 }
