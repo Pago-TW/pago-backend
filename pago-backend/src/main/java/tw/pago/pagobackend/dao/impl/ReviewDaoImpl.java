@@ -11,9 +11,7 @@ import tw.pago.pagobackend.dao.ReviewDao;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.model.Review;
-import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.ReviewRowMapper;
-import tw.pago.pagobackend.rowmapper.TripRowMapper;
 
 @Component
 public class ReviewDaoImpl implements ReviewDao {
@@ -113,6 +111,11 @@ public class ReviewDaoImpl implements ReviewDao {
     if (listQueryParametersDto.getReviewType() != null) {
       sql = sql + " AND review_type = :reviewType ";
       map.put("reviewType", listQueryParametersDto.getReviewType().name());
+    }
+
+    if (listQueryParametersDto.getTargetId() != null) {
+      sql = sql + " AND target_id = :targetId ";
+      map.put("targetId", listQueryParametersDto.getTargetId());
     }
 
 

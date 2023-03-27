@@ -6,7 +6,6 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,19 +22,9 @@ import tw.pago.pagobackend.dto.CreateReviewRequestDto;
 // import tw.pago.pagobackend.dto.UpdateReviewRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
-import tw.pago.pagobackend.dto.OrderDto;
-import tw.pago.pagobackend.dto.ReviewCreatorDto;
-import tw.pago.pagobackend.dto.ReviewOrderDto;
 import tw.pago.pagobackend.dto.ReviewResponseDto;
-import tw.pago.pagobackend.dto.ReviewTargetDto;
-import tw.pago.pagobackend.dto.UserDto;
-import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Review;
-import tw.pago.pagobackend.model.Trip;
-import tw.pago.pagobackend.model.User;
-import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.ReviewService;
-import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @RestController
@@ -81,7 +70,7 @@ public class ReviewController {
 
   @GetMapping("/users/{userId}/reviews")
   public ResponseEntity<ListResponseDto<ReviewResponseDto>> getReviewList(@PathVariable String userId,
-      @RequestParam(required = true) String type,
+      @RequestParam(required = true) ReviewTypeEnum type,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
@@ -91,12 +80,13 @@ public class ReviewController {
 
     // Set Query Parameters
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
-        .reviewType(ReviewTypeEnum.valueOf(type))
         .search(search)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)
         .sort(sort)
+        .targetId(userId) // Get the review list for this user
+        .reviewType(type) // Set review type {FOR_SHOPPER / FOR_CONSUMER}
         .build();
 
     // Get ReviewList
