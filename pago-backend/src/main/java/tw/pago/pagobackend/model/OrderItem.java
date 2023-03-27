@@ -2,6 +2,7 @@ package tw.pago.pagobackend.model;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -22,8 +23,8 @@ public class OrderItem {
   private String purchaseCity;
   private String purchaseDistrict;
   private String purchaseRoad;
-  private URL fileUrl;
-
+  // private URL fileUrl;
+  private List<URL> fileUrls;
   public String getOrderItemId() {
     return orderItemId;
   }

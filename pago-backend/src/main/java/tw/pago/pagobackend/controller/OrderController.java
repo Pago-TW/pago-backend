@@ -39,14 +39,14 @@ public class OrderController {
   private OrderService orderService;
 
   @PostMapping("/users/{userId}/orders")
-  public ResponseEntity<Order> createOrder(@PathVariable String userId, @RequestParam("file") MultipartFile file, 
+  public ResponseEntity<Order> createOrder(@PathVariable String userId, @RequestParam("file") List<MultipartFile> files, 
       @RequestParam("data") String createOrderRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
     // Create Order
     ObjectMapper objectMapper = new ObjectMapper();
     CreateOrderRequestDto createOrderRequestDto = objectMapper.readValue(createOrderRequestDtoString, CreateOrderRequestDto.class);
 
-    Order order = orderService.createOrder(userId, file, createOrderRequestDto);
+    Order order = orderService.createOrder(userId, files, createOrderRequestDto);
 
 //    Order order = orderService.getOrderById(orderId);
 
