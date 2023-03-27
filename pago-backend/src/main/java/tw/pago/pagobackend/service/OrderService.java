@@ -14,7 +14,7 @@ import tw.pago.pagobackend.model.Order;
 
 public interface OrderService {
 
-  Order createOrder (String userId, MultipartFile file, CreateOrderRequestDto createOrderRequestDto);
+  Order createOrder (String userId, List<MultipartFile> files, CreateOrderRequestDto createOrderRequestDto);
 
   Order getOrderById (String orderId);
 

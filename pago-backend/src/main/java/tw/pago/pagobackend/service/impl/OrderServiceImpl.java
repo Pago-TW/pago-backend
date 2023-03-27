@@ -42,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Transactional
   @Override
-  public Order createOrder(String userId, MultipartFile file, CreateOrderRequestDto createOrderRequestDto) {
+  public Order createOrder(String userId, List<MultipartFile> files, CreateOrderRequestDto createOrderRequestDto) {
 
     String orderItemUuid = uuidGenerator.getUuid();
     String orderUuid = uuidGenerator.getUuid();
@@ -65,8 +65,13 @@ public class OrderServiceImpl implements OrderService {
     createFileRequestDto.setObjectId(orderUuid);
     createFileRequestDto.setObjectType("order");
 
-    fileService.uploadFile(file, createFileRequestDto);
-    System.out.println("file uploaded");
+    List<URL> uploadedUrls = fileService.uploadFile(files, createFileRequestDto);
+    // print out all uploadedurls
+    for (URL url: uploadedUrls) {
+      System.out.println(url);
+      System.out.println("Successfully uploaded!");
+    }
+    // System.out.println("file uploaded");
 
     Order order = getOrderById(orderUuid);
 
@@ -84,8 +89,8 @@ public class OrderServiceImpl implements OrderService {
 
     //get file url
     String objectType = "order";
-    URL fileUrl = fileService.getFileUrlByObjectIdnType(orderId, objectType);
-    order.getOrderItem().setFileUrl(fileUrl);
+    List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, objectType);
+    order.getOrderItem().setFileUrls(fileUrls);
 
     return order;
   }
@@ -111,13 +116,14 @@ public class OrderServiceImpl implements OrderService {
     return orderList;
   }
 
+  @Transactional
   @Override
   public void deleteOrderById(String orderId) {
     orderDao.deleteOrderById(orderId);
 
     //delete file
     String objectType = "order";
-    fileService.deleteFileByObjectIdnType(orderId, objectType);
+    fileService.deleteFilesByObjectIdnType(orderId, objectType);
   }
 
   @Override
