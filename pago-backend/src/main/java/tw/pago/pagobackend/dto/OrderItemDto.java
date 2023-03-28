@@ -3,6 +3,7 @@ package tw.pago.pagobackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -14,6 +15,19 @@ import tw.pago.pagobackend.constant.CityCode;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({
+    "orderItemId",
+    "name",
+    "description",
+    "quantity",
+    "unitPrice",
+    "purchaseCountryName",
+    "purchaseCityName",
+    "purchaseCountryCode",
+    "purchaseCityCode",
+    "purchaseDistrict",
+    "purchaseRoad",
+    "fileUrls"})
 public class OrderItemDto {
   private String orderItemId;
   private String name;

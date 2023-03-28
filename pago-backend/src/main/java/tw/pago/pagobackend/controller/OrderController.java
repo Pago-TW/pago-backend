@@ -87,9 +87,21 @@ public class OrderController {
   @GetMapping("/orders/{orderId}")
   public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable String orderId) {
 
-    OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoById(orderId);
+    Order order = orderService.getOrderById(orderId);
+    OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoByOrder(order);
 
     return ResponseEntity.status(HttpStatus.OK).body(orderResponseDto);
+  }
+
+  @GetMapping("/users/{userId}/orders/{orderId}")
+  public ResponseEntity<OrderResponseDto> getOrderByUserIdAndOrderId(@PathVariable String userId,
+      @PathVariable String orderId) {
+
+    Order order = orderService.getOrderByUserIdAndOrderId(userId, orderId);
+    OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoByOrder(order);
+
+    return ResponseEntity.status(HttpStatus.OK).body(orderResponseDto);
+
   }
 
   @GetMapping("/orders")

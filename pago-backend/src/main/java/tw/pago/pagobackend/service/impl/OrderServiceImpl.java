@@ -32,10 +32,8 @@ import tw.pago.pagobackend.util.UuidGenerator;
 @Component
 public class OrderServiceImpl implements OrderService {
 
-  @Value("${platform_fee_percent}")
-  private static BigDecimal PLATFORM_FEE_PERCENT;
-  @Value("${tariff_fee_percent}")
-  private static BigDecimal TARIFF_FEE_PERCENT;
+  private static final String OBJECT_TYPE = "order";
+
 
   @Autowired
   private OrderDao orderDao;
@@ -87,12 +85,7 @@ public class OrderServiceImpl implements OrderService {
   public Order getOrderById(String orderId) {
     Order order = orderDao.getOrderById(orderId);
 
-    String orderItemId = order.getOrderItemId();
-    OrderItem orderItem = orderDao.getOrderItemById(orderItemId);
-
-    order.setOrderItem(orderItem);
-
-
+    // Calculate Fee
     Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
     order.setTariffFee(orderEachAmountMap.get("tariffFee"));
     order.setPlatformFee(orderEachAmountMap.get("platformFee"));
@@ -100,8 +93,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     //get file url
-    String objectType = "order";
-    List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, objectType);
+    List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
 
     return order;
@@ -112,11 +104,62 @@ public class OrderServiceImpl implements OrderService {
   public OrderResponseDto getOrderResponseDtoById(String orderId) {
     // Retrieve the order & orderItem by its ID
     Order order = getOrderById(orderId);
-    OrderItem orderItem = orderDao.getOrderItemById(order.getOrderItemId());
+    OrderItem orderItem = order.getOrderItem();
 
     // Get the country and city names for the orderItem
-    String orderItemPurchaseCountryName = order.getOrderItem().getPurchaseCountry().getName();
-    String orderItemPurchaseCityName = order.getOrderItem().getPurchaseCity().getEnglishName();
+    String orderItemPurchaseCountryName = orderItem.getPurchaseCountry().getName();
+    String orderItemPurchaseCityName = orderItem.getPurchaseCity().getEnglishName();
+
+    // Set the country and city names for the ordeItem
+    orderItem.setPurchaseCountryName(orderItemPurchaseCountryName);
+    orderItem.setPurchaseCityName(orderItemPurchaseCityName);
+
+    // Create a new OrderItemDto and copy properties from the orderItem
+    OrderItemDto orderItemDto = new OrderItemDto();
+    BeanUtils.copyProperties(orderItem, orderItemDto);
+
+    // Create a new OrderResponseDto and copy properties from the order
+    OrderResponseDto orderResponseDto = new OrderResponseDto();
+    BeanUtils.copyProperties(order, orderResponseDto);
+
+    // Get the country and city names for the order's destination
+    String orderDestinationCountryName = order.getDestinationCountry().getName();
+    String orderDestinationCityName = order.getDestinationCity().getEnglishName();
+
+    // Set the destination country and city names, and the order item in the OrderResponseDto
+    orderResponseDto.setOrderItem(orderItemDto);
+    orderResponseDto.setDestinationCountryName(orderDestinationCountryName);
+    orderResponseDto.setDestinationCityName(orderDestinationCityName);
+
+    return orderResponseDto;
+  }
+
+
+  @Override
+  public Order getOrderByUserIdAndOrderId(String userId, String orderId) {
+
+    Order order = orderDao.getOrderByUserIdAndOrderId(userId, orderId);
+
+    // Calculate Fee
+    Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
+    order.setTariffFee(orderEachAmountMap.get("tariffFee"));
+    order.setPlatformFee(orderEachAmountMap.get("platformFee"));
+    order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
+
+    //get file url
+    List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
+    order.getOrderItem().setFileUrls(fileUrls);
+
+    return order;
+  }
+
+  @Override
+  public OrderResponseDto getOrderResponseDtoByOrder(Order order) {
+    OrderItem orderItem = order.getOrderItem();
+
+    // Get the country and city names for the orderItem
+    String orderItemPurchaseCountryName = orderItem.getPurchaseCountry().getName();
+    String orderItemPurchaseCityName = orderItem.getPurchaseCity().getEnglishName();
 
     // Set the country and city names for the ordeItem
     orderItem.setPurchaseCountryName(orderItemPurchaseCountryName);
@@ -159,6 +202,9 @@ public class OrderServiceImpl implements OrderService {
       order.setTariffFee(orderEachAmountMap.get("tariffFee"));
       order.setPlatformFee(orderEachAmountMap.get("platformFee"));
       order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
+      //get file url
+      List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
+      order.getOrderItem().setFileUrls(fileUrls);
     }
     return orderList;
   }
@@ -171,7 +217,7 @@ public class OrderServiceImpl implements OrderService {
     List<Order> orderList = getOrderList(listQueryParametersDto);
 
     List<OrderResponseDto> orderResponseDtoList = orderList.stream()
-        .map(order -> getOrderResponseDtoById(order.getOrderId()))
+        .map(this::getOrderResponseDtoByOrder)
         .collect(Collectors.toList());
 
     return orderResponseDtoList;

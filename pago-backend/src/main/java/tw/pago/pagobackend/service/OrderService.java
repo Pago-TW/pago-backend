@@ -21,7 +21,10 @@ public interface OrderService {
 
   OrderResponseDto getOrderResponseDtoById(String orderId);
 
-  // Order getUserOrderById (String orderId, String userId);
+  Order getOrderByUserIdAndOrderId(String userId, String orderId);
+
+  OrderResponseDto getOrderResponseDtoByOrder(Order order);
+
 
   void updateOrderAndOrderItemByOrderId(Order order,
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);

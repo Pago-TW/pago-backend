@@ -102,7 +102,7 @@ public class OrderDaoImpl implements OrderDao {
     Map<String, Object> map = new HashMap<>();
     map.put("orderId", orderId);
 
-    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderRowMapper());
+    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderWithOrderItemRowMapper());
 
     if (orderList.size() > 0) {
       return orderList.get(0);
@@ -111,6 +111,33 @@ public class OrderDaoImpl implements OrderDao {
     }
   }
 
+
+  @Override
+  public Order getOrderByUserIdAndOrderId(String userId, String orderId) {
+    String sql =
+        "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+            + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, "
+            + "om.currency, om.platform_fee_percent, "
+            + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
+            + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
+            + "oi.purchase_district, oi.purchase_road "
+            + "FROM order_main AS om "
+            + "LEFT JOIN order_item AS oi ON om.order_item_id = oi.order_item_id "
+            + "WHERE om.consumer_id = :userId "
+            + "AND om.order_id = :orderId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userId", userId);
+    map.put("orderId", orderId);
+
+    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderWithOrderItemRowMapper());
+
+    if (orderList.size() > 0) {
+      return orderList.get(0);
+    } else {
+      return null;
+    }
+  }
 
   @Override
   public OrderItem getOrderItemById(String orderItemId) {
