@@ -30,10 +30,10 @@ public class OrderDaoImpl implements OrderDao {
   public void createOrder(String userId, CreateOrderRequestDto createOrderRequestDto) {
     String sql =
         "INSERT INTO order_main (order_id, order_item_id, consumer_id, create_date, update_date, packaging, "
-            + "verification, destination, traveler_fee, currency, platform_fee_percent, "
+            + "verification, destination_country, destination_city, traveler_fee, currency, platform_fee_percent, "
             + "tariff_fee_percent, latest_receive_item_date, note, order_status) "
             + "VALUES (:orderId, :orderItemId, :consumerId, :createDate, :updateDate, :packaging, :verification, "
-            + ":destination, :travelerFee, :currency, :platformFeePercent, :tariffFeePercent, "
+            + ":destinationCountry, :destinationCity, :travelerFee, :currency, :platformFeePercent, :tariffFeePercent, "
             + ":latestReceiveItemDate, :note, :orderStatus)";
 
     Map<String, Object> map = new HashMap<>();
@@ -45,7 +45,8 @@ public class OrderDaoImpl implements OrderDao {
     map.put("updateDate", now);
     map.put("packaging", createOrderRequestDto.getPackaging());
     map.put("verification", createOrderRequestDto.getVerification());
-    map.put("destination", createOrderRequestDto.getDestination());
+    map.put("destinationCountry", createOrderRequestDto.getDestinationCountry());
+    map.put("destinationCity", createOrderRequestDto.getDestinationCity());
     map.put("travelerFee", createOrderRequestDto.getTravelerFee());
     map.put("currency", createOrderRequestDto.getCurrency().toString());
     System.out.println(createOrderRequestDto.getPlatformFeePercent());
