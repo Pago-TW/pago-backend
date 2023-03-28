@@ -90,7 +90,8 @@ public class OrderDaoImpl implements OrderDao {
   public Order getOrderById(String orderId) {
     String sql =
         "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
-            + "om.verification, om.destination, om.traveler_fee, om.currency, om.platform_fee_percent, "
+            + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, "
+            + "om.currency, om.platform_fee_percent, "
             + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
             + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
             + "oi.purchase_district, oi.purchase_road "
@@ -141,7 +142,7 @@ public class OrderDaoImpl implements OrderDao {
         + "oi.quantity = :quantity, oi.unit_price = :unitPrice, "
         + "oi.purchase_country = :purchaseCountry, oi.purchase_city = :purchaseCity, "
         + "oi.purchase_district = :purchaseDistrict, oi.purchase_road = :purchaseRoad, "
-        + "om.packaging = :packaging, om.verification = :verification, om.destination = :destination, "
+        + "om.packaging = :packaging, om.verification = :verification, om.destination_country = :destinationCountry, om.destination_city = :destinationCity "
         + "om.traveler_fee = :travelerFee, om.currency = :currency, om.latest_receive_item_date = :latestReceiveItemDate, "
         + "om.note = :note, om.order_status = :orderStatus, om.update_date = :updateDate "
         + "WHERE om.order_Id = :orderId";
@@ -187,7 +188,8 @@ public class OrderDaoImpl implements OrderDao {
     Boolean verification = updateOrderAndOrderItemRequestDto.isVerificationRequired();
     map.put("verification", verification != null ? verification : order.isVerificationRequired());
 
-    map.put("destination", updateOrderAndOrderItemRequestDto.getDestination() != null ? updateOrderAndOrderItemRequestDto.getDestination() : order.getDestination());
+    map.put("destinationCountry", updateOrderAndOrderItemRequestDto.getDestinationCountry() != null ? updateOrderAndOrderItemRequestDto.getDestinationCountry() : order.getDestinationCountry());
+    map.put("destinationCity", updateOrderAndOrderItemRequestDto.getDestinationCity() != null ? updateOrderAndOrderItemRequestDto.getDestinationCity() : order.getDestinationCity());
     map.put("travelerFee", updateOrderAndOrderItemRequestDto.getTravelerFee() != null ? updateOrderAndOrderItemRequestDto.getTravelerFee() : order.getTravelerFee());
     map.put("currency", updateOrderAndOrderItemRequestDto.getCurrency() != null ? updateOrderAndOrderItemRequestDto.getCurrency().toString() : order.getCurrency().toString());
     map.put("latestReceiveItemDate", updateOrderAndOrderItemRequestDto.getLatestReceiveItemDate() != null ? updateOrderAndOrderItemRequestDto.getLatestReceiveItemDate() : order.getLatestReceiveItemDate());
@@ -215,7 +217,7 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
-        + "om.verification, om.destination, om.traveler_fee, om.currency, om.platform_fee_percent, "
+        + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "
         + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
         + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
         + "oi.purchase_district, oi.purchase_road "
@@ -226,7 +228,7 @@ public class OrderDaoImpl implements OrderDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    // Filtering e.g. status, search
+    // Filtering e.g. status, search, userId
     sql = addFilteringSql(sql, map, listQueryParametersDto);
 
     // Order by {column} & sort by {DESC/ASC}
@@ -288,6 +290,11 @@ public class OrderDaoImpl implements OrderDao {
   // }
 
   private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+    if (listQueryParametersDto.getUserId() != null) {
+      sql = sql + " AND om.consumer_id = :consumerId ";
+      map.put("consumerId", listQueryParametersDto.getUserId());
+    }
+
     if (listQueryParametersDto.getOrderStatus() != null) {
       sql = sql + " AND order_status = :orderStatus ";
       map.put("orderStatus", listQueryParametersDto.getOrderStatus().name());

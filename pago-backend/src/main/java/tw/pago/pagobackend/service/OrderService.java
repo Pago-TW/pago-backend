@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
@@ -18,6 +19,8 @@ public interface OrderService {
 
   Order getOrderById (String orderId);
 
+  OrderResponseDto getOrderResponseDtoById(String orderId);
+
   // Order getUserOrderById (String orderId, String userId);
 
   void updateOrderAndOrderItemByOrderId(Order order,
@@ -26,6 +29,8 @@ public interface OrderService {
   void deleteOrderById(String orderId);
 
   List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto);
+
+  List<OrderResponseDto> getOrderResponseDtoList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countOrder(ListQueryParametersDto listQueryParametersDto);
 

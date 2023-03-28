@@ -2,6 +2,7 @@ package tw.pago.pagobackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
+import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 // import tw.pago.pagobackend.constant.PackagingEnum;
@@ -34,7 +36,10 @@ public class UpdateOrderAndOrderItemRequestDto {
   private boolean isVerificationRequired;
 
 
-  private String destination;
+
+  private CountryCode destinationCountry;
+
+  private CityCode destinationCity;
 
 
   private BigDecimal travelerFee;

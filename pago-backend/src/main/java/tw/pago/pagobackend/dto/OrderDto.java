@@ -3,6 +3,7 @@ package tw.pago.pagobackend.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.model.OrderItem;
@@ -28,7 +30,8 @@ public class OrderDto {
   private String consumerId;
   private Date createDate;
   private Date updateDate;
-  private String destination;
+  private CountryCode destinationCountry;
+  private CityCode destinationCity;
   private CurrencyEnum currency;
   @JsonIgnore
   private Double platformFeePercent;

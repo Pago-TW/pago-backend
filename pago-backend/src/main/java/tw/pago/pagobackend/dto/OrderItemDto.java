@@ -2,12 +2,14 @@ package tw.pago.pagobackend.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
-import lombok.Builder;
+import java.net.URL;
+import java.util.List;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import tw.pago.pagobackend.constant.CityCode;
 
 @Data
 @NoArgsConstructor
@@ -18,9 +20,15 @@ public class OrderItemDto {
   private String description;
   private Integer quantity;
   private BigDecimal unitPrice;
-  private String purchaseCountry;
-  private String purchaseCity;
+  @JsonProperty("purchaseCountryCode")
+  private CountryCode purchaseCountry;
+  private String purchaseCountryName;
+  @JsonProperty("purchaseCityCode")
+  private CityCode purchaseCity;
+  private String purchaseCityName;
   private String purchaseDistrict;
   private String purchaseRoad;
+  // private URL fileUrl;
+  private List<URL> fileUrls;
 
 }

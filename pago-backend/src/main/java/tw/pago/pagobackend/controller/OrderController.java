@@ -27,6 +27,7 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
+import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.service.OrderService;
@@ -84,15 +85,16 @@ public class OrderController {
   }
 
   @GetMapping("/orders/{orderId}")
-  public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
+  public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable String orderId) {
 
-    Order order = orderService.getOrderById(orderId);
+    OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoById(orderId);
 
-    return ResponseEntity.status(HttpStatus.OK).body(order);
+    return ResponseEntity.status(HttpStatus.OK).body(orderResponseDto);
   }
 
   @GetMapping("/orders")
-  public ResponseEntity<ListResponseDto<Order>> getOrderList(
+  public ResponseEntity<ListResponseDto<OrderResponseDto>> getOrderList(
+      @RequestParam(required = false) String userId,
       @RequestParam(required = false) OrderStatusEnum status,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
@@ -101,6 +103,7 @@ public class OrderController {
       @RequestParam(defaultValue = "DESC") String sort) {
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .userId(userId)
         .orderStatus(status)
         .search(search)
         .startIndex(startIndex)
@@ -109,15 +112,15 @@ public class OrderController {
         .sort(sort)
         .build();
 
-    List<Order> orderList = orderService.getOrderList(listQueryParametersDto);
+    List<OrderResponseDto> orderResponseDtoList = orderService.getOrderResponseDtoList(listQueryParametersDto);
 
     Integer total = orderService.countOrder(listQueryParametersDto);
 
-    ListResponseDto<Order> orderListResponseDto = ListResponseDto.<Order>builder()
+    ListResponseDto<OrderResponseDto> orderListResponseDto = ListResponseDto.<OrderResponseDto>builder()
         .total(total)
         .startIndex(startIndex)
         .size(size)
-        .data(orderList)
+        .data(orderResponseDtoList)
         .build();
 
     return ResponseEntity.status(HttpStatus.OK).body(orderListResponseDto);

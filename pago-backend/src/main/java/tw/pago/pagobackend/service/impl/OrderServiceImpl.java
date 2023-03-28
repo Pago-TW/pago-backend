@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,8 @@ import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.OrderItemDto;
+import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
@@ -39,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
   private UuidGenerator uuidGenerator;
   @Autowired
   private FileService fileService;
+
 
   @Transactional
   @Override
@@ -87,6 +92,13 @@ public class OrderServiceImpl implements OrderService {
 
     order.setOrderItem(orderItem);
 
+
+    Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
+    order.setTariffFee(orderEachAmountMap.get("tariffFee"));
+    order.setPlatformFee(orderEachAmountMap.get("platformFee"));
+    order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
+
+
     //get file url
     String objectType = "order";
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, objectType);
@@ -95,6 +107,40 @@ public class OrderServiceImpl implements OrderService {
     return order;
   }
 
+
+  @Override
+  public OrderResponseDto getOrderResponseDtoById(String orderId) {
+    // Retrieve the order & orderItem by its ID
+    Order order = getOrderById(orderId);
+    OrderItem orderItem = orderDao.getOrderItemById(order.getOrderItemId());
+
+    // Get the country and city names for the orderItem
+    String orderItemPurchaseCountryName = order.getOrderItem().getPurchaseCountry().getName();
+    String orderItemPurchaseCityName = order.getOrderItem().getPurchaseCity().getEnglishName();
+
+    // Set the country and city names for the ordeItem
+    orderItem.setPurchaseCountryName(orderItemPurchaseCountryName);
+    orderItem.setPurchaseCityName(orderItemPurchaseCityName);
+
+    // Create a new OrderItemDto and copy properties from the orderItem
+    OrderItemDto orderItemDto = new OrderItemDto();
+    BeanUtils.copyProperties(orderItem, orderItemDto);
+
+    // Create a new OrderResponseDto and copy properties from the order
+    OrderResponseDto orderResponseDto = new OrderResponseDto();
+    BeanUtils.copyProperties(order, orderResponseDto);
+
+    // Get the country and city names for the order's destination
+    String orderDestinationCountryName = order.getDestinationCountry().getName();
+    String orderDestinationCityName = order.getDestinationCity().getEnglishName();
+
+    // Set the destination country and city names, and the order item in the OrderResponseDto
+    orderResponseDto.setOrderItem(orderItemDto);
+    orderResponseDto.setDestinationCountryName(orderDestinationCountryName);
+    orderResponseDto.setDestinationCityName(orderDestinationCityName);
+
+    return orderResponseDto;
+  }
 
   @Override
   public void updateOrderAndOrderItemByOrderId(Order order,
@@ -107,6 +153,7 @@ public class OrderServiceImpl implements OrderService {
 
     List<Order> orderList = orderDao.getOrderList(listQueryParametersDto);
 
+    // calculate each order amount
     for (Order order: orderList) {
       Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
       order.setTariffFee(orderEachAmountMap.get("tariffFee"));
@@ -114,6 +161,20 @@ public class OrderServiceImpl implements OrderService {
       order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
     }
     return orderList;
+  }
+
+
+  @Override
+  public List<OrderResponseDto> getOrderResponseDtoList(
+      ListQueryParametersDto listQueryParametersDto) {
+
+    List<Order> orderList = getOrderList(listQueryParametersDto);
+
+    List<OrderResponseDto> orderResponseDtoList = orderList.stream()
+        .map(order -> getOrderResponseDtoById(order.getOrderId()))
+        .collect(Collectors.toList());
+
+    return orderResponseDtoList;
   }
 
   @Transactional

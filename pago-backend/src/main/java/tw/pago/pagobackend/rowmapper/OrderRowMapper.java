@@ -1,8 +1,10 @@
 package tw.pago.pagobackend.rowmapper;
 
+import com.neovisionaries.i18n.CountryCode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
+import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 // import tw.pago.pagobackend.constant.PackagingEnum;
@@ -19,7 +21,8 @@ public class OrderRowMapper implements RowMapper<Order> {
         .createDate(resultSet.getTimestamp("create_date"))
         .isPackagingRequired(resultSet.getBoolean("packaging"))
         .isVerificationRequired(resultSet.getBoolean("verification"))
-        .destination(resultSet.getString("destination"))
+        .destinationCountry(CountryCode.valueOf(resultSet.getString("destination_country")))
+        .destinationCity(CityCode.valueOf(resultSet.getString("destination_city")))
         .travelerFee(resultSet.getBigDecimal("traveler_fee"))
         .currency(CurrencyEnum.valueOf(resultSet.getString("currency")))
         .platformFeePercent(resultSet.getDouble("platform_fee_percent"))

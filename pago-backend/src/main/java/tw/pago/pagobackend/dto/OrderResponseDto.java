@@ -1,30 +1,48 @@
-package tw.pago.pagobackend.model;
+package tw.pago.pagobackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 
-@Getter
-@Setter
-@Builder
-public class Order {
 
+@JsonPropertyOrder({
+    "orderId",
+    "consumerId",
+    "destinationCountryName",
+    "destinationCityName",
+    "destinationCountryCode",
+    "destinationCityCode",
+    "latestReceiveItemDate",
+    "note",
+    "orderStatus",
+    "orderItem",
+    "travelerFee",
+    "tariffFee",
+    "platformFee",
+    "totalAmount",
+    "currency",
+    "hasNewActivity",
+    "isPackagingRequired",
+    "isVerificationRequired",
+    "createDate",
+    "updateDate"
+})
+@Data
+@NoArgsConstructor
+public class OrderResponseDto {
   // Order
   private String orderId;
 
   @JsonIgnore
   private String orderItemId;
-
   private String consumerId;
   private Date createDate;
   private Date updateDate;
@@ -32,7 +50,11 @@ public class Order {
   private boolean isPackagingRequired;
   @JsonProperty("isVerificationRequired")
   private boolean isVerificationRequired;
+  private String destinationCountryName;
+  @JsonProperty("destinationCountryCode")
   private CountryCode destinationCountry;
+  private String destinationCityName;
+  @JsonProperty("destinationCityCode")
   private CityCode destinationCity;
   private CurrencyEnum currency;
   @JsonIgnore
@@ -44,7 +66,7 @@ public class Order {
   private OrderStatusEnum orderStatus;
 
   // OrderItem
-  private OrderItem orderItem;
+  private OrderItemDto orderItem;
 
   // For programing use
   private BigDecimal travelerFee;
@@ -52,5 +74,4 @@ public class Order {
   private BigDecimal platformFee;
   private BigDecimal totalAmount;
   private boolean hasNewActivity;
-
 }

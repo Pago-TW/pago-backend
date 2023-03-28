@@ -20,6 +20,7 @@ public class ListQueryParametersDto {
 
   // Order
   private OrderStatusEnum orderStatus;
+  private String userId;
 
 
   // Review
