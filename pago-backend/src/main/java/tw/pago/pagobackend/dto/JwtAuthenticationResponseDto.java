@@ -9,10 +9,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class JwtAuthenticationResponseDto {
-  private String accessToken;
-
-  @Builder.Default
-  private String tokenType = "Bearer";
+  private JwtDto token;
+  private UserDto user;
 
 
 

@@ -2,6 +2,7 @@ package tw.pago.pagobackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Date;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,20 @@ import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({
+    "userId",
+    "email",
+    "account",
+    "firstName",
+    "lastName",
+    "fullName",
+    "phone",
+    "provider",
+    "role",
+    "enabled",
+    "createDate",
+    "updateDate",
+    "lastLogin"})
 public class UserDto {
   private String userId;
   private String account;
@@ -27,12 +42,12 @@ public class UserDto {
   private String gender;
   private String googleId;
   private String accountStatus;
-  private Date updateDate;
-  private Date createDate;
   private String aboutMe;
   private String country;
   private Date lastLogin;
   private String avatarUrl;
+  private Date updateDate;
+  private Date createDate;
   // private Integer persent;
 
   // For programing use;
