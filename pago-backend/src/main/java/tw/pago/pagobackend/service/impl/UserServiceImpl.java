@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserService {
   private UserDao userDao;
 
   @Override
+  @Deprecated
   public User register(UserRegisterRequestDto userRegisterRequestDto) throws UsernameNotFoundException {
 
     // Get User By Email, will be used to check isExist?

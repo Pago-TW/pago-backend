@@ -6,7 +6,7 @@ import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
 
 public interface UserService {
-  User register(UserRegisterRequestDto userRegisterRequestDto);
+  @Deprecated User register(UserRegisterRequestDto userRegisterRequestDto);
 
   User getUserById(String userId);
 
