@@ -1,6 +1,9 @@
 package tw.pago.pagobackend.dto;
 
+import java.net.URL;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -22,5 +25,5 @@ public class ReviewResponseDto {
   private ReviewTypeEnum reviewType;
   private Date createDate;
   private Date updateDate;
-
+  private List<URL> fileUrls;
 }

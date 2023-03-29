@@ -1,6 +1,9 @@
 package tw.pago.pagobackend.model;
 
+import java.net.URL;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,5 +23,5 @@ public class Review {
   private Date createDate;
   private ReviewTypeEnum reviewType;
   private Date updateDate;
-
+  private List<URL> fileUrls;
 }

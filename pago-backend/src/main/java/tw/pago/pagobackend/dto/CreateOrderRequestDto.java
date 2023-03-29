@@ -24,7 +24,10 @@ public class CreateOrderRequestDto {
   private boolean verification;
 
   @NotNull
-  private String destination;
+  private String destinationCountry;
+
+  @NotNull
+  private String destinationCity;
 
   @NotNull
   private BigDecimal travelerFee;
@@ -80,12 +83,20 @@ public class CreateOrderRequestDto {
     this.verification = verification;
   }
 
-  public String getDestination() {
-    return destination;
+  public String getDestinationCountry() {
+    return destinationCountry;
   }
 
-  public void setDestination(String destination) {
-    this.destination = destination;
+  public void setDestinationCountry(String destinationCountry) {
+    this.destinationCountry = destinationCountry;
+  }
+
+  public String getDestinationCity() {
+    return destinationCity;
+  }
+
+  public void setDestinationCity(String destinationCity) {
+    this.destinationCity = destinationCity;
   }
 
   public BigDecimal getTravelerFee() {

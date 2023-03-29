@@ -4,13 +4,15 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 
 
 @Getter
 @Setter
-@Builder
+// @Builder
+@NoArgsConstructor
 public class CreateReviewRequestDto {
   private String reviewId;
   private String orderId;
