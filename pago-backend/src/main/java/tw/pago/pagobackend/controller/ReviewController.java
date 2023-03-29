@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import tw.pago.pagobackend.assembler.ReviewAssembler;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
@@ -40,18 +46,20 @@ public class ReviewController {
 
   @PostMapping("/orders/{orderId}/reviews")
   public ResponseEntity<ReviewResponseDto> createReview(
-      @PathVariable String orderId,
-      @RequestBody @Valid CreateReviewRequestDto createReviewRequestDto) {
+      @PathVariable String orderId, @RequestParam("file") List<MultipartFile> files, 
+      @Valid @RequestParam("data") String createReviewRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
+    ObjectMapper objectMapper = new ObjectMapper();
+    CreateReviewRequestDto createReviewRequestDto = objectMapper.readValue(createReviewRequestDtoString, CreateReviewRequestDto.class);
 
     // Set Parameter to DTO
     createReviewRequestDto.setOrderId(orderId);
     createReviewRequestDto.setCreatorId(currentLoginUserId);
 
     // Create Review
-    Review review = reviewService.createReview(createReviewRequestDto);
+    Review review = reviewService.createReview(files, createReviewRequestDto);
 
     // Convert to Dto by assembler
     ReviewResponseDto reviewResponseDto = reviewAssembler.assemble(review);

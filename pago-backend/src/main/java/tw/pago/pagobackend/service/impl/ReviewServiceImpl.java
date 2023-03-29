@@ -1,15 +1,20 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.net.URL;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
 import tw.pago.pagobackend.assembler.ReviewAssembler;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dao.ReviewDao;
+import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.model.Review;
+import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -17,6 +22,8 @@ import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
 public class ReviewServiceImpl implements ReviewService {
+
+  private static final String OBJECT_TYPE = "review";
 
   @Autowired
   private ReviewDao reviewDao;
@@ -26,27 +33,42 @@ public class ReviewServiceImpl implements ReviewService {
   private UserService userService;
   @Autowired
   private ReviewAssembler reviewAssembler;
+  @Autowired
+  private FileService fileService;
 
   @Override
-  public Review createReview(CreateReviewRequestDto createReviewRequestDto) {
+  public Review createReview(List<MultipartFile> files, CreateReviewRequestDto createReviewRequestDto) {
     String reviewId = uuidGenerator.getUuid();
 
     // Create Review
     createReviewRequestDto.setReviewId(reviewId);
     reviewDao.createReview(createReviewRequestDto);
 
+    // Upload file
+    CreateFileRequestDto createFileRequestDto = new CreateFileRequestDto();
+    createFileRequestDto.setFileCreator(createReviewRequestDto.getCreatorId());
+    createFileRequestDto.setObjectId(reviewId);
+    createFileRequestDto.setObjectType(OBJECT_TYPE);
+    List<URL> uploadedUrls = fileService.uploadFile(files, createFileRequestDto);
+    // print out all uploadedurls
+    for (URL url: uploadedUrls) {
+      System.out.println(url);
+      System.out.println("Successfully uploaded!");
+    }
+
     // Get Review and return
-    Review review = reviewDao.getReviewById(reviewId);
+    Review review = getReviewById(reviewId);
 
     return review;
   }
 
   @Override
   public Review getReviewById(String reviewId) {
-
-
-
     Review review = reviewDao.getReviewById(reviewId);
+
+    //get file url
+    List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(reviewId, OBJECT_TYPE);
+    review.setFileUrls(fileUrls);
     return review;
   }
 
