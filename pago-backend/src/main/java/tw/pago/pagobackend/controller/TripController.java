@@ -1,11 +1,14 @@
 package tw.pago.pagobackend.controller;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -86,6 +89,8 @@ public class TripController {
 
   @GetMapping("/users/{userId}/trips")
   public ResponseEntity<ListResponseDto<Trip>> getTripList(
+      @PathVariable String userId,
+      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
@@ -93,6 +98,8 @@ public class TripController {
       @RequestParam(defaultValue = "DESC") String sort) {
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .userId(userId)
+        .latestReceiveItemDate(latestReceiveItemDate)
         .search(search)
         .startIndex(startIndex)
         .size(size)

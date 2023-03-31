@@ -3,6 +3,7 @@ package tw.pago.pagobackend.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -181,8 +182,24 @@ public class TripDaoImpl implements TripDao {
 
   private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
 
+    if (listQueryParametersDto.getUserId() != null) {
+      sql = sql + " AND shopper_id = :shopperId ";
+      map.put("shopperId", listQueryParametersDto.getUserId());
+    }
+
+    if (listQueryParametersDto.getLatestReceiveItemDate() != null) {
+      LocalDate latestReceiveItemDate = listQueryParametersDto.getLatestReceiveItemDate();
+      sql = sql + " AND DATE(arrival_date) < :latestReceiveItemDate ";
+      map.put("latestReceiveItemDate", latestReceiveItemDate);
+    }
+
     if (listQueryParametersDto.getSearch() != null) {
-      sql = sql + " AND oi.name LIKE :search ";
+      sql = sql + " "
+          + "AND ("
+          + "   from_country LIKE :search "
+          + "OR from_city LIKE :search "
+          + "OR to_country LIKE :search "
+          + "OR to_city LIKE :search) ";
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
 

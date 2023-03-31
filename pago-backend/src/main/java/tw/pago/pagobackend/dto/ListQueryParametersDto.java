@@ -1,9 +1,12 @@
 package tw.pago.pagobackend.dto;
 
 
+import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 
@@ -20,8 +23,12 @@ public class ListQueryParametersDto {
 
   // Order
   private OrderStatusEnum orderStatus;
+
+  // Order, Trip
   private String userId;
 
+  // Trip
+  private LocalDate latestReceiveItemDate;
 
   // Review
   private String targetId;
