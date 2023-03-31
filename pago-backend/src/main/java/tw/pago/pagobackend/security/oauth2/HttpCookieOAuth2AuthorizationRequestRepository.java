@@ -33,6 +33,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements
       return;
     }
 
+    System.out.println("Received state: " + authorizationRequest.getState());
+
     CookieUtil.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, CookieUtil.serialize(authorizationRequest), cookieExpireSeconds);
     String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
     if (StringUtils.isNotBlank(redirectUriAfterLogin)) {
