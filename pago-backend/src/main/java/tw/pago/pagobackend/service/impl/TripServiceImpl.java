@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -43,31 +44,44 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public Trip getTripById(String tripId) {
-        return tripDao.getTripById(tripId);
+        Trip trip = tripDao.getTripById(tripId);
+
+        List<Bid> bidListForTrip = getBidListForTrip(tripId);
+        List<Order> orderListForChosenBids = getOrderListForChosenBids(bidListForTrip);
+        BigDecimal totalProfit = calculateProfit(orderListForChosenBids);
+
+        trip.setProfit(totalProfit);
+
+
+        return trip;
     }
 
     @Override
     public TripResponseDto getTripResponseDtoByTrip(Trip trip) {
-        // Convert model to DTO
+        // Convert the Trip model to TripResponseDto
         TripResponseDto tripResponseDto = tripAssembler.assemble(trip);
 
+        // Set the trip status based on the trip arrivalDate
         setTripStatusBasedOnDates(tripResponseDto);
 
+        // Get the list of bids for the given trip
+        List<Bid> bidListForTrip = getBidListForTrip(trip.getTripId());
+        // Get the list of orders for the chosen bids
+        List<Order> orderListForChosenBids = getOrderListForChosenBids(bidListForTrip);
 
-        TripDashboardDto tripDashboardDto = getTripDashBoardDtoByTrip(trip);
+
+        // Calculate the total profit for the trip using the orders list
+        BigDecimal totalProfit = calculateProfit(orderListForChosenBids);
+        tripResponseDto.setProfit(totalProfit);
+
+        // Get the dashboard counts (totalRequested, totalToBePurchased, totalToBeDelivered)
+        TripDashboardDto tripDashboardDto = getTripDashboardCounts(bidListForTrip, orderListForChosenBids);
         tripResponseDto.setDashboard(tripDashboardDto);
-
-
-
-
 
         return tripResponseDto;
     }
 
-    //    @Override
-//    public List<Trip> findAll() throws SQLException {
-//        return tripDAO.findAll();
-//    }
+
 
     @Override
     public String createTrip(String userId, CreateTripRequestDto createTripRequestDto) {
@@ -134,44 +148,43 @@ public class TripServiceImpl implements TripService {
     }
 
 
-    private TripDashboardDto getTripDashBoardDtoByTrip(Trip trip) {
-        // Initialize counts for each status category
-        int totalRequested = 0;
-        int totalToBePurchased = 0;
-        int totalToBeDelivered = 0;
-
-        // Create list query parameters with the trip ID and a large size limit
+    private List<Bid> getBidListForTrip(String tripId) {
         ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
             .orderBy("create_date")
             .sort("DESC")
             .startIndex(0)
             .size(999)
-            .tripId(trip.getTripId())
+            .tripId(tripId)
             .build();
 
-        // Retrieve the list of bids for the given trip
         List<Bid> bidListForTrip = bidDao.getBidList(listQueryParametersDto);
 
-        // Initialize lists for chosen bids and corresponding orders
+        return bidListForTrip;
+    }
+
+    private List<Order> getOrderListForChosenBids(List<Bid> bidListForTrip) {
         List<Bid> isChosenBidList = new ArrayList<>();
         List<Order> orderListForChosenBids = new ArrayList<>();
 
-        // Iterate through the bid list to update status counts and store chosen bids
         for (Bid bid : bidListForTrip) {
-            if (bid.getBidStatus().equals(BidStatusEnum.NOT_CHOSEN)) {
-                totalRequested += 1;
-            } else if (bid.getBidStatus().equals(BidStatusEnum.IS_CHOSEN)) {
+            if (bid.getBidStatus().equals(BidStatusEnum.IS_CHOSEN)) {
                 isChosenBidList.add(bid);
             }
         }
 
-        // Iterate through the chosen bid list and retrieve the corresponding orders
         for (Bid bid : isChosenBidList) {
             Order order = orderDao.getOrderById(bid.getOrderId());
             orderListForChosenBids.add(order);
         }
 
-        // Iterate through the chosen order list to update status counts
+        return orderListForChosenBids;
+    }
+
+    private TripDashboardDto getTripDashboardCounts(List<Bid> bidListForTrip, List<Order> orderListForChosenBids) {
+        int totalRequested = bidListForTrip.size() - orderListForChosenBids.size(); // ALL_BIDS - IS_CHOSEN = NOT_CHOSEN
+        int totalToBePurchased = 0;
+        int totalToBeDelivered = 0;
+
         for (Order order : orderListForChosenBids) {
             if (order.getOrderStatus().equals(OrderStatusEnum.TO_BE_PURCHASED)) {
                 totalToBePurchased += 1;
@@ -180,14 +193,24 @@ public class TripServiceImpl implements TripService {
             }
         }
 
-        // Build the TripDashboardDto object with the computed status counts
+
         TripDashboardDto tripDashboardDto = new TripDashboardDto();
         tripDashboardDto.setRequested(totalRequested);
         tripDashboardDto.setToBePurchased(totalToBePurchased);
         tripDashboardDto.setToBeDelivered(totalToBeDelivered);
 
-        // Return the TripDashboardDto object
         return tripDashboardDto;
+    }
+
+
+    private BigDecimal calculateProfit(List<Order> orderListForChosenBids) {
+        BigDecimal totalProfit = BigDecimal.valueOf(0);
+
+        for (Order order : orderListForChosenBids) {
+            totalProfit = totalProfit.add(order.getTravelerFee());
+        }
+
+        return totalProfit;
     }
 
 }
