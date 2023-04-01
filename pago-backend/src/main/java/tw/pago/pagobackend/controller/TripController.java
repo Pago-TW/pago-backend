@@ -90,7 +90,7 @@ public class TripController {
   }
 
   @GetMapping("/users/{userId}/trips")
-  public ResponseEntity<ListResponseDto<Trip>> getTripList(
+  public ResponseEntity<ListResponseDto<TripResponseDto>> getTripList(
       @PathVariable String userId,
       @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
@@ -109,17 +109,17 @@ public class TripController {
         .sort(sort)
         .build();
 
-    List<Trip> tripList = tripService.getTripList(listQueryParametersDto);
+    List<TripResponseDto> tripList = tripService.getTripResponseDtoList(listQueryParametersDto);
 
     Integer total = tripService.countTrip(listQueryParametersDto);
 
-    ListResponseDto<Trip> tripListResponseDto = ListResponseDto.<Trip>builder()
+    ListResponseDto<TripResponseDto> tripResponseDtoList = ListResponseDto.<TripResponseDto>builder()
         .total(total)
         .startIndex(startIndex)
         .size(size)
         .data(tripList)
         .build();
 
-    return ResponseEntity.status(HttpStatus.OK).body(tripListResponseDto);
+    return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoList);
   }
 }

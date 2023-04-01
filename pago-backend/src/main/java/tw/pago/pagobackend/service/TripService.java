@@ -10,12 +10,12 @@ import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 
 public interface TripService {
-    
+
     Trip getTripById(String tripId);
 
     TripResponseDto getTripResponseDtoByTrip(Trip trip);
 
-//    public List<Trip> findAll() throws SQLException;
+    // public List<Trip> findAll() throws SQLException;
 
     String createTrip(String userId, CreateTripRequestDto createTripRequestDto);
 
@@ -24,6 +24,8 @@ public interface TripService {
     void deleteTripById(String tripId) throws SQLException;
 
     List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto);
+
+    List<TripResponseDto> getTripResponseDtoList(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
 }

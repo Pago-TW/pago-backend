@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.assembler.TripAssembler;
@@ -92,6 +93,18 @@ public class TripServiceImpl implements TripService {
         return tripList;
     }
 
+
+    @Override
+    public List<TripResponseDto> getTripResponseDtoList(
+        ListQueryParametersDto listQueryParametersDto) {
+        List<Trip> tripList = getTripList(listQueryParametersDto);
+
+        List<TripResponseDto> tripResponseDtoList = tripList.stream()
+            .map(this::getTripResponseDtoByTrip)
+            .collect(Collectors.toList());
+
+        return tripResponseDtoList;
+    }
 
     @Override
     public Integer countTrip(ListQueryParametersDto listQueryParametersDto) {
