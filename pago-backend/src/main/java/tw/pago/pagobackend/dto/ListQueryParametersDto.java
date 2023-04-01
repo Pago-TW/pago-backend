@@ -37,4 +37,7 @@ public class ListQueryParametersDto {
 
   // Bid
   private String orderId;
+
+  // Trip
+  private String tripId;
 }

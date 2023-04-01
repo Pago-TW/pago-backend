@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
+import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.TripService;
@@ -33,11 +34,12 @@ public class TripController {
   private TripService tripService;
 
   @GetMapping("/trips/{tripId}")
-  public ResponseEntity<Trip> getTripById(@PathVariable String tripId) {
+  public ResponseEntity<TripResponseDto> getTripById(@PathVariable String tripId) {
     Trip trip = tripService.getTripById(tripId);
+    TripResponseDto tripResponseDto = tripService.getTripResponseDtoByTrip(trip);
 
     if (trip != null) {
-      return ResponseEntity.status(HttpStatus.OK).body(trip);
+      return ResponseEntity.status(HttpStatus.OK).body(tripResponseDto);
     } else {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
