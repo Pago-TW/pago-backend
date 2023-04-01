@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google OAuth2 Login</title>
+</head>
+<body>
+<h1>Google OAuth2 Login</h1>
+<form id="google-login-form">
+  <label for="code">Code:</label>
+  <input type="text" id="code" name="code">
+  <br>
+  <label for="state">State:</label>
+  <input type="text" id="state" name="state">
+  <br>
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+  document.getElementById("google-login-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const code = document.getElementById("code").value;
+    const state = document.getElementById("state").value;
+
+    const response = await fetch("http://localhost:8080/api/v1/oauth2/google-login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ code, state })
+    });
+
+    if (response.ok) {
+      const jwtToken = await response.text();
+      console.log("JWT Token:", jwtToken);
+      alert("Success! JWT Token: " + jwtToken);
+    } else {
+      console.error("Error:", response.statusText);
+      alert("Error: " + response.statusText);
+    }
+  });
+</script>
+</body>
+</html>
