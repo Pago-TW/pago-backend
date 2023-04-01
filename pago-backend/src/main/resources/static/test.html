@@ -6,10 +6,8 @@
 </head>
 <body>
 <form id="google-login-form">
-  <label for="code">Code:</label>
-  <input type="text" id="code" name="code">
-  <label for="state">State:</label>
-  <input type="text" id="state" name="state">
+  <label for="redirectUri">Redirect URI:</label>
+  <input type="text" id="redirectUri" name="redirectUri">
   <button type="submit">Submit</button>
 </form>
 
@@ -17,20 +15,19 @@
   document.getElementById('google-login-form').addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const code = document.getElementById('code').value;
-    const state = document.getElementById('state').value;
+    const redirectUri = document.getElementById('redirectUri').value;
 
     const response = await fetch('http://localhost:8080/api/v1/oauth2/google-login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ code, state }),
+      body: JSON.stringify({ redirectUri }),
       credentials: 'include'
     });
 
     if (response.ok) {
-      console.log('Success!');
+      window.location.href = await response.text();
     } else {
       console.error('Error:', response.status);
     }

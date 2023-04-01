@@ -1,12 +1,14 @@
 package tw.pago.pagobackend.controller;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -15,8 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-import tw.pago.pagobackend.dto.GoogleOAuthRequestDto;
 import tw.pago.pagobackend.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import tw.pago.pagobackend.util.UuidGenerator;
 
@@ -62,19 +62,18 @@ public class GoogleOAuthController {
   }
 
   @PostMapping("/oauth2/google-login")
-  public void googleLogin(HttpServletResponse response, @RequestBody GoogleOAuthRequestDto googleOAuthRequestDto)
-      throws IOException {
-    String code = googleOAuthRequestDto.getCode();
-    String state = googleOAuthRequestDto.getState();
+  public ResponseEntity<String> googleLogin(@RequestBody  Map<String, String> requestBody) throws URISyntaxException {
+    String redirectUri = requestBody.get("redirectUri");
 
-    String redirectUrl = UriComponentsBuilder.fromHttpUrl("http://localhost:8080/api/v1/oauth2/callback/google")
-        .queryParam("code", code)
-        .queryParam("state", state)
-        .toUriString();
 
-    response.setStatus(HttpStatus.FOUND.value());
-    response.setHeader("Location", redirectUrl);
+    redirectUri = redirectUri.replace("http://localhost:3000", "http://localhost:8080/api/v1");
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setLocation(new URI(redirectUri));
+    return new ResponseEntity<>(headers, HttpStatus.FOUND);
   }
+
+
 
 
 }
