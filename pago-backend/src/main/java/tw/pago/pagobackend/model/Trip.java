@@ -1,10 +1,13 @@
 package tw.pago.pagobackend.model;
 
+import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.TripStatusEnum;
 
 @Getter
 @Setter
@@ -12,10 +15,10 @@ import lombok.Setter;
 public class Trip {
     private String tripId;
     private String shopperId;
-    private String fromCountry;
-    private String fromCity;
-    private String toCountry;
-    private String toCity;
+    private CountryCode fromCountry;
+    private CityCode fromCity;
+    private CountryCode toCountry;
+    private CityCode toCity;
     private Date arrivalDate;
     private BigDecimal profit;
     private Date createDate;
