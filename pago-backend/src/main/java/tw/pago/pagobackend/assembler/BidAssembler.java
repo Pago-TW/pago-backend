@@ -21,46 +21,42 @@ public class BidAssembler implements Assembler<Bid, BidResponseDto> {
 
   @Autowired
   private ModelMapper modelMapper;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private TripService tripService;
-  @Autowired
-  private ReviewService reviewService;
 
 
   @Override
+  @Deprecated
   public BidResponseDto assemble(Bid bid) {
 
-    // Get related data
-    Trip bidRelatedTrip = tripService.getTripById(bid.getTripId());
-    User creator = userService.getUserById(bidRelatedTrip.getShopperId());
+//    // Get related data
+//    Trip bidRelatedTrip = tripService.getTripById(bid.getTripId());
+//    User creator = userService.getUserById(bidRelatedTrip.getShopperId());
+//
+//    // Get averageRating & totalReview
+//    ReviewRatingResultDto reviewRatingResultDto = reviewService.calculateAverageRating(creator.getUserId(), ReviewTypeEnum.FOR_SHOPPER);
+//    double averageRating = reviewRatingResultDto.getAverageRating();
+//    int totalReview = reviewRatingResultDto.getTotalReviews();
+//
+//    // Set value to bidCreatorReviewDto
+//    BidCreatorReviewDto bidCreatorReviewDto = new BidCreatorReviewDto();
+//    bidCreatorReviewDto.setAverageRating(averageRating);
+//    bidCreatorReviewDto.setTotalReview(totalReview);
+//    bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+//
+//
+//
+//    // Covert all data to DTO
+//    BidCreatorDto bidCreatorDto = modelMapper.map(creator, BidCreatorDto.class);
+//    BidTripDto bidTripDto = modelMapper.map(bidRelatedTrip, BidTripDto.class);
+//    BidResponseDto bidResponseDto = modelMapper.map(bid, BidResponseDto.class);
+//
+//    // Set related data to ResponseDTO
+//    bidResponseDto.setCreator(bidCreatorDto);
+//    bidResponseDto.setTrip(bidTripDto);
+//    bidResponseDto.getCreator().setReview(bidCreatorReviewDto);
 
-    // Get averageRating & totalReview
-    ReviewRatingResultDto reviewRatingResultDto = reviewService.calculateAverageRating(creator.getUserId(), ReviewTypeEnum.FOR_SHOPPER);
-    double averageRating = reviewRatingResultDto.getAverageRating();
-    int totalReview = reviewRatingResultDto.getTotalReviews();
 
-    // Set value to bidCreatorReviewDto
-    BidCreatorReviewDto bidCreatorReviewDto = new BidCreatorReviewDto();
-    bidCreatorReviewDto.setAverageRating(averageRating);
-    bidCreatorReviewDto.setTotalReview(totalReview);
-    bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
-
-
-
-    // Covert all data to DTO
-    BidCreatorDto bidCreatorDto = modelMapper.map(creator, BidCreatorDto.class);
-    BidTripDto bidTripDto = modelMapper.map(bidRelatedTrip, BidTripDto.class);
-    BidResponseDto bidResponseDto = modelMapper.map(bid, BidResponseDto.class);
-
-    // Set related data to ResponseDTO
-    bidResponseDto.setCreator(bidCreatorDto);
-    bidResponseDto.setTrip(bidTripDto);
-    bidResponseDto.getCreator().setReview(bidCreatorReviewDto);
-
-
-    return bidResponseDto;
+//    return bidResponseDto;
+    return null;
   }
 
 

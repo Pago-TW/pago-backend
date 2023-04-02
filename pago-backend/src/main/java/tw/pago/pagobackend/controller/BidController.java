@@ -36,12 +36,6 @@ public class BidController {
 
   @Autowired
   private BidService bidService;
-  @Autowired
-  private JwtTokenProvider jwtTokenProvider;
-  @Autowired
-  private BidAssembler bidAssembler;
-  @Autowired
-  private CurrentUserInfoProvider currentUserInfoProvider;
 
   @PostMapping("/orders/{orderId}/bids")
   public ResponseEntity<Bid> createBid(@PathVariable String orderId,
