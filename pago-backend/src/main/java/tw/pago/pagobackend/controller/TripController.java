@@ -11,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,19 +20,28 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
+import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
+import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @RestController
+@Validated
 public class TripController {
 
   @Autowired
   private TripService tripService;
+  @Autowired
+  private OrderService orderService;
+  @Autowired
+  private CurrentUserInfoProvider currentUserInfoProvider;
 
   @GetMapping("/trips/{tripId}")
   public ResponseEntity<TripResponseDto> getTripById(@PathVariable String tripId) {
@@ -51,11 +61,10 @@ public class TripController {
 //    return ResponseEntity.status(HttpStatus.OK).body(trips);
 //  }
 
-  @PostMapping("/users/{userId}/trips")
-  public ResponseEntity<Trip> createTrip(@PathVariable String userId,
-    @RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
+  @PostMapping("/trips")
+  public ResponseEntity<Trip> createTrip(@RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
 
-    String tripId = tripService.createTrip(userId, createTripRequestDto);
+    String tripId = tripService.createTrip(currentUserInfoProvider.getCurrentLoginUserId(), createTripRequestDto);
     Trip trip = tripService.getTripById(tripId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(trip);
@@ -82,9 +91,16 @@ public class TripController {
     return ResponseEntity.status(HttpStatus.OK).body(updatedTrip);
   }
 
-  @DeleteMapping("users/{userId}/trips/{tripId}")
-  public ResponseEntity<?> delete(@PathVariable String userId, @PathVariable String tripId)
+  @DeleteMapping("/trips/{tripId}")
+  public ResponseEntity<?> delete(@PathVariable String tripId)
       throws SQLException {
+
+    Trip trip = tripService.getTripById(tripId);
+    String tripCreatorId = trip.getShopperId();
+    if (!currentUserInfoProvider.getCurrentLoginUserId().equals(tripCreatorId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
     tripService.deleteTripById(tripId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -122,4 +138,46 @@ public class TripController {
 
     return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoList);
   }
+
+
+  @GetMapping("/trips/{tripId}/matching-orders")
+  public ResponseEntity<ListResponseDto<OrderResponseDto>> getMatchingOrderListForTrip(
+      @PathVariable String tripId,
+      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
+      @RequestParam(required = false) String search,
+      @RequestParam(defaultValue = "REQUESTED") OrderStatusEnum orderStatus,
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "latest_receive_item_date") String orderBy,
+      @RequestParam(defaultValue = "DESC") String sort) {
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .tripId(tripId)
+        .latestReceiveItemDate(latestReceiveItemDate)
+        .search(search)
+        .orderStatus(orderStatus)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
+        .build();
+
+    Trip trip = tripService.getTripById(tripId);
+
+    List<OrderResponseDto> matchingOrderResponseDtoListForTrip = tripService.getMatchingOrderResponseDtoListForTrip(listQueryParametersDto, trip);
+
+    Integer total = tripService.countMatchingOrderForTrip(listQueryParametersDto, trip);
+
+    ListResponseDto<OrderResponseDto> listResponseDto = ListResponseDto.<OrderResponseDto>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .data(matchingOrderResponseDtoListForTrip)
+        .build();
+
+    return ResponseEntity.status(HttpStatus.OK).body(listResponseDto);
+
+  }
+
+
 }

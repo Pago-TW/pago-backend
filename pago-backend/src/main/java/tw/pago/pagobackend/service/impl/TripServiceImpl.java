@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.assembler.TripAssembler;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dao.BidDao;
@@ -19,12 +20,14 @@ import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.TripDashboardDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
@@ -41,6 +44,8 @@ public class TripServiceImpl implements TripService {
     private BidDao bidDao;
     @Autowired
     private OrderDao orderDao;
+    @Autowired
+    private OrderService orderService;
 
     @Override
     public Trip getTripById(String tripId) {
@@ -60,6 +65,9 @@ public class TripServiceImpl implements TripService {
     public TripResponseDto getTripResponseDtoByTrip(Trip trip) {
         // Convert the Trip model to TripResponseDto
         TripResponseDto tripResponseDto = tripAssembler.assemble(trip);
+
+        // Set default currency to TWD
+        tripResponseDto.setCurrency(CurrencyEnum.TWD);
 
         // Set the trip status based on the trip arrivalDate
         setTripStatusBasedOnDates(tripResponseDto);
@@ -109,6 +117,18 @@ public class TripServiceImpl implements TripService {
 
 
     @Override
+    public List<OrderResponseDto> getMatchingOrderResponseDtoListForTrip(
+        ListQueryParametersDto listQueryParametersDto, Trip trip) {
+
+        List<Order> matchingOrderListForTrip = orderService.getMatchingOrderListForTrip(listQueryParametersDto, trip);
+
+        List<OrderResponseDto> orderResponseDtoList = orderService.getOrderResponseDtoListByOrderList(matchingOrderListForTrip);
+
+
+        return orderResponseDtoList;
+    }
+
+    @Override
     public List<TripResponseDto> getTripResponseDtoList(
         ListQueryParametersDto listQueryParametersDto) {
         List<Trip> tripList = getTripList(listQueryParametersDto);
@@ -126,6 +146,16 @@ public class TripServiceImpl implements TripService {
 
         return total;
     }
+
+    @Override
+    public Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto,
+        Trip trip) {
+
+        Integer total = orderService.countMatchingOrderForTrip(listQueryParametersDto, trip);
+
+        return total;
+    }
+
 
     private void setTripStatusBasedOnDates(TripResponseDto tripResponseDto) {
         LocalDate currentDate = LocalDate.now();

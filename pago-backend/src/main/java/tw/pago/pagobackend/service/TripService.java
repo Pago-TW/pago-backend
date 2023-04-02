@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
@@ -23,9 +24,13 @@ public interface TripService {
 
     void deleteTripById(String tripId) throws SQLException;
 
-    List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto);
+    List<Trip> getTripList(ListQueryParametersDto ListQueryParametersDto);
+
+    List<OrderResponseDto> getMatchingOrderResponseDtoListForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 
     List<TripResponseDto> getTripResponseDtoList(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
+
+    Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 }
