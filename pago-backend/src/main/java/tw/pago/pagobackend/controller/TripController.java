@@ -143,17 +143,15 @@ public class TripController {
   @GetMapping("/trips/{tripId}/matching-orders")
   public ResponseEntity<ListResponseDto<OrderResponseDto>> getMatchingOrderListForTrip(
       @PathVariable String tripId,
-      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "REQUESTED") OrderStatusEnum orderStatus,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
-      @RequestParam(defaultValue = "latest_receive_item_date") String orderBy,
+      @RequestParam(defaultValue = "traveler_fee") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .tripId(tripId)
-        .latestReceiveItemDate(latestReceiveItemDate)
         .search(search)
         .orderStatus(orderStatus)
         .startIndex(startIndex)
