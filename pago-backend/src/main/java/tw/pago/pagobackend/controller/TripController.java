@@ -3,6 +3,7 @@ package tw.pago.pagobackend.controller;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -28,7 +29,6 @@ import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
-import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
@@ -38,8 +38,6 @@ public class TripController {
 
   @Autowired
   private TripService tripService;
-  @Autowired
-  private OrderService orderService;
   @Autowired
   private CurrentUserInfoProvider currentUserInfoProvider;
 
@@ -105,15 +103,19 @@ public class TripController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @GetMapping("/users/{userId}/trips")
+  @GetMapping("/trips")
   public ResponseEntity<ListResponseDto<TripResponseDto>> getTripList(
-      @PathVariable String userId,
+      @RequestParam(required = false) String userId,
       @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
+
+    if (userId == null) {
+      userId = currentUserInfoProvider.getCurrentLoginUserId();
+    }
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .userId(userId)
