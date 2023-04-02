@@ -84,10 +84,10 @@ public class TripDaoImpl implements TripDao {
     Map<String, Object> map = new HashMap<>();
     map.put("shopperId", userId);
     map.put("tripId", createTripRequestDto.getTripId());
-    map.put("fromCountry", createTripRequestDto.getFromCountry());
-    map.put("toCountry", createTripRequestDto.getToCountry());
-    map.put("fromCity", createTripRequestDto.getFromCity());
-    map.put("toCity", createTripRequestDto.getToCity());
+    map.put("fromCountry", createTripRequestDto.getFromCountry().name());
+    map.put("toCountry", createTripRequestDto.getToCountry().name());
+    map.put("fromCity", createTripRequestDto.getFromCity().name());
+    map.put("toCity", createTripRequestDto.getToCity().name());
     map.put("arrivalDate", createTripRequestDto.getArrivalDate());
     Date now = new Date();
     map.put("createDate", now);
@@ -110,10 +110,10 @@ public class TripDaoImpl implements TripDao {
 
     Map<String, Object> map = new HashMap<>();
     map.put("shopperId", updateTripRequestDto.getShopperId() != null ? updateTripRequestDto.getShopperId() : trip.getShopperId());
-    map.put("fromCountry", updateTripRequestDto.getFromCountry() != null ? updateTripRequestDto.getFromCountry() : trip.getFromCountry());
-    map.put("toCountry", updateTripRequestDto.getToCountry() != null ? updateTripRequestDto.getToCountry() : trip.getToCountry());
-    map.put("fromCity", updateTripRequestDto.getFromCity() != null ? updateTripRequestDto.getFromCity() : trip.getFromCity());
-    map.put("toCity", updateTripRequestDto.getToCity() != null ? updateTripRequestDto.getToCity() : trip.getToCity());
+    map.put("fromCountry", updateTripRequestDto.getFromCountry() != null ? updateTripRequestDto.getFromCountry().name() : trip.getFromCountry().name());
+    map.put("toCountry", updateTripRequestDto.getToCountry() != null ? updateTripRequestDto.getToCountry().name() : trip.getToCountry().name());
+    map.put("fromCity", updateTripRequestDto.getFromCity() != null ? updateTripRequestDto.getFromCity().name() : trip.getFromCity().name());
+    map.put("toCity", updateTripRequestDto.getToCity() != null ? updateTripRequestDto.getToCity().name() : trip.getToCity().name());
     map.put("arrivalDate", updateTripRequestDto.getArrivalDate() != null ? updateTripRequestDto.getArrivalDate() : trip.getArrivalDate());
 
     Date now = new Date();
