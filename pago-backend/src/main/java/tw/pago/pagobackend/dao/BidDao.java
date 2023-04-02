@@ -21,4 +21,8 @@ public interface BidDao {
   List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countBid(ListQueryParametersDto listQueryParametersDto);
+
+  Integer countBidByTripId(String tripId);
+
+
 }

@@ -168,6 +168,23 @@ public class BidDaoImpl implements BidDao {
     return total;
   }
 
+
+  @Override
+  public Integer countBidByTripId(String tripId) {
+    String sql = "SELECT COUNT(bid_id) "
+        + "FROM bid "
+        + "WHERE trip_id = :tripId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("tripId", tripId);
+
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+
+    return total;
+  }
+
   private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
     if (listQueryParametersDto.getSearch() != null) {
       sql = sql + "AND ( "
@@ -182,6 +199,11 @@ public class BidDaoImpl implements BidDao {
     if (listQueryParametersDto.getOrderId() != null) {
       sql = sql + " AND order_id = :orderId ";
       map.put("orderId", listQueryParametersDto.getOrderId());
+    }
+
+    if (listQueryParametersDto.getTripId() != null) {
+      sql = sql + " AND trip.trip_id = :tripId ";
+      map.put("tripId", listQueryParametersDto.getTripId());
     }
 
     return sql;
