@@ -7,6 +7,7 @@ import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
+import tw.pago.pagobackend.model.Trip;
 
 public interface OrderDao {
 
@@ -26,7 +27,13 @@ public interface OrderDao {
 
   List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto);
 
+  List<Order> getMatchingOrderListForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
+
   Integer countOrder(ListQueryParametersDto listQueryParametersDto);
+
+  Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
+
+
 
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

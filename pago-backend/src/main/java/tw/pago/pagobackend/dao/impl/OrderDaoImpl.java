@@ -16,8 +16,8 @@ import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.OrderItemRowMapper;
-import tw.pago.pagobackend.rowmapper.OrderRowMapper;
 import tw.pago.pagobackend.rowmapper.OrderWithOrderItemRowMapper;
 
 @Component
@@ -274,6 +274,44 @@ public class OrderDaoImpl implements OrderDao {
 
   }
 
+
+  @Override
+  public List<Order> getMatchingOrderListForTrip(ListQueryParametersDto listQueryParametersDto,
+      Trip trip) {
+    String sql = "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+        + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "
+        + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
+        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
+        + "oi.purchase_district, oi.purchase_road "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search, userId
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+
+    // TripConditions e.g. toCountry, toCity, arrivalDate
+    sql = addTripConditionSql(sql, map, trip);
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderWithOrderItemRowMapper());
+
+
+    return orderList;
+
+  }
+
   @Override
   public Integer countOrder(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT COUNT(order_id) "
@@ -286,6 +324,28 @@ public class OrderDaoImpl implements OrderDao {
 
     // Filtering e.g. status, search
     sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
+  @Override
+  public Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto,
+      Trip trip) {
+    String sql = "SELECT COUNT(order_id) "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // TripConditions e.g. toCountry, toCity, arrivalDate
+    sql = addTripConditionSql(sql, map, trip);
 
     Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
 
@@ -332,6 +392,20 @@ public class OrderDaoImpl implements OrderDao {
       sql = sql + " AND oi.name LIKE :search ";
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
+
+    return sql;
+  }
+
+  private String addTripConditionSql(String sql, Map<String, Object> map, Trip trip) {
+    sql = sql + " AND om.destination_country = :toCountry ";
+    map.put("toCountry", trip.getToCountry().name());
+
+    sql = sql + " AND om.destination_city = :toCity  ";
+    map.put("toCity", trip.getToCity().name());
+
+
+    sql = sql + " AND om.latest_receive_item_date >= :arrivalDate ";
+    map.put("arrivalDate", trip.getArrivalDate());
 
     return sql;
   }

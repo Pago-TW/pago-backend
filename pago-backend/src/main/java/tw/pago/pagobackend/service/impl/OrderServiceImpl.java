@@ -25,6 +25,7 @@ import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -209,12 +210,44 @@ public class OrderServiceImpl implements OrderService {
     return orderList;
   }
 
+  @Override
+  public List<Order> getMatchingOrderListForTrip(ListQueryParametersDto listQueryParametersDto,
+      Trip trip) {
+    List<Order> matchingOrderListForTrip = orderDao.getMatchingOrderListForTrip(listQueryParametersDto, trip);
+
+    // calculate each order amount
+    for (Order order: matchingOrderListForTrip) {
+      Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
+      order.setTariffFee(orderEachAmountMap.get("tariffFee"));
+      order.setPlatformFee(orderEachAmountMap.get("platformFee"));
+      order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
+      //get file url
+      List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
+      order.getOrderItem().setFileUrls(fileUrls);
+    }
+
+
+
+
+    return matchingOrderListForTrip;
+  }
+
 
   @Override
   public List<OrderResponseDto> getOrderResponseDtoList(
       ListQueryParametersDto listQueryParametersDto) {
 
     List<Order> orderList = getOrderList(listQueryParametersDto);
+
+    List<OrderResponseDto> orderResponseDtoList = orderList.stream()
+        .map(this::getOrderResponseDtoByOrder)
+        .collect(Collectors.toList());
+
+    return orderResponseDtoList;
+  }
+
+  @Override
+  public List<OrderResponseDto> getOrderResponseDtoListByOrderList(List<Order> orderList) {
 
     List<OrderResponseDto> orderResponseDtoList = orderList.stream()
         .map(this::getOrderResponseDtoByOrder)
@@ -236,6 +269,15 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public Integer countOrder(ListQueryParametersDto listQueryParametersDto) {
     Integer total = orderDao.countOrder(listQueryParametersDto);
+
+    return total;
+  }
+
+  @Override
+  public Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto,
+      Trip trip) {
+    Integer total = orderDao.countMatchingOrderForTrip(listQueryParametersDto, trip);
+
     return total;
   }
 
