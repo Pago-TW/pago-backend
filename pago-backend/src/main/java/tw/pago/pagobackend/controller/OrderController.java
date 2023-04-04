@@ -31,6 +31,7 @@ import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @Validated
 @RestController
@@ -38,16 +39,21 @@ public class OrderController {
 
   @Autowired
   private OrderService orderService;
+  @Autowired
+  private CurrentUserInfoProvider currentUserInfoProvider;
 
-  @PostMapping("/users/{userId}/orders")
-  public ResponseEntity<Order> createOrder(@PathVariable String userId, @RequestParam("file") List<MultipartFile> files, 
+  @PostMapping("/orders")
+  public ResponseEntity<Order> createOrder(@RequestParam("file") List<MultipartFile> files,
       @RequestParam("data") String createOrderRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
-    // Create Order
+    // Convert data to DTO
     ObjectMapper objectMapper = new ObjectMapper();
     CreateOrderRequestDto createOrderRequestDto = objectMapper.readValue(createOrderRequestDtoString, CreateOrderRequestDto.class);
 
-    Order order = orderService.createOrder(userId, files, createOrderRequestDto);
+    // Get currentLogin User
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    Order order = orderService.createOrder(currentLoginUserId, files, createOrderRequestDto);
 
 //    Order order = orderService.getOrderById(orderId);
 
