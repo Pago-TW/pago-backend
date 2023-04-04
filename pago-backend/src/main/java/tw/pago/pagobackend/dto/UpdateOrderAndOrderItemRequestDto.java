@@ -27,38 +27,22 @@ public class UpdateOrderAndOrderItemRequestDto {
   private String consumerId;
 
   @JsonProperty(value = "orderItem")
-  private Optional<UpdateOrderItemDto> updateOrderItemDto;
-
-
+  private UpdateOrderItemDto updateOrderItemDto;
+  @JsonProperty(value = "isPackagingRequired")
   private boolean isPackagingRequired;
-
-
+  @JsonProperty(value = "isVerificationRequired")
   private boolean isVerificationRequired;
-
-
-
   private CountryCode destinationCountry;
-
   private CityCode destinationCity;
-
-
   private BigDecimal travelerFee;
-
-
   private CurrencyEnum currency;
-
   @Value("4.5")
   private Double platformFeePercent;
-
   @Value("2.5")
   private Double tariffFeePercent;
-
-
   @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
   private Date latestReceiveItemDate;
-
   private String note;
-
   private OrderStatusEnum orderStatus;
 
 

@@ -9,11 +9,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
@@ -22,12 +20,13 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
-// import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
+import tw.pago.pagobackend.dto.UpdateOrderItemDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
@@ -187,9 +186,29 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public void updateOrderAndOrderItemByOrderId(Order order,
-      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
-    orderDao.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+  public void updateOrderAndOrderItemByOrderId(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
+
+    // Get oldOrder
+    if (oldOrder == null) {
+      System.out.println("No such order");
+      return;
+    }
+
+    OrderItem oldOrderItem = oldOrder.getOrderItem();
+    UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
+    if (updateOrderItemDto == null) {
+      updateOrderItemDto = new UpdateOrderItemDto();
+    }
+
+    String[] presentPropertyNamesForOrderDto = EntityPropertyUtil.getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
+    BeanUtils.copyProperties(oldOrder, updateOrderAndOrderItemRequestDto, presentPropertyNamesForOrderDto);
+
+    String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil.getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
+    BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto, presentPropertyNamesForOrdetItemDto);
+
+    updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
+
+    orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
   }
 
   @Override

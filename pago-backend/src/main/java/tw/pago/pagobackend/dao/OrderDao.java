@@ -4,7 +4,6 @@ import java.util.List;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
-// import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
@@ -21,7 +20,7 @@ public interface OrderDao {
 
   OrderItem getOrderItemById (String orderItemId);
 
-  void updateOrderAndOrderItemByOrderId(Order order, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
+  void updateOrderAndOrderItemByOrderId(UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
 
   void deleteOrderById(String orderId);
 

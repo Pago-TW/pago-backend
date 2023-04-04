@@ -1,11 +1,13 @@
 package tw.pago.pagobackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,11 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -61,19 +58,26 @@ public class OrderController {
   }
 
 
-  @PatchMapping("/users/{userId}/orders/{orderId}")
-  public ResponseEntity<Order> updateOrderById(@PathVariable String userId,
+  @PatchMapping("/orders/{orderId}")
+  public ResponseEntity<Order> updateOrder(
       @PathVariable String orderId, @RequestBody @Valid
   UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
 
-    // Check if the Order to be updated exists
+
+    // Get currentLoginUser
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    // Get orderCreatorId
     Order order = orderService.getOrderById(orderId);
-    if (order == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(order);
+    String orderCreatorId = order.getConsumerId();
+
+    // Check permission
+    if (!currentLoginUserId.equals(orderCreatorId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     // Update Order
-    updateOrderAndOrderItemRequestDto.setConsumerId(userId);
+    updateOrderAndOrderItemRequestDto.setConsumerId(currentLoginUserId);
     updateOrderAndOrderItemRequestDto.setOrderId(orderId);
     orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
 

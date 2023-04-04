@@ -27,8 +27,7 @@ public interface OrderService {
   OrderResponseDto getOrderResponseDtoByOrder(Order order);
 
 
-  void updateOrderAndOrderItemByOrderId(Order order,
-      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
+  void updateOrderAndOrderItemByOrderId(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
 
   void deleteOrderById(String orderId);
 

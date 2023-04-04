@@ -8,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
-
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
-// import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
@@ -162,7 +160,7 @@ public class OrderDaoImpl implements OrderDao {
 
 
   @Override
-  public void updateOrderAndOrderItemByOrderId(Order order, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
+  public void updateOrderAndOrderItemByOrderId(UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
     String sql = "UPDATE order_main AS om "
         + "LEFT JOIN order_item AS oi "
         + "ON om.order_item_id = oi.order_item_id "
@@ -170,60 +168,31 @@ public class OrderDaoImpl implements OrderDao {
         + "oi.quantity = :quantity, oi.unit_price = :unitPrice, "
         + "oi.purchase_country = :purchaseCountry, oi.purchase_city = :purchaseCity, "
         + "oi.purchase_district = :purchaseDistrict, oi.purchase_road = :purchaseRoad, "
-        + "om.packaging = :packaging, om.verification = :verification, om.destination_country = :destinationCountry, om.destination_city = :destinationCity "
-        + "om.traveler_fee = :travelerFee, om.currency = :currency, om.latest_receive_item_date = :latestReceiveItemDate, "
+        + "om.packaging = :packaging, om.verification = :verification, "
+        + "om.destination_country = :destinationCountry, om.destination_city = :destinationCity, "
+        + "om.traveler_fee = :travelerFee, om.currency = :currency, "
+        + "om.latest_receive_item_date = :latestReceiveItemDate, "
         + "om.note = :note, om.order_status = :orderStatus, om.update_date = :updateDate "
         + "WHERE om.order_Id = :orderId";
 
     Map<String, Object> map = new HashMap<>();
-
-    map.put("name", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getName() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getName() : order.getOrderItem().getName());
-    map.put("description", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getDescription() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getDescription() : order.getOrderItem().getDescription());
-    map.put("quantity", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getQuantity() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getQuantity() : order.getOrderItem().getQuantity());
-    map.put("unitPrice", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getUnitPrice() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getUnitPrice() : order.getOrderItem().getUnitPrice());
-    map.put("purchaseCountry", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseCountry() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseCountry() : order.getOrderItem().getPurchaseCountry());
-    map.put("purchaseCity", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseCity() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseCity() : order.getOrderItem().getPurchaseCity());
-    map.put("purchaseDistrict", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseDistrict() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseDistrict() : order.getOrderItem().getPurchaseDistrict());
-    map.put("purchaseRoad", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto() != null && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().isPresent() && 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseRoad() != null ? 
-    updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().get().getPurchaseRoad() : order.getOrderItem().getPurchaseRoad());
-    
-    Boolean packaging = updateOrderAndOrderItemRequestDto.isPackagingRequired();
-    map.put("packaging", packaging != null ? packaging : order.isPackagingRequired());
-
-    Boolean verification = updateOrderAndOrderItemRequestDto.isVerificationRequired();
-    map.put("verification", verification != null ? verification : order.isVerificationRequired());
-
-    map.put("destinationCountry", updateOrderAndOrderItemRequestDto.getDestinationCountry() != null ? updateOrderAndOrderItemRequestDto.getDestinationCountry() : order.getDestinationCountry());
-    map.put("destinationCity", updateOrderAndOrderItemRequestDto.getDestinationCity() != null ? updateOrderAndOrderItemRequestDto.getDestinationCity() : order.getDestinationCity());
-    map.put("travelerFee", updateOrderAndOrderItemRequestDto.getTravelerFee() != null ? updateOrderAndOrderItemRequestDto.getTravelerFee() : order.getTravelerFee());
-    map.put("currency", updateOrderAndOrderItemRequestDto.getCurrency() != null ? updateOrderAndOrderItemRequestDto.getCurrency().toString() : order.getCurrency().toString());
-    map.put("latestReceiveItemDate", updateOrderAndOrderItemRequestDto.getLatestReceiveItemDate() != null ? updateOrderAndOrderItemRequestDto.getLatestReceiveItemDate() : order.getLatestReceiveItemDate());
-    map.put("note", updateOrderAndOrderItemRequestDto.getNote() != null ? updateOrderAndOrderItemRequestDto.getNote() : order.getNote());
-    map.put("orderStatus", updateOrderAndOrderItemRequestDto.getOrderStatus() != null ? updateOrderAndOrderItemRequestDto.getOrderStatus().toString() : order.getOrderStatus().toString());
-
+    map.put("name", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName());
+    map.put("description", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getDescription());
+    map.put("quantity", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getQuantity());
+    map.put("unitPrice", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getUnitPrice());
+    map.put("purchaseCountry", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseCountry().name());
+    map.put("purchaseCity", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseCity().name());
+    map.put("purchaseDistrict", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseDistrict());
+    map.put("purchaseRoad", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseRoad());
+    map.put("packaging", updateOrderAndOrderItemRequestDto.isPackagingRequired());
+    map.put("verification", updateOrderAndOrderItemRequestDto.isVerificationRequired());
+    map.put("destinationCountry", updateOrderAndOrderItemRequestDto.getDestinationCountry().name());
+    map.put("destinationCity", updateOrderAndOrderItemRequestDto.getDestinationCity().name());
+    map.put("travelerFee", updateOrderAndOrderItemRequestDto.getTravelerFee());
+    map.put("currency", updateOrderAndOrderItemRequestDto.getCurrency().name());
+    map.put("latestReceiveItemDate", updateOrderAndOrderItemRequestDto.getLatestReceiveItemDate());
+    map.put("note", updateOrderAndOrderItemRequestDto.getNote());
+    map.put("orderStatus", updateOrderAndOrderItemRequestDto.getOrderStatus().name());
     Date now = new Date();
     map.put("updateDate", now);
     map.put("orderId", updateOrderAndOrderItemRequestDto.getOrderId());

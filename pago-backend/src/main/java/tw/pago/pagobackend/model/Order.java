@@ -1,14 +1,13 @@
 package tw.pago.pagobackend.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
@@ -39,6 +38,7 @@ public class Order {
   private Double platformFeePercent;
   @JsonIgnore
   private Double tariffFeePercent;
+  @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
   private Date latestReceiveItemDate;
   private String note;
   private OrderStatusEnum orderStatus;

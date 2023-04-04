@@ -1,14 +1,17 @@
 package tw.pago.pagobackend.dto;
 
+import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tw.pago.pagobackend.constant.CityCode;
 
 
-@Getter
-@Setter
-@Builder
+@Data
+@NoArgsConstructor
 public class UpdateOrderItemDto {
 
   private String orderItemId;
@@ -21,9 +24,9 @@ public class UpdateOrderItemDto {
 
   private BigDecimal unitPrice;
 
-  private String purchaseCountry;
+  private CountryCode purchaseCountry;
 
-  private String purchaseCity;
+  private CityCode purchaseCity;
 
   private String purchaseDistrict;
 
