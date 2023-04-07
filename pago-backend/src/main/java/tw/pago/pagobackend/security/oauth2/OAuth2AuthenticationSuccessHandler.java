@@ -2,10 +2,20 @@ package tw.pago.pagobackend.security.oauth2;
 
 import static tw.pago.pagobackend.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.Json;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.gson.JsonObject;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URI;
-import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -14,20 +24,24 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.JwtDto;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.security.model.AppProperties;
 import tw.pago.pagobackend.security.model.UserPrincipal;
-import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.CookieUtil;
 import tw.pago.pagobackend.util.JwtTokenProvider;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -36,6 +50,11 @@ import tw.pago.pagobackend.util.UuidGenerator;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
   private static final String GOOGLE_ISS_URL = "https://accounts.google.com";
+  private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+
+  @Value("${spring.security.oauth2.client.registration.google.client-id}")
+  private String GOOGLE_CLIENT_ID;
+
 
   private JwtTokenProvider jwtTokenProvider;
   private AppProperties appProperties;
@@ -43,8 +62,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
   private UserDao userDao;
   private UuidGenerator uuidGenerator;
 
+
   @Autowired
-  OAuth2AuthenticationSuccessHandler(JwtTokenProvider jwtTokenProvider, AppProperties appProperties, HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository, UserDao userDao, UuidGenerator uuidGenerator) {
+  public OAuth2AuthenticationSuccessHandler(JwtTokenProvider jwtTokenProvider, AppProperties appProperties,
+      HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
+      UserDao userDao, UuidGenerator uuidGenerator) {
     this.jwtTokenProvider = jwtTokenProvider;
     this.appProperties = appProperties;
     this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
@@ -58,15 +80,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
     Map<String, Object> userInfoMap = getUserInfoFromAuthentication(authentication);
-
-//    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-//
-//    String googleUserId = oAuth2User.getAttribute("sub");
-//    String email = oAuth2User.getAttribute("email");
-//    String firstName = oAuth2User.getAttribute("given_name");
-//    String lastName = oAuth2User.getAttribute("family_name");
-//    String avatarUrl = oAuth2User.getAttribute("picture");
-
 
 
     Optional<User> userOptional = Optional.ofNullable(userDao.getUserByEmail(
@@ -120,6 +133,86 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
+  public void handleGoogleLogin(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) throws IOException, ServletException {
+
+
+
+    Map<String, Object> userInfoMap = getUserInfoFromAuthentication(authentication);
+
+
+    Optional<User> userOptional = Optional.ofNullable(userDao.getUserByEmail(
+        (String) userInfoMap.get("email")));
+
+    User user;
+    if (userOptional.isPresent()) {
+
+      // Get Old data
+      User oldUser = userDao.getUserByEmail(userInfoMap.get("email").toString());
+
+      // Set Data You want to update
+      UpdateUserRequestDto updateUserRequestDto = UpdateUserRequestDto.builder()
+          .email(userInfoMap.get("email").toString())
+          .firstName(userInfoMap.get("firstName").toString())
+          .lastName(userInfoMap.get("firstName").toString())
+          .avatarUrl(userInfoMap.get("avatarUrl").toString())
+          .build();
+
+      // Compare with data you set, if null -> set oldUser data;
+      updateUserRequestDto.fillEmptyFieldsWithOldData(oldUser);
+
+      // update exist User
+      userDao.updateUser(updateUserRequestDto);
+
+    } else {
+      String userId = uuidGenerator.getUuid();
+      UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
+          .userId(userId)
+          .account(userInfoMap.get("email").toString())
+          .provider(UserAuthProviderEnum.valueOf(userInfoMap.get("provider").toString()))
+          .googleId(userInfoMap.get("googleId").toString())
+          .firstName(userInfoMap.get("firstName").toString())
+          .lastName(userInfoMap.get("lastName").toString())
+          .email(userInfoMap.get("email").toString())
+          .avatarUrl(userInfoMap.get("avatarUrl").toString())
+          .build();
+
+      userDao.createUser(userRegisterRequestDto);
+    }
+
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+
+    String jwtToken = generateJwtToken(authentication);
+    System.out.println("JWT: " + jwtToken);
+
+    // Create a JSON object instead of concatenating strings
+    JsonObject json = new JsonObject();
+    setJwtTokenToJsonObject(jwtToken, json);
+    user = userDao.getUserByEmail(userInfoMap.get("email").toString());
+    setUserInfoToJsonObject(user, json);
+
+    // Use a PrintWriter to write the JSON object to the response
+    PrintWriter out = response.getWriter();
+    out.print(json.toString());
+    out.flush();
+
+    // Clear the response buffer
+    out.close();
+
+
+    String targetUrl = determineTargetUrl(request, response, authentication);
+
+
+    if (response.isCommitted()) {
+      logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
+      return;
+    }
+
+    clearAuthenticationAttributes(request, response);
+    getRedirectStrategy().sendRedirect(request, response, targetUrl);
+  }
+
   protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
     Optional<String> redirectUri = CookieUtil.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
         .map(Cookie::getValue);
@@ -132,10 +225,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     String jwtToken = jwtTokenProvider.generateJwtToken(authentication);
 
+
     return UriComponentsBuilder.fromUriString(targetUrl)
         .queryParam("token", jwtToken)
         .build().toUriString();
   }
+
+  protected String generateJwtToken(Authentication authentication) {
+    String jwtToken = jwtTokenProvider.generateJwtToken(authentication);
+    return jwtToken;
+  }
+
 
   protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
     super.clearAuthenticationAttributes(request);
@@ -205,6 +305,92 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
     return userInfoMap;
+  }
+
+  public Authentication processGoogleLogin(String idToken, HttpServletRequest request, HttpServletResponse response) {
+    // 使用id_token和access_token進行後續的驗證和註冊過程
+    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
+        .setAudience(Collections.singletonList(GOOGLE_CLIENT_ID))
+        .build();
+
+    GoogleIdToken googleIdToken;
+    try {
+      googleIdToken = verifier.verify(idToken);
+    } catch (GeneralSecurityException | IOException e) {
+      throw new RuntimeException("無法驗證 Google ID Token", e);
+    }
+
+    if (googleIdToken == null) {
+      throw new RuntimeException("無效的 Google ID Token");
+    }
+
+    Payload payload = googleIdToken.getPayload();
+
+    Map<String, Object> userInfoMap = getUserInfoFromPayload(payload);
+
+    // 使用驗證結果創建一個 Authentication 對象
+    OAuth2User oAuth2User = new DefaultOAuth2User(
+        Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
+        userInfoMap,
+        "name"
+    );
+
+    Authentication authentication = new OAuth2AuthenticationToken(oAuth2User, Collections.emptyList(), "google");
+
+    return authentication;
+  }
+
+
+  private Map<String, Object> getUserInfoFromPayload(Payload payload) {
+    Map<String, Object> userInfoMap = new HashMap<>();
+
+    userInfoMap.put("iss", payload.getIssuer());
+    userInfoMap.put("azp", payload.getAuthorizedParty());
+    userInfoMap.put("aud", payload.getAudience());
+    userInfoMap.put("sub", payload.getSubject());
+    userInfoMap.put("email", payload.getEmail());
+    userInfoMap.put("email_verified", payload.getEmailVerified());
+    userInfoMap.put("at_hash", (String) payload.get("at_hash"));
+    userInfoMap.put("nonce", (String) payload.get("nonce"));
+    userInfoMap.put("name", (String) payload.get("name"));
+    userInfoMap.put("picture", (String) payload.get("picture"));
+    userInfoMap.put("given_name", (String) payload.get("given_name"));
+    userInfoMap.put("family_name", (String) payload.get("family_name"));
+    userInfoMap.put("locale", (String) payload.get("locale"));
+    userInfoMap.put("iat", payload.getIssuedAtTimeSeconds());
+    userInfoMap.put("exp", payload.getExpirationTimeSeconds());
+
+    return userInfoMap;
+  }
+
+
+  private JsonObject setJwtTokenToJsonObject(String jwtToken, JsonObject json) {
+    // Create a token object
+    JsonObject tokenObject = new JsonObject();
+    tokenObject.addProperty("tokenType", "Bearer");
+    tokenObject.addProperty("accessToken", jwtToken);
+    json.add("token", tokenObject);
+
+
+    return json;
+  }
+
+  private JsonObject setUserInfoToJsonObject(User user, JsonObject json) {
+    JsonObject userObject = new JsonObject();
+    userObject.addProperty("userId", user.getUserId());
+    userObject.addProperty("email", user.getEmail());
+    userObject.addProperty("account", user.getAccount());
+    userObject.addProperty("firstName", user.getFirstName());
+    userObject.addProperty("lastName", user.getLastName());
+    userObject.addProperty("fullName", user.getFullName());
+    userObject.addProperty("phone", user.getPhone());
+    userObject.addProperty("provider", user.getProvider().toString());
+    userObject.addProperty("createDate", user.getCreateDate().toString());
+    userObject.addProperty("updateDate", user.getUpdateDate().toString());
+    userObject.addProperty("lastLogin", user.getLastLogin().toString());
+    json.add("user", userObject);
+
+    return json;
   }
 
 }
