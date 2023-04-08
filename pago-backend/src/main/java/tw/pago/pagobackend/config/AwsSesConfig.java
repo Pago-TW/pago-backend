@@ -2,21 +2,21 @@ package tw.pago.pagobackend.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AwsS3Config {
+public class AwsSesConfig {
 
     @Autowired
     private AWSStaticCredentialsProvider awsStaticCredentialsProvider;
 
     @Bean
-    public AmazonS3 amazonS3() {
-        return AmazonS3ClientBuilder.standard()
+    public AmazonSimpleEmailService amazonSimpleEmailService() {
+        return AmazonSimpleEmailServiceClientBuilder.standard()
             .withCredentials(awsStaticCredentialsProvider)
             .withRegion(Regions.AP_NORTHEAST_1)
             .build();
