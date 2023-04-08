@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Component;
 import java.util.Date;
 import tw.pago.pagobackend.dao.UserDao;
@@ -37,9 +38,10 @@ public class JwtTokenProvider {
     if (userPrincipal instanceof UserPrincipal) {
       userId = ((UserPrincipal) userPrincipal).getId();
     } else if (userPrincipal instanceof DefaultOidcUser) {
-      // Convert DefaultOidcUser to UserPrincipal or extract the required data
-      // For example, you can extract the user's ID (subject) like this:
       User user = userDao.getUserByEmail(((DefaultOidcUser) userPrincipal).getEmail().toString());
+      userId = user.getUserId();
+    } else if (userPrincipal instanceof DefaultOAuth2User) {
+      User user = userDao.getUserByEmail(((DefaultOAuth2User) userPrincipal).getAttribute("email").toString());
       userId = user.getUserId();
     } else {
       throw new IllegalArgumentException("Unsupported principal type");

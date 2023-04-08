@@ -62,7 +62,7 @@ public class UserDaoImpl implements UserDao {
   public User getUserById(String userId) {
     String sql = "SELECT user_id, account, password, first_name, last_name,"
         + "phone, email, gender, google_id, account_status, update_date,"
-        + "create_date, avatar_url, about_me, country, last_login, provider, role "
+        + "create_date, avatar_url, about_me, country, last_login, provider "
         + "FROM user "
         + "WHERE user_id = :userId ";
 
@@ -82,7 +82,7 @@ public class UserDaoImpl implements UserDao {
   public User getUserByEmail(String email) {
     String sql = "SELECT user_id, account, password, first_name, last_name,"
         + "phone, email, gender, google_id, account_status, update_date,"
-        + "create_date, avatar_url, about_me, country, last_login, provider, role "
+        + "create_date, avatar_url, about_me, country, last_login, provider "
         + "FROM user "
         + "WHERE email = :email ";
 
