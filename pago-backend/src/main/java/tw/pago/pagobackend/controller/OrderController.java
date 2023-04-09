@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -87,8 +88,14 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.OK).body(updatedOrder);
   }
 
-  @DeleteMapping("/users/{userId}/orders/{orderId}")
+  @DeleteMapping("/orders/{orderId}")
   public ResponseEntity<Object> deleteOrderById(@PathVariable String orderId) {
+
+    Order order = orderService.getOrderById(orderId);
+
+    if (!order.getConsumerId().equals(currentUserInfoProvider.getCurrentLoginUserId())) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
 
     orderService.deleteOrderById(orderId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -120,6 +127,8 @@ public class OrderController {
       @RequestParam(required = false) String userId,
       @RequestParam(required = false) OrderStatusEnum status,
       @RequestParam(required = false) String search,
+      @RequestParam(required = false) CityCode from,
+      @RequestParam(required = false) CityCode to,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
@@ -129,6 +138,8 @@ public class OrderController {
         .userId(userId)
         .orderStatus(status)
         .search(search)
+        .from(from)
+        .to(to)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)

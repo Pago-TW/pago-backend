@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 
@@ -23,6 +24,8 @@ public class ListQueryParametersDto {
 
   // Order
   private OrderStatusEnum orderStatus;
+  private CityCode from;
+  private CityCode to;
 
   // Order, Trip
   private String userId;
@@ -40,4 +43,6 @@ public class ListQueryParametersDto {
 
   // Trip
   private String tripId;
+
+  //
 }
