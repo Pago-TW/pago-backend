@@ -3,6 +3,7 @@ package tw.pago.pagobackend.service.impl;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.model.*;
 
+import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.service.SesEmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,16 @@ public class SesEmailServiceImpl implements SesEmailService {
     @Autowired
     private AmazonSimpleEmailService amazonSimpleEmailService;
 
+    private final String fromEmail = "pagonotifications@gmail.com";
+
     @Override
-    public void sendEmail(String from, String to, String subject, String body) {
+    public void sendEmail(EmailRequestDto emailRequestDto) {
         SendEmailRequest request = new SendEmailRequest()
-                .withDestination(new Destination().withToAddresses(to))
+                .withDestination(new Destination().withToAddresses(emailRequestDto.getTo()))
                 .withMessage(new Message().withBody(new Body().withText(new Content().withCharset("UTF-8")
-                        .withData(body)))
-                        .withSubject(new Content().withCharset("UTF-8").withData(subject)))
-                .withSource(from);
+                        .withData(emailRequestDto.getBody())))
+                        .withSubject(new Content().withCharset("UTF-8").withData(emailRequestDto.getSubject())))
+                .withSource(fromEmail);
 
         amazonSimpleEmailService.sendEmail(request);
     }

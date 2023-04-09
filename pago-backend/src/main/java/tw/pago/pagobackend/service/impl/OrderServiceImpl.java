@@ -16,6 +16,7 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
@@ -26,6 +27,8 @@ import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.service.SesEmailService;
+import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.UuidGenerator;
 
@@ -41,7 +44,10 @@ public class OrderServiceImpl implements OrderService {
   private UuidGenerator uuidGenerator;
   @Autowired
   private FileService fileService;
-
+  @Autowired
+  private SesEmailService sesEmailService;
+  @Autowired
+  private CurrentUserInfoProvider currentUserInfoProvider;
 
   @Transactional
   @Override
@@ -75,6 +81,19 @@ public class OrderServiceImpl implements OrderService {
       System.out.println("Successfully uploaded!");
     }
     // System.out.println("file uploaded");
+
+    // Get the current login user's email
+    String currentLoginUserEmail = currentUserInfoProvider.getCurrentLoginUser().getEmail();
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(currentLoginUserEmail);
+    emailRequest.setSubject("Order Created");
+    emailRequest.setBody("Your order has been created successfully. Order ID: " + orderUuid);
+
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent!");
 
     Order order = getOrderById(orderUuid);
 

@@ -1,5 +1,7 @@
 package tw.pago.pagobackend.service;
 
+import tw.pago.pagobackend.dto.EmailRequestDto;
+
 public interface SesEmailService {
-    void sendEmail(String from, String to, String subject, String body);
+    void sendEmail(EmailRequestDto emailRequestDto);
 }
