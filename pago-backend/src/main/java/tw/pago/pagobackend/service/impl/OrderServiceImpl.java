@@ -3,9 +3,12 @@ package tw.pago.pagobackend.service.impl;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,6 +216,9 @@ public class OrderServiceImpl implements OrderService {
       return;
     }
 
+    // Store the old order status
+    OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
+
     OrderItem oldOrderItem = oldOrder.getOrderItem();
     UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
     if (updateOrderItemDto == null) {
@@ -228,6 +234,36 @@ public class OrderServiceImpl implements OrderService {
     updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
 
     orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
+
+    // Check if the order status has been modified
+    boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
+
+    // If the order status has been changed, send the email notification
+    if (orderStatusChanged) {
+      System.out.println("status updated");
+        // Get the current login user's email
+        String currentLoginUserEmail = currentUserInfoProvider.getCurrentLoginUser().getEmail();
+        // Get the order item name
+        String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
+        // Get the user name
+        String username = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
+        // Get current date
+        Date now = new Date();
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+        String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+        "您的訂單 %s，已於%s更新為「%s」", username, orderItemName, date, updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
+
+        // Prepare the email content
+        EmailRequestDto emailRequest = new EmailRequestDto();
+        emailRequest.setTo(currentLoginUserEmail);
+        emailRequest.setSubject("【Pago 訂單狀態更新通知】" + orderItemName);
+        emailRequest.setBody(emailBody);
+
+        // Send the email notification
+        sesEmailService.sendEmail(emailRequest);
+        System.out.println("......Email sent!");
+    }
   }
 
   @Override
