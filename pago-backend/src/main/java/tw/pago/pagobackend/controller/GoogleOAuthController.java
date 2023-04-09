@@ -49,21 +49,18 @@ public class GoogleOAuthController {
 
 
   @PostMapping("/oauth2/google-login")
-  public ResponseEntity<?> handleGoogleLogin(HttpServletRequest request, HttpServletResponse response, @RequestBody
-      GoogleLoginRequestDto googleLoginRequestDto) {
-
+  public ResponseEntity<?> handleGoogleLogin(HttpServletRequest request, @RequestBody GoogleLoginRequestDto googleLoginRequestDto) {
     String idToken = googleLoginRequestDto.getIdToken();
 
-    Authentication authentication = oAuth2AuthenticationSuccessHandler.processGoogleLogin(idToken, request, response);
+    Authentication authentication = oAuth2AuthenticationSuccessHandler.processGoogleLogin(idToken);
 
     try {
-      oAuth2AuthenticationSuccessHandler.handleGoogleLogin(request, response, authentication);
+      String loginResponseData = oAuth2AuthenticationSuccessHandler.handleGoogleLogin(request, authentication);
+      return ResponseEntity.status(HttpStatus.OK).body(loginResponseData);
     } catch (IOException | ServletException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during authentication");
     }
-
-
-    return ResponseEntity.status(HttpStatus.OK).body(response);
   }
+
 
 }
