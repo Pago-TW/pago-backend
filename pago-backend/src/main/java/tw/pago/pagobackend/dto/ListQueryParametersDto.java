@@ -26,6 +26,7 @@ public class ListQueryParametersDto {
   private OrderStatusEnum orderStatus;
   private CityCode from;
   private CityCode to;
+  private Boolean isPackagingRequired;
 
   // Order, Trip
   private String userId;

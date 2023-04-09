@@ -129,6 +129,7 @@ public class OrderController {
       @RequestParam(required = false) String search,
       @RequestParam(required = false) CityCode from,
       @RequestParam(required = false) CityCode to,
+      @RequestParam(required = false) Boolean isPackagingRequired,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
@@ -140,6 +141,7 @@ public class OrderController {
         .search(search)
         .from(from)
         .to(to)
+        .isPackagingRequired(isPackagingRequired)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)
