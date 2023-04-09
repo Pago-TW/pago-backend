@@ -31,6 +31,7 @@ import tw.pago.pagobackend.dto.UpdateOrderItemDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
@@ -208,6 +209,16 @@ public class OrderServiceImpl implements OrderService {
     orderResponseDto.setDestinationCityName(orderDestinationCityName);
 
     return orderResponseDto;
+  }
+
+  @Override
+  public String getChosenBidderIdByOrderId(String orderId) {
+
+    String chosenBidderId = orderDao.getChosenBidderIdByOrderId(orderId);
+
+    System.out.println("ChosenBidder: " + chosenBidderId);
+
+    return chosenBidderId;
   }
 
   @Override

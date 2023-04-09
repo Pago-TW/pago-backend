@@ -27,7 +27,9 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
+import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
@@ -39,6 +41,8 @@ public class OrderController {
   private OrderService orderService;
   @Autowired
   private CurrentUserInfoProvider currentUserInfoProvider;
+  @Autowired
+  private BidService bidService;
 
   @PostMapping("/orders")
   public ResponseEntity<OrderResponseDto> createOrder(@RequestParam("file") List<MultipartFile> files,
@@ -73,8 +77,12 @@ public class OrderController {
     Order order = orderService.getOrderById(orderId);
     String orderCreatorId = order.getConsumerId();
 
-    // Check permission
-    if (!currentLoginUserId.equals(orderCreatorId)) {
+    // Get chosenBidderId
+    String chosenBidderId = orderService.getChosenBidderIdByOrderId(orderId);
+
+
+    // Check permission, only order creator or shopper can update Order
+    if (!(currentLoginUserId.equals(orderCreatorId) || currentLoginUserId.equals(chosenBidderId))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -17,6 +18,7 @@ import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.OrderItemRowMapper;
 import tw.pago.pagobackend.rowmapper.OrderWithOrderItemRowMapper;
+import tw.pago.pagobackend.rowmapper.ShopperIdRowMapper;
 
 @Component
 public class OrderDaoImpl implements OrderDao {
@@ -134,6 +136,30 @@ public class OrderDaoImpl implements OrderDao {
 
     if (orderList.size() > 0) {
       return orderList.get(0);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public String getChosenBidderIdByOrderId(String orderId) {
+    String sql = "SELECT t.shopper_id "
+        + "FROM trip AS t "
+        + "LEFT JOIN bid AS b ON b.trip_id = t.trip_id "
+        + "LEFT JOIN order_main AS om ON om.order_id = b.order_id "
+        + "WHERE b.bid_status = :bidStatus "
+        + "AND om.order_id = :orderId ";
+
+    System.out.println("SQL: " + sql);
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("bidStatus", BidStatusEnum.IS_CHOSEN.name());
+    map.put("orderId", orderId);
+
+    List<String> shopperIdList = namedParameterJdbcTemplate.query(sql, map, new ShopperIdRowMapper());
+
+    if (shopperIdList.size() > 0) {
+      return shopperIdList.get(0);
     } else {
       return null;
     }

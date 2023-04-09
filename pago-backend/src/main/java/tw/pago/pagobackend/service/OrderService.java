@@ -26,6 +26,8 @@ public interface OrderService {
 
   OrderResponseDto getOrderResponseDtoByOrder(Order order);
 
+  String getChosenBidderIdByOrderId(String orderId);
+
 
   void updateOrderAndOrderItemByOrderId(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
 
