@@ -45,5 +45,7 @@ public interface OrderService {
 
   Map<String, BigDecimal> calculateOrderEachAmount(Order order);
 
+  String generateOrderSerialNumber(CreateOrderRequestDto createOrderRequestDto);
+
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

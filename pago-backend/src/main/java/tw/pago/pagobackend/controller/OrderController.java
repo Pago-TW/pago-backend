@@ -40,7 +40,7 @@ public class OrderController {
   private CurrentUserInfoProvider currentUserInfoProvider;
 
   @PostMapping("/orders")
-  public ResponseEntity<Order> createOrder(@RequestParam("file") List<MultipartFile> files,
+  public ResponseEntity<OrderResponseDto> createOrder(@RequestParam("file") List<MultipartFile> files,
       @RequestParam("data") String createOrderRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
     // Convert data to DTO
@@ -51,10 +51,11 @@ public class OrderController {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     Order order = orderService.createOrder(currentLoginUserId, files, createOrderRequestDto);
+    OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoByOrder(order);
 
 //    Order order = orderService.getOrderById(orderId);
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(order);
+    return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDto);
   }
 
 

@@ -27,24 +27,25 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public void createOrder(String userId, CreateOrderRequestDto createOrderRequestDto) {
     String sql =
-        "INSERT INTO order_main (order_id, order_item_id, consumer_id, create_date, update_date, packaging, "
+        "INSERT INTO order_main (order_id, order_item_id, serial_number, consumer_id, create_date, update_date, packaging, "
             + "verification, destination_country, destination_city, traveler_fee, currency, platform_fee_percent, "
             + "tariff_fee_percent, latest_receive_item_date, note, order_status) "
-            + "VALUES (:orderId, :orderItemId, :consumerId, :createDate, :updateDate, :packaging, :verification, "
+            + "VALUES (:orderId, :orderItemId, :serialNumber, :consumerId, :createDate, :updateDate, :packaging, :verification, "
             + ":destinationCountry, :destinationCity, :travelerFee, :currency, :platformFeePercent, :tariffFeePercent, "
             + ":latestReceiveItemDate, :note, :orderStatus)";
 
     Map<String, Object> map = new HashMap<>();
     map.put("orderId", createOrderRequestDto.getOrderId());
     map.put("orderItemId", createOrderRequestDto.getCreateOrderItemDto().getOrderItemId());
+    map.put("serialNumber", createOrderRequestDto.getSerialNumber());
     map.put("consumerId", userId);
     Date now = new Date();
     map.put("createDate", now);
     map.put("updateDate", now);
-    map.put("packaging", createOrderRequestDto.getPackaging());
-    map.put("verification", createOrderRequestDto.getVerification());
-    map.put("destinationCountry", createOrderRequestDto.getDestinationCountry());
-    map.put("destinationCity", createOrderRequestDto.getDestinationCity());
+    map.put("packaging", createOrderRequestDto.isPackaging());
+    map.put("verification", createOrderRequestDto.isVerification());
+    map.put("destinationCountry", createOrderRequestDto.getDestinationCountry().name());
+    map.put("destinationCity", createOrderRequestDto.getDestinationCity().name());
     map.put("travelerFee", createOrderRequestDto.getTravelerFee());
     map.put("currency", createOrderRequestDto.getCurrency().toString());
     System.out.println(createOrderRequestDto.getPlatformFeePercent());
@@ -73,9 +74,9 @@ public class OrderDaoImpl implements OrderDao {
     map.put("quantity", createOrderRequestDto.getCreateOrderItemDto().getQuantity());
     map.put("unitPrice", createOrderRequestDto.getCreateOrderItemDto().getUnitPrice());
     map.put("purchaseCountry",
-        createOrderRequestDto.getCreateOrderItemDto().getPurchaseCountry());
+        createOrderRequestDto.getCreateOrderItemDto().getPurchaseCountry().name());
     map.put("purchaseCity",
-        createOrderRequestDto.getCreateOrderItemDto().getPurchaseCity());
+        createOrderRequestDto.getCreateOrderItemDto().getPurchaseCity().name());
     map.put("purchaseDistrict",
         createOrderRequestDto.getCreateOrderItemDto().getPurchaseDistrict());
     map.put("purchaseRoad",
@@ -88,7 +89,7 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public Order getOrderById(String orderId) {
     String sql =
-        "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+        "SELECT om.order_id, om.order_item_id, om.serial_number ,om.consumer_id, om.create_date, om.update_date, om.packaging, "
             + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, "
             + "om.currency, om.platform_fee_percent, "
             + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
@@ -114,7 +115,7 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public Order getOrderByUserIdAndOrderId(String userId, String orderId) {
     String sql =
-        "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+        "SELECT om.order_id, om.order_item_id, om.serial_number, om.consumer_id, om.create_date, om.update_date, om.packaging, "
             + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, "
             + "om.currency, om.platform_fee_percent, "
             + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
@@ -213,7 +214,7 @@ public class OrderDaoImpl implements OrderDao {
 
   @Override
   public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+    String sql = "SELECT om.order_id, om.order_item_id, om.serial_number,om.consumer_id, om.create_date, om.update_date, om.packaging, "
         + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "
         + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
         + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
@@ -247,7 +248,7 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public List<Order> getMatchingOrderListForTrip(ListQueryParametersDto listQueryParametersDto,
       Trip trip) {
-    String sql = "SELECT om.order_id, om.order_item_id, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+    String sql = "SELECT om.order_id, om.order_item_id, om.serial_number, om.consumer_id, om.create_date, om.update_date, om.packaging, "
         + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "
         + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
         + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"

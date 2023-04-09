@@ -20,6 +20,7 @@ public class Order {
 
   // Order
   private String orderId;
+  private String serialNumber;
 
   @JsonIgnore
   private String orderItemId;

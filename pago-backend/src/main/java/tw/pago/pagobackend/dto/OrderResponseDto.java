@@ -15,6 +15,7 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 
 @JsonPropertyOrder({
     "orderId",
+    "serialNumber",
     "consumerId",
     "destinationCountryName",
     "destinationCityName",
@@ -44,6 +45,7 @@ public class OrderResponseDto {
   @JsonIgnore
   private String orderItemId;
   private String consumerId;
+  private String serialNumber;
   private Date createDate;
   private Date updateDate;
   @JsonProperty("isPackagingRequired")

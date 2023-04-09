@@ -2,13 +2,18 @@ package tw.pago.pagobackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 
-
+@Data
+@NoArgsConstructor
 public class CreateOrderRequestDto {
 
   @NotNull
@@ -16,6 +21,7 @@ public class CreateOrderRequestDto {
   private CreateOrderItemDto createOrderItemDto;
 
   private String orderId;
+  private String serialNumber;
 
   @NotNull
   private boolean packaging;
@@ -24,10 +30,10 @@ public class CreateOrderRequestDto {
   private boolean verification;
 
   @NotNull
-  private String destinationCountry;
+  private CountryCode destinationCountry;
 
   @NotNull
-  private String destinationCity;
+  private CityCode destinationCity;
 
   @NotNull
   private BigDecimal travelerFee;
@@ -50,108 +56,4 @@ public class CreateOrderRequestDto {
   // @Value("REQUESTED")
   private OrderStatusEnum orderStatus;
 
-
-  public String getOrderId() {
-    return orderId;
-  }
-
-  public void setOrderId(String orderId) {
-    this.orderId = orderId;
-  }
-
-  public CreateOrderItemDto getCreateOrderItemDto() {
-    return createOrderItemDto;
-  }
-
-  public void setCreateOrderItemDto(CreateOrderItemDto createOrderItemDto) {
-    this.createOrderItemDto = createOrderItemDto;
-  }
-
-  public boolean getPackaging() {
-    return packaging;
-  }
-
-  public void setPackaging(boolean packaging) {
-    this.packaging = packaging;
-  }
-
-  public boolean getVerification() {
-    return verification;
-  }
-
-  public void setVerification(boolean verification) {
-    this.verification = verification;
-  }
-
-  public String getDestinationCountry() {
-    return destinationCountry;
-  }
-
-  public void setDestinationCountry(String destinationCountry) {
-    this.destinationCountry = destinationCountry;
-  }
-
-  public String getDestinationCity() {
-    return destinationCity;
-  }
-
-  public void setDestinationCity(String destinationCity) {
-    this.destinationCity = destinationCity;
-  }
-
-  public BigDecimal getTravelerFee() {
-    return travelerFee;
-  }
-
-  public void setTravelerFee(BigDecimal travelerFee) {
-    this.travelerFee = travelerFee;
-  }
-
-  public CurrencyEnum getCurrency() {
-    return currency;
-  }
-
-  public void setCurrency(CurrencyEnum currency) {
-    this.currency = currency;
-  }
-
-  public Double getPlatformFeePercent() {
-    return platformFeePercent;
-  }
-
-  public void setPlatformFeePercent(Double platformFeePercent) {
-    this.platformFeePercent = platformFeePercent;
-  }
-
-  public Double getTariffFeePercent() {
-    return tariffFeePercent;
-  }
-
-  public void setTariffFeePercent(Double tariffFeePercent) {
-    this.tariffFeePercent = tariffFeePercent;
-  }
-
-  public Date getLatestReceiveItemDate() {
-    return latestReceiveItemDate;
-  }
-
-  public void setLatestReceiveItemDate(Date latestReceiveItemDate) {
-    this.latestReceiveItemDate = latestReceiveItemDate;
-  }
-
-  public String getNote() {
-    return note;
-  }
-
-  public void setNote(String note) {
-    this.note = note;
-  }
-
-  public OrderStatusEnum getOrderStatus() {
-    return orderStatus;
-  }
-
-  public void setOrderStatus(OrderStatusEnum orderStatus) {
-    this.orderStatus = orderStatus;
-  }
 }

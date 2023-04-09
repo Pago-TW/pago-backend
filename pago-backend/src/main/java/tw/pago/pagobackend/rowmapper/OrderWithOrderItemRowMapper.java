@@ -29,6 +29,7 @@ public class OrderWithOrderItemRowMapper implements RowMapper<Order> {
     Order order = Order.builder()
         .orderId(resultSet.getString("order_id"))
         .orderItemId(resultSet.getString("order_item_id"))
+        .serialNumber(resultSet.getString("serial_number"))
         .consumerId(resultSet.getString("consumer_id"))
         .createDate(resultSet.getTimestamp("create_date"))
         .isPackagingRequired(resultSet.getBoolean("packaging"))

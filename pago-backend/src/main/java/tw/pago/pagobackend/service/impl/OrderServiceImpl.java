@@ -4,11 +4,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +61,15 @@ public class OrderServiceImpl implements OrderService {
 
     String orderItemUuid = uuidGenerator.getUuid();
     String orderUuid = uuidGenerator.getUuid();
+    String orderSerialNumber = generateOrderSerialNumber(createOrderRequestDto);
+
 
     Double platformFeePercent = 4.5;
     Double tariffFeePercent = 2.5;
 
     createOrderRequestDto.getCreateOrderItemDto().setOrderItemId(orderItemUuid);
     createOrderRequestDto.setOrderId(orderUuid);
+    createOrderRequestDto.setSerialNumber(orderSerialNumber);
     createOrderRequestDto.setPlatformFeePercent(platformFeePercent);
     createOrderRequestDto.setTariffFeePercent(tariffFeePercent);
     createOrderRequestDto.setOrderStatus(OrderStatusEnum.REQUESTED);
@@ -97,6 +103,7 @@ public class OrderServiceImpl implements OrderService {
     // Send the email notification
     sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent!");
+
 
     Order order = getOrderById(orderUuid);
 
@@ -183,7 +190,7 @@ public class OrderServiceImpl implements OrderService {
     String orderItemPurchaseCountryName = orderItem.getPurchaseCountry().getName();
     String orderItemPurchaseCityName = orderItem.getPurchaseCity().getEnglishName();
 
-    // Set the country and city names for the ordeItem
+    // Set the country and city names for the orderItem
     orderItem.setPurchaseCountryName(orderItemPurchaseCountryName);
     orderItem.setPurchaseCityName(orderItemPurchaseCityName);
 
@@ -384,6 +391,35 @@ public class OrderServiceImpl implements OrderService {
 
 
     return orderEachAmountMap;
+  }
+
+  @Override
+  public String generateOrderSerialNumber(CreateOrderRequestDto createOrderRequestDto) {
+    LocalDate now = LocalDate.now();
+
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyMMdd");
+    String datePart = dateTimeFormatter.format(now);
+    String destinationCityCode = createOrderRequestDto.getDestinationCity().name();
+    String randomAlphaNumericPart = generateRandomAlphaNumeric();
+
+
+    String serialNumber = datePart + destinationCityCode + randomAlphaNumericPart;
+    return serialNumber;
+  }
+
+  public String generateRandomAlphaNumeric() {
+    Random random = new Random();
+    StringBuilder randomPart = new StringBuilder(5);
+
+    for (int i = 0; i < 5; i++) {
+      int randomCharOrDigit = random.nextInt(36);
+      if (randomCharOrDigit < 10) {
+        randomPart.append((char) (randomCharOrDigit + '0'));
+      } else {
+        randomPart.append((char) (randomCharOrDigit - 10 + 'A'));
+      }
+    }
+    return randomPart.toString();
   }
 
   // @Override
