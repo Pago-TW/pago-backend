@@ -27,6 +27,7 @@ public class ListQueryParametersDto {
   private CityCode from;
   private CityCode to;
   private Boolean isPackagingRequired;
+  private LocalDate orderCreateDate;
 
   // Order, Trip
   private String userId;

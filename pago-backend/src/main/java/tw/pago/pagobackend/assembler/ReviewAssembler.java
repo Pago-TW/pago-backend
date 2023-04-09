@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.assembler;
 
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,16 +15,12 @@ import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.UserService;
 
 @Component
+@AllArgsConstructor
 public class ReviewAssembler implements Assembler<Review, ReviewResponseDto> {
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private OrderService orderService;
+    private final ModelMapper modelMapper;
+    private final UserService userService;
+    private final OrderService orderService;
 
     @Override
     public ReviewResponseDto assemble(Review review) {

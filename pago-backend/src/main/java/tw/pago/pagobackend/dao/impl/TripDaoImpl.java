@@ -163,17 +163,60 @@ public class TripDaoImpl implements TripDao {
     return tripList;
   }
 
+  @Override
+  public List<Trip> getMatchingTripForOrder(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+        + "arrival_date, profit, create_date, update_date "
+        + "FROM trip "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addMatchingTripForOrderSql(sql, map, listQueryParametersDto);
+
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+
+    List<Trip> matchingTripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return matchingTripList;
+  }
+
 
   @Override
   public Integer countTrip(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT COUNT(trip_id) "
         + "FROM trip "
-        + "WHERE 1=1";
+        + "WHERE 1=1 ";
 
     Map<String, Object> map = new HashMap<>();
 
     // Filtering e.g. status, search
     sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
+  @Override
+  public Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(DISTINCT shopper_id) "
+        + "FROM trip "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addMatchingTripForOrderSql(sql, map, listQueryParametersDto);
 
     Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
 
@@ -202,6 +245,26 @@ public class TripDaoImpl implements TripDao {
           + "OR to_city LIKE :search) ";
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
+
+    return  sql;
+  }
+
+  private String addMatchingTripForOrderSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+
+    if (listQueryParametersDto.getFrom() != null) {
+      sql = sql + " AND from_city = :fromCity ";
+      map.put("fromCity", listQueryParametersDto.getFrom().name());
+    }
+
+    if (listQueryParametersDto.getTo() != null) {
+      sql = sql + " AND to_city = :toCity ";
+      map.put("toCity", listQueryParametersDto.getTo().name());
+    }
+
+    sql = sql + " AND DATE(arrival_date) BETWEEN :orderCreateDate AND :latestReceiveItemDate ";
+    map.put("latestReceiveItemDate", listQueryParametersDto.getLatestReceiveItemDate());
+    map.put("orderCreateDate", listQueryParametersDto.getOrderCreateDate());
+
 
     return  sql;
   }

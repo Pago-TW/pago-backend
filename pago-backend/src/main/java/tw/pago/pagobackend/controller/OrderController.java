@@ -3,11 +3,17 @@ package tw.pago.pagobackend.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,24 +31,25 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
+import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
-import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @Validated
 @RestController
+@AllArgsConstructor
 public class OrderController {
 
-  @Autowired
-  private OrderService orderService;
-  @Autowired
-  private CurrentUserInfoProvider currentUserInfoProvider;
-  @Autowired
-  private BidService bidService;
+  private final OrderService orderService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
+  private final TripService tripService;
 
   @PostMapping("/orders")
   public ResponseEntity<OrderResponseDto> createOrder(@RequestParam("file") List<MultipartFile> files,
@@ -168,5 +175,59 @@ public class OrderController {
         .build();
 
     return ResponseEntity.status(HttpStatus.OK).body(orderListResponseDto);
+  }
+
+  @GetMapping("/orders/{orderId}/matching-shoppers")
+  public ResponseEntity<?> getMatchingShopperList(
+      @PathVariable String orderId,
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "arrival_date") String orderBy,
+      @RequestParam(defaultValue = "DESC") String sort) {
+
+    // Get permission checking needing value
+    Order order = orderService.getOrderById(orderId);
+    String orderCreatorId = order.getConsumerId();
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    // Check permission
+    if (!currentLoginUserId.equals(orderCreatorId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+    Date latestReceiveItemDate = order.getLatestReceiveItemDate();
+    LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    Date orderCreateDate = order.getCreateDate();
+    LocalDate orderCreateLocalDate = orderCreateDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .orderId(orderId)
+        .to(order.getDestinationCity())
+        .from(order.getOrderItem().getPurchaseCity())
+        .latestReceiveItemDate(latestReceiveItemLocalDate)
+        .orderCreateDate(orderCreateLocalDate)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
+        .build();
+
+    List<MatchingShopperResponseDto> matchingShopperList = orderService.getMatchingShopperList(listQueryParametersDto);
+
+    Integer total = tripService.countMatchingShopper(listQueryParametersDto);
+
+    OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoByOrder(order);
+
+    ListResponseDto<MatchingShopperResponseDto> matchingShoppers = ListResponseDto.<MatchingShopperResponseDto>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .order(orderResponseDto)
+        .data(matchingShopperList)
+        .build();
+
+    return ResponseEntity.status(HttpStatus.OK).body(matchingShoppers);
+
   }
 }

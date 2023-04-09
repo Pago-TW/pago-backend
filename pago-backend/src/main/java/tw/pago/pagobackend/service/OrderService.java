@@ -8,11 +8,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.User;
 
 public interface OrderService {
 
@@ -41,7 +43,10 @@ public interface OrderService {
 
   List<OrderResponseDto> getOrderResponseDtoListByOrderList(List<Order> orderList);
 
+  List<MatchingShopperResponseDto> getMatchingShopperList(ListQueryParametersDto listQueryParametersDto);
+
   Integer countOrder(ListQueryParametersDto listQueryParametersDto);
+
 
   Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 

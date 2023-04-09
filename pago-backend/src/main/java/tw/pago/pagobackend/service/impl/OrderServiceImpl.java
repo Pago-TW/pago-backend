@@ -13,17 +13,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
+import tw.pago.pagobackend.dao.TripDao;
+import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
+import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
@@ -35,25 +42,26 @@ import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
+import tw.pago.pagobackend.service.TripService;
+import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.UuidGenerator;
 
-@Component
+@Service
+@AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
   private static final String OBJECT_TYPE = "order";
 
-  @Autowired
-  private OrderDao orderDao;
-  @Autowired
-  private UuidGenerator uuidGenerator;
-  @Autowired
-  private FileService fileService;
-  @Autowired
-  private SesEmailService sesEmailService;
-  @Autowired
-  private CurrentUserInfoProvider currentUserInfoProvider;
+  private final OrderDao orderDao;
+  private final UuidGenerator uuidGenerator;
+  private final FileService fileService;
+  private final SesEmailService sesEmailService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
+  private final TripDao tripDao;
+  private final UserDao userDao;
+  private final ModelMapper modelMapper;
 
   @Transactional
   @Override
@@ -344,6 +352,32 @@ public class OrderServiceImpl implements OrderService {
     return orderResponseDtoList;
   }
 
+  @Override
+  public List<MatchingShopperResponseDto> getMatchingShopperList(ListQueryParametersDto listQueryParametersDto) {
+
+    List<Trip> matchingTripList = tripDao.getMatchingTripForOrder(listQueryParametersDto);
+
+    List<MatchingShopperResponseDto> matchingShopperResponseDtoList = matchingTripList.stream()
+        .map(trip -> {
+          User user = userDao.getUserById(trip.getShopperId());
+          MatchingShopperResponseDto matchingShopperResponseDto = modelMapper.map(user, MatchingShopperResponseDto.class);
+
+          // Set tripDto properties based on the trip object
+          MatchingTripForOrderDto matchingTripForOrderDto = modelMapper.map(trip, MatchingTripForOrderDto.class);
+          matchingShopperResponseDto.setTrip(matchingTripForOrderDto);
+
+
+
+
+          return matchingShopperResponseDto;
+        })
+        .collect(Collectors.toList());
+
+
+
+    return matchingShopperResponseDtoList;
+  }
+
   @Transactional
   @Override
   public void deleteOrderById(String orderId) {
@@ -360,6 +394,8 @@ public class OrderServiceImpl implements OrderService {
 
     return total;
   }
+
+
 
   @Override
   public Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto,

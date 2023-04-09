@@ -9,12 +9,15 @@ import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.User;
 
 public interface TripService {
 
     Trip getTripById(String tripId);
 
     TripResponseDto getTripResponseDtoByTrip(Trip trip);
+
+    User getUserByShopperId(String shopperId);
 
     // public List<Trip> findAll() throws SQLException;
 
@@ -31,6 +34,8 @@ public interface TripService {
     List<TripResponseDto> getTripResponseDtoList(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
+
+    Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
 
     Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 }

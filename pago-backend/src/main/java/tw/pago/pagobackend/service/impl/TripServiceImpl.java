@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.assembler.TripAssembler;
@@ -18,6 +19,7 @@ import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.TripDao;
+import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
@@ -27,25 +29,22 @@ import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
+@AllArgsConstructor
 public class TripServiceImpl implements TripService {
 
-    @Autowired
-    private TripAssembler tripAssembler;
-    @Autowired
-    private TripDao tripDao;
-    @Autowired
-    private UuidGenerator uuidGenerator;
-    @Autowired
-    private BidDao bidDao;
-    @Autowired
-    private OrderDao orderDao;
-    @Autowired
-    private OrderService orderService;
+    private final TripAssembler tripAssembler;
+    private final TripDao tripDao;
+    private final UuidGenerator uuidGenerator;
+    private final BidDao bidDao;
+    private final OrderDao orderDao;
+    private final OrderService orderService;
+    private final UserDao userDao;
 
     @Override
     public Trip getTripById(String tripId) {
@@ -89,9 +88,16 @@ public class TripServiceImpl implements TripService {
         return tripResponseDto;
     }
 
+  @Override
+  public User getUserByShopperId(String shopperId) {
+
+      User shopper = userDao.getUserById(shopperId);
+
+    return shopper;
+  }
 
 
-    @Override
+  @Override
     public String createTrip(String userId, CreateTripRequestDto createTripRequestDto) {
         String tripUuid = uuidGenerator.getUuid();
         createTripRequestDto.setTripId(tripUuid);
@@ -147,7 +153,14 @@ public class TripServiceImpl implements TripService {
         return total;
     }
 
-    @Override
+  @Override
+  public Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto) {
+      Integer total = tripDao.countMatchingShopper(listQueryParametersDto);
+
+    return total;
+  }
+
+  @Override
     public Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto,
         Trip trip) {
 
