@@ -43,7 +43,6 @@ public class OrderServiceImpl implements OrderService {
 
   private static final String OBJECT_TYPE = "order";
 
-
   @Autowired
   private OrderDao orderDao;
   @Autowired
@@ -63,7 +62,6 @@ public class OrderServiceImpl implements OrderService {
     String orderUuid = uuidGenerator.getUuid();
     String orderSerialNumber = generateOrderSerialNumber(createOrderRequestDto);
 
-
     Double platformFeePercent = 4.5;
     Double tariffFeePercent = 2.5;
 
@@ -77,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
     orderDao.createOrderItem(createOrderRequestDto);
     orderDao.createOrder(userId, createOrderRequestDto);
 
-    //upload file
+    // upload file
     CreateFileRequestDto createFileRequestDto = new CreateFileRequestDto();
     createFileRequestDto.setFileCreator(userId);
     createFileRequestDto.setObjectId(orderUuid);
@@ -85,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
 
     List<URL> uploadedUrls = fileService.uploadFile(files, createFileRequestDto);
     // print out all uploadedurls
-    for (URL url: uploadedUrls) {
+    for (URL url : uploadedUrls) {
       System.out.println(url);
       System.out.println("Successfully uploaded!");
     }
@@ -104,7 +102,6 @@ public class OrderServiceImpl implements OrderService {
     sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent!");
 
-
     Order order = getOrderById(orderUuid);
 
     return order;
@@ -120,14 +117,12 @@ public class OrderServiceImpl implements OrderService {
     order.setPlatformFee(orderEachAmountMap.get("platformFee"));
     order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
 
-
-    //get file url
+    // get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
 
     return order;
   }
-
 
   @Override
   public OrderResponseDto getOrderResponseDtoById(String orderId) {
@@ -155,14 +150,14 @@ public class OrderServiceImpl implements OrderService {
     String orderDestinationCountryName = order.getDestinationCountry().getName();
     String orderDestinationCityName = order.getDestinationCity().getEnglishName();
 
-    // Set the destination country and city names, and the order item in the OrderResponseDto
+    // Set the destination country and city names, and the order item in the
+    // OrderResponseDto
     orderResponseDto.setOrderItem(orderItemDto);
     orderResponseDto.setDestinationCountryName(orderDestinationCountryName);
     orderResponseDto.setDestinationCityName(orderDestinationCityName);
 
     return orderResponseDto;
   }
-
 
   @Override
   public Order getOrderByUserIdAndOrderId(String userId, String orderId) {
@@ -175,7 +170,7 @@ public class OrderServiceImpl implements OrderService {
     order.setPlatformFee(orderEachAmountMap.get("platformFee"));
     order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
 
-    //get file url
+    // get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
 
@@ -206,7 +201,8 @@ public class OrderServiceImpl implements OrderService {
     String orderDestinationCountryName = order.getDestinationCountry().getName();
     String orderDestinationCityName = order.getDestinationCity().getEnglishName();
 
-    // Set the destination country and city names, and the order item in the OrderResponseDto
+    // Set the destination country and city names, and the order item in the
+    // OrderResponseDto
     orderResponseDto.setOrderItem(orderItemDto);
     orderResponseDto.setDestinationCountryName(orderDestinationCountryName);
     orderResponseDto.setDestinationCityName(orderDestinationCityName);
@@ -215,7 +211,8 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public void updateOrderAndOrderItemByOrderId(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
+  public void updateOrderAndOrderItemByOrderId(Order oldOrder,
+      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
 
     // Get oldOrder
     if (oldOrder == null) {
@@ -232,10 +229,12 @@ public class OrderServiceImpl implements OrderService {
       updateOrderItemDto = new UpdateOrderItemDto();
     }
 
-    String[] presentPropertyNamesForOrderDto = EntityPropertyUtil.getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
+    String[] presentPropertyNamesForOrderDto = EntityPropertyUtil
+        .getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
     BeanUtils.copyProperties(oldOrder, updateOrderAndOrderItemRequestDto, presentPropertyNamesForOrderDto);
 
-    String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil.getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
+    String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil
+        .getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
     BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto, presentPropertyNamesForOrdetItemDto);
 
     updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
@@ -248,28 +247,29 @@ public class OrderServiceImpl implements OrderService {
     // If the order status has been changed, send the email notification
     if (orderStatusChanged) {
       System.out.println("status updated");
-        // Get the current login user's email
-        String currentLoginUserEmail = currentUserInfoProvider.getCurrentLoginUser().getEmail();
-        // Get the order item name
-        String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
-        // Get the user name
-        String username = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
-        // Get current date
-        Date now = new Date();
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+      // Get the current login user's email
+      String currentLoginUserEmail = currentUserInfoProvider.getCurrentLoginUser().getEmail();
+      // Get the order item name
+      String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
+      // Get the user name
+      String username = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
+      // Get current date
+      Date now = new Date();
+      String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
-        String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
-        "您的訂單 %s，已於%s更新為「%s」", username, orderItemName, date, updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
+      String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+          "您的訂單 %s，已於%s更新為「%s」", username, orderItemName, date,
+          updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
 
-        // Prepare the email content
-        EmailRequestDto emailRequest = new EmailRequestDto();
-        emailRequest.setTo(currentLoginUserEmail);
-        emailRequest.setSubject("【Pago 訂單狀態更新通知】" + orderItemName);
-        emailRequest.setBody(emailBody);
+      // Prepare the email content
+      EmailRequestDto emailRequest = new EmailRequestDto();
+      emailRequest.setTo(currentLoginUserEmail);
+      emailRequest.setSubject("【Pago 訂單狀態更新通知】" + orderItemName);
+      emailRequest.setBody(emailBody);
 
-        // Send the email notification
-        sesEmailService.sendEmail(emailRequest);
-        System.out.println("......Email sent!");
+      // Send the email notification
+      sesEmailService.sendEmail(emailRequest);
+      System.out.println("......Email sent!");
     }
   }
 
@@ -279,12 +279,12 @@ public class OrderServiceImpl implements OrderService {
     List<Order> orderList = orderDao.getOrderList(listQueryParametersDto);
 
     // calculate each order amount
-    for (Order order: orderList) {
+    for (Order order : orderList) {
       Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
       order.setTariffFee(orderEachAmountMap.get("tariffFee"));
       order.setPlatformFee(orderEachAmountMap.get("platformFee"));
       order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
-      //get file url
+      // get file url
       List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
       order.getOrderItem().setFileUrls(fileUrls);
     }
@@ -297,22 +297,18 @@ public class OrderServiceImpl implements OrderService {
     List<Order> matchingOrderListForTrip = orderDao.getMatchingOrderListForTrip(listQueryParametersDto, trip);
 
     // calculate each order amount
-    for (Order order: matchingOrderListForTrip) {
+    for (Order order : matchingOrderListForTrip) {
       Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
       order.setTariffFee(orderEachAmountMap.get("tariffFee"));
       order.setPlatformFee(orderEachAmountMap.get("platformFee"));
       order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
-      //get file url
+      // get file url
       List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
       order.getOrderItem().setFileUrls(fileUrls);
     }
 
-
-
-
     return matchingOrderListForTrip;
   }
-
 
   @Override
   public List<OrderResponseDto> getOrderResponseDtoList(
@@ -342,7 +338,7 @@ public class OrderServiceImpl implements OrderService {
   public void deleteOrderById(String orderId) {
     orderDao.deleteOrderById(orderId);
 
-    //delete file
+    // delete file
     String objectType = "order";
     fileService.deleteFilesByObjectIdnType(orderId, objectType);
   }
@@ -368,8 +364,10 @@ public class OrderServiceImpl implements OrderService {
     Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
     BigDecimal orderItemUnitPrice = order.getOrderItem().getUnitPrice();
     BigDecimal orderItemQuantity = BigDecimal.valueOf(order.getOrderItem().getQuantity());
-    BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(order.getPlatformFeePercent()).multiply(BigDecimal.valueOf(0.01));
-    BigDecimal orderTariffFeePercent = BigDecimal.valueOf(order.getTariffFeePercent()).multiply(BigDecimal.valueOf(0.01));
+    BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(order.getPlatformFeePercent())
+        .multiply(BigDecimal.valueOf(0.01));
+    BigDecimal orderTariffFeePercent = BigDecimal.valueOf(order.getTariffFeePercent())
+        .multiply(BigDecimal.valueOf(0.01));
 
     // Calculation
     BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity); // 1
@@ -377,7 +375,8 @@ public class OrderServiceImpl implements OrderService {
     BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent); // 3
     BigDecimal travelerFee = order.getTravelerFee(); // 4
 
-    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3 + 4
+    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3
+                                                                                                    // + 4
 
     // Set only the second digit after the decimal point (Banker 's rounding)
     tariffFee = tariffFee.setScale(2, RoundingMode.HALF_EVEN);
@@ -388,7 +387,6 @@ public class OrderServiceImpl implements OrderService {
     orderEachAmountMap.put("tariffFee", tariffFee);
     orderEachAmountMap.put("platformFee", platformFee);
     orderEachAmountMap.put("orderTotalAmount", orderTotalAmount);
-
 
     return orderEachAmountMap;
   }
@@ -401,7 +399,6 @@ public class OrderServiceImpl implements OrderService {
     String datePart = dateTimeFormatter.format(now);
     String destinationCityCode = createOrderRequestDto.getDestinationCity().name();
     String randomAlphaNumericPart = generateRandomAlphaNumeric();
-
 
     String serialNumber = datePart + destinationCityCode + randomAlphaNumericPart;
     return serialNumber;
@@ -424,6 +421,6 @@ public class OrderServiceImpl implements OrderService {
 
   // @Override
   // public void updateOrder(UpdateOrderRequestDto updateOrderRequestDto) {
-  //   orderDao.updateOrder(updateOrderRequestDto);
+  // orderDao.updateOrder(updateOrderRequestDto);
   // }
 }
