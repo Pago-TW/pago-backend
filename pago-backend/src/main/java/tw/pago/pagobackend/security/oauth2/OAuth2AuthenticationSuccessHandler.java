@@ -133,13 +133,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
-  public void handleGoogleLogin(HttpServletRequest request, HttpServletResponse response,
-      Authentication authentication) throws IOException, ServletException {
-
-
+  public String handleGoogleLogin(HttpServletRequest request, Authentication authentication) throws IOException, ServletException {
 
     Map<String, Object> userInfoMap = getUserInfoFromAuthentication(authentication);
-
 
     Optional<User> userOptional = Optional.ofNullable(userDao.getUserByEmail(
         (String) userInfoMap.get("email")));
@@ -180,38 +176,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
       userDao.createUser(userRegisterRequestDto);
     }
 
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
-
     String jwtToken = generateJwtToken(authentication);
-    System.out.println("JWT: " + jwtToken);
 
-    // Create a JSON object instead of concatenating strings
     JsonObject json = new JsonObject();
     setJwtTokenToJsonObject(jwtToken, json);
     user = userDao.getUserByEmail(userInfoMap.get("email").toString());
     setUserInfoToJsonObject(user, json);
 
-    // Use a PrintWriter to write the JSON object to the response
-    PrintWriter out = response.getWriter();
-    out.print(json.toString());
-    out.flush();
-
-    // Clear the response buffer
-    out.close();
-
-
-    String targetUrl = determineTargetUrl(request, response, authentication);
-
-
-    if (response.isCommitted()) {
-      logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
-      return;
-    }
-
-    clearAuthenticationAttributes(request, response);
-    getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    return json.toString();
   }
+
 
   protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
     Optional<String> redirectUri = CookieUtil.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
@@ -307,7 +281,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     return userInfoMap;
   }
 
-  public Authentication processGoogleLogin(String idToken, HttpServletRequest request, HttpServletResponse response) {
+  public Authentication processGoogleLogin(String idToken) {
     // 使用id_token和access_token進行後續的驗證和註冊過程
     GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
         .setAudience(Collections.singletonList(GOOGLE_CLIENT_ID))
