@@ -18,6 +18,8 @@ public interface BidDao {
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
 
+  void chooseBid(Bid bid);
+
   List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countBid(ListQueryParametersDto listQueryParametersDto);

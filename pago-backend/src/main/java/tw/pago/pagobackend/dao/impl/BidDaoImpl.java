@@ -116,6 +116,19 @@ public class BidDaoImpl implements BidDao {
     namedParameterJdbcTemplate.update(sql, map);
   }
 
+  @Override
+  public void chooseBid(Bid bid) {
+    String sql = "UPDATE bid SET bid_status = :bidStatus , update_date = :updateDate "
+        + "WHERE bid_id = :bidId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("bidStatus", bid.getBidStatus().toString());
+    map.put("bidId", bid.getBidId());
+    Date now = new Date();
+    map.put("updateDate", now);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
 
   @Override
   public List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto) {

@@ -19,6 +19,8 @@ public interface BidService {
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
 
+  void chooseBid(String orderId, String bidId);
+
   List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countBid(ListQueryParametersDto listQueryParametersDto);

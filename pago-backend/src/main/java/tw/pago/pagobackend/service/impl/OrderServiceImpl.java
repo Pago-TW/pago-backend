@@ -98,19 +98,6 @@ public class OrderServiceImpl implements OrderService {
     }
     // System.out.println("file uploaded");
 
-    // Get the current login user's email
-    String currentLoginUserEmail = currentUserInfoProvider.getCurrentLoginUser().getEmail();
-
-    // Prepare the email content
-    EmailRequestDto emailRequest = new EmailRequestDto();
-    emailRequest.setTo(currentLoginUserEmail);
-    emailRequest.setSubject("Order Created");
-    emailRequest.setBody("Your order has been created successfully. Order ID: " + orderUuid);
-
-    // Send the email notification
-    sesEmailService.sendEmail(emailRequest);
-    System.out.println("......Email sent!");
-
     Order order = getOrderById(orderUuid);
 
     return order;

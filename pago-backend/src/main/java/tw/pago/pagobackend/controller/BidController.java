@@ -92,6 +92,14 @@ public class BidController {
     return ResponseEntity.status(HttpStatus.OK).body(updatedBid);
   }
 
+  // Consumer chooses a bid
+  @PatchMapping("/orders/{orderId}/bids/{bidId}/choose")
+  public ResponseEntity<Bid> chooseBid(@PathVariable String orderId, @PathVariable String bidId) {
+      bidService.chooseBid(orderId, bidId);
+      Bid updatedBid = bidService.getBidById(bidId);
+      return ResponseEntity.status(HttpStatus.OK).body(updatedBid);
+  }
+
 
   @GetMapping("/orders/{orderId}/bids")
   public ResponseEntity<ListResponseDto<BidResponseDto>> getBidList(

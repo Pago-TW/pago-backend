@@ -147,6 +147,60 @@ public class BidServiceImpl implements BidService {
     bidDao.updateBid(updateBidRequestDto);
   }
 
+  @Override
+  public void chooseBid(String orderId, String bidId) {
+    Bid bid = getBidById(bidId);
+
+    if (bid == null) {
+        throw new ResourceNotFoundException(bidId, "Bid not found", bidId);
+    }
+
+    bid.setBidStatus(BidStatusEnum.IS_CHOSEN);
+
+    /*
+      * Send email to the bidder
+      * Current user: consumer
+     * To: Bidder
+     * From: pago
+     * Subject: Pago 訂單出價通知
+     * Body: 親愛的XXX您好，感謝您使用Pago的服務
+     */
+
+    // Get bidder's name and email
+    String tripId = bid.getTripId();
+    Trip trip = tripService.getTripById(tripId);
+    String bidderId = trip.getShopperId();
+    User bidder = userService.getUserById(bidderId);
+    String bidderName = bidder.getFirstName();
+    String bidderEmail = bidder.getEmail();
+
+    // Get the order item name
+    Order order = orderService.getOrderById(orderId);
+    String orderItemName = order.getOrderItem().getName();
+    // Get the user name
+    String orderCreatorId = order.getConsumerId();
+    User orderCreator = userService.getUserById(orderCreatorId);
+    String orderCreatorName = orderCreator.getFirstName();
+    // Get current date
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+    "您於 %s 訂單的出價已在%s被%s選中！請前往Pago查看詳情",
+    bidderName, orderItemName, date, orderCreatorName);
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(bidderEmail);
+    emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent!");
+
+    bidDao.chooseBid(bid);
+  }
 
   @Override
   public List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto) {
