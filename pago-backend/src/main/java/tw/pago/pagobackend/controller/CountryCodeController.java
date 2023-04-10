@@ -8,15 +8,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.neovisionaries.i18n.CountryCode;
 
+import tw.pago.pagobackend.model.Country;
+
 @RestController
 public class CountryCodeController {
-
     @GetMapping("/countries")
-    public List<String> getCountries() {
-        List<String> countries = new ArrayList<>();
-        for (CountryCode countryCode : CountryCode.values()) {
-            countries.add(countryCode.getAlpha2());
+    public List<Country> getCountries() {
+        List<Country> countries = new ArrayList<>();
+        for (CountryCode code : CountryCode.values()) {
+            String name = code.getName();
+            countries.add(new Country(code, name));
         }
         return countries;
     }
+    
 }
