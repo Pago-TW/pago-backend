@@ -1,6 +1,5 @@
 package tw.pago.pagobackend.constant;
 
-
 import static com.neovisionaries.i18n.CountryCode.*;
 
 import com.neovisionaries.i18n.CountryCode;
@@ -16,14 +15,13 @@ public enum CityCode {
   TNN("台南市", "Tainan", TW),
 
   // JP
-  TKO("東京市", "Tokyo", KR),
+  TKO("東京市", "Tokyo", JP),
   HND("東京羽田", "Tokyo Haneda", JP),
   NRT("東京成田", "Tokyo Narita", JP),
   NGO("名古屋", "Nagoya", JP),
   CTS("札幌市", "Sapporo", JP),
   KIX("大阪市", "Osaka", JP),
   FUK("福岡市", "Fukuoka", JP),
-
 
   // KR
   SEL("首爾", "Seoul", KR),
@@ -55,19 +53,30 @@ public enum CityCode {
   GRU("聖保羅", "São Paulo", BR),
   MEX("墨西哥城", "Mexico City", MX),
   SVO("莫斯科", "Moscow", RU),
+
+  // IN
   BOM("孟買", "Mumbai", IN),
   DEL("德里", "Delhi", IN),
   MAA("金奈", "Chennai", IN),
   BLR("邦加羅爾", "Bengaluru", IN),
+
+  // CN
   PEK("北京", "Beijing", CN),
   PVG("上海", "Shanghai", CN),
   CAN("廣州", "Guangzhou", CN),
   SZX("深圳", "Shenzhen", CN),
+
+  // ID
   CGK("雅加達", "Jakarta", ID),
   DPS("峇里島", "Bali", ID),
+
+  // VN
   SGN("胡志明市", "Ho Chi Minh City", VN),
   HAN("河内", "Hanoi", VN),
+
   KTM("加德滿都", "Kathmandu", NP),
+
+  // PK
   ISB("伊斯蘭堡", "Islamabad", PK),
   KHI("克拉嗤", "Karachi", PK),
   DAC("達卡", "Dhaka", BD),
@@ -80,12 +89,6 @@ public enum CityCode {
   MCT("馬斯開特", "Muscat", OM),
   BAH("巴林", "Manama", BH),
   KWI("科威特", "Kuwait City", KW),
-
-
-
-
-
-
 
   ;
 
