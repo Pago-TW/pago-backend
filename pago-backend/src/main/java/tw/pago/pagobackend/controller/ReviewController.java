@@ -78,7 +78,7 @@ public class ReviewController {
 
   @GetMapping("/users/{userId}/reviews")
   public ResponseEntity<ListResponseDto<ReviewResponseDto>> getReviewList(@PathVariable String userId,
-      @RequestParam(required = true) ReviewTypeEnum type,
+      @RequestParam(required = false) ReviewTypeEnum type,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,

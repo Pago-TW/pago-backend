@@ -3,6 +3,7 @@ package tw.pago.pagobackend.service.impl;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,20 +23,14 @@ import tw.pago.pagobackend.util.UuidGenerator;
 
 
 @Component
+@AllArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
   private static final String OBJECT_TYPE = "review";
 
-  @Autowired
-  private ReviewDao reviewDao;
-  @Autowired
-  private UuidGenerator uuidGenerator;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private ReviewAssembler reviewAssembler;
-  @Autowired
-  private FileService fileService;
+  private final ReviewDao reviewDao;
+  private final UuidGenerator uuidGenerator;
+  private final FileService fileService;
 
   @Override
   public Review createReview(List<MultipartFile> files, CreateReviewRequestDto createReviewRequestDto) {

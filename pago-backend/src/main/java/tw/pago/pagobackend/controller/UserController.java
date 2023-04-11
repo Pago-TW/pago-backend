@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
+import tw.pago.pagobackend.dto.UserResponseDto;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.security.CurrentUser;
 import tw.pago.pagobackend.security.model.UserPrincipal;
@@ -44,10 +45,11 @@ public class UserController {
   }
 
   @GetMapping("/users/{userId}")
-  public ResponseEntity<User> getUserById(@PathVariable String userId) {
+  public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId) {
     User user = userService.getUserById(userId);
+    UserResponseDto userResponseDto = userService.getUserResponseDtoByUser(user);
 
-    return ResponseEntity.status(HttpStatus.OK).body(user);
+    return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
   }
 
   @GetMapping("/user/me")
