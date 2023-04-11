@@ -2,6 +2,7 @@ package tw.pago.pagobackend.service.impl;
 
 import java.net.URL;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,6 +67,7 @@ public class ReviewServiceImpl implements ReviewService {
   public Review getReviewById(String reviewId) {
     Review review = reviewDao.getReviewById(reviewId);
 
+
     //get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(reviewId, OBJECT_TYPE);
     review.setFileUrls(fileUrls);
@@ -79,6 +81,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     List<Review> reviewList = reviewDao.getReviewList(listQueryParametersDto);
 
+    reviewList.forEach(review -> {
+      List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(review.getReviewId(), OBJECT_TYPE);
+      review.setFileUrls(fileUrls);
+    });
 
 
     return reviewList;
