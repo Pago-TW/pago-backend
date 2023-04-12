@@ -230,18 +230,20 @@ public class OrderServiceImpl implements OrderService {
     OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
 
     OrderItem oldOrderItem = oldOrder.getOrderItem();
-    UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
-    if (updateOrderItemDto == null) {
-      updateOrderItemDto = new UpdateOrderItemDto();
-    }
 
     String[] presentPropertyNamesForOrderDto = EntityPropertyUtil
         .getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
     BeanUtils.copyProperties(oldOrder, updateOrderAndOrderItemRequestDto, presentPropertyNamesForOrderDto);
 
+    UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
+    if (updateOrderItemDto == null) {
+      updateOrderItemDto = new UpdateOrderItemDto();
+      BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto);
+    } else {
     String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil
         .getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
     BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto, presentPropertyNamesForOrdetItemDto);
+    }
 
     updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
 
