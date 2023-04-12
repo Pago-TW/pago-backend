@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
@@ -35,6 +36,8 @@ public interface OrderService {
 
   void deleteOrderById(String orderId);
 
+  void createFavoriteOrder(CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto);
+  
   List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto);
 
   List<Order> getMatchingOrderListForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);

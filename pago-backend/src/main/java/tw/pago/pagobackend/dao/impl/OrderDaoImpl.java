@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
+import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
@@ -85,6 +86,21 @@ public class OrderDaoImpl implements OrderDao {
         createOrderRequestDto.getCreateOrderItemDto().getPurchaseRoad());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
+  }
+
+  @Override
+  public void createFavoriteOrder(CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto) {
+    String sql = "INSERT INTO user_favorite_order (user_favorite_order_id ,order_id, user_id) "
+        + "VALUES (:userFavoriteOrderId ,:orderId, :userId) ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userFavoriteOrderId", createFavoriteOrderRequestDto.getUserFavoriteOrderId());
+    map.put("orderId", createFavoriteOrderRequestDto.getOrderId());
+    map.put("userId", createFavoriteOrderRequestDto.getUserId());
+
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
+
+
   }
 
 

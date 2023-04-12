@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
@@ -229,5 +230,16 @@ public class OrderController {
 
     return ResponseEntity.status(HttpStatus.OK).body(matchingShoppers);
 
+  }
+
+  @PostMapping("/favorites")
+  public ResponseEntity<?> createFavoriteOrder(@RequestBody CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto) {
+
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    createFavoriteOrderRequestDto.setUserId(currentLoginUserId);
+
+    orderService.createFavoriteOrder(createFavoriteOrderRequestDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body("Add Success");
   }
 }

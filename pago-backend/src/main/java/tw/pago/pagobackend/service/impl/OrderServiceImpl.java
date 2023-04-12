@@ -25,6 +25,7 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
@@ -377,6 +378,14 @@ public class OrderServiceImpl implements OrderService {
     // delete file
     String objectType = "order";
     fileService.deleteFilesByObjectIdnType(orderId, objectType);
+  }
+
+  @Override
+  public void createFavoriteOrder(CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto) {
+    String userFavoriteOrderUuid = uuidGenerator.getUuid();
+    createFavoriteOrderRequestDto.setUserFavoriteOrderId(userFavoriteOrderUuid);
+
+    orderDao.createFavoriteOrder(createFavoriteOrderRequestDto);
   }
 
   @Override

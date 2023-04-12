@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.dao;
 
 import java.util.List;
+import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
@@ -13,6 +14,8 @@ public interface OrderDao {
   void createOrder(String userId, CreateOrderRequestDto createOrderRequestDto);
 
   void createOrderItem(CreateOrderRequestDto createOrderRequestDto);
+
+  void createFavoriteOrder(CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto);
 
   Order getOrderById (String orderId);
 
