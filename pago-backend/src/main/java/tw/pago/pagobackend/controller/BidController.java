@@ -142,7 +142,6 @@ public class BidController {
   @GetMapping("/orders/{orderId}/bids")
   public ResponseEntity<ListResponseDto<BidResponseDto>> getBidList(
       @PathVariable String orderId,
-      @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
@@ -151,7 +150,6 @@ public class BidController {
     // Set query parameters
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .orderId(orderId)
-        .search(search)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)
