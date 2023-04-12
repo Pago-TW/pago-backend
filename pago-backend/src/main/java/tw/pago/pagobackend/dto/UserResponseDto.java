@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.pago.pagobackend.constant.CompletionRatingEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 
@@ -31,12 +32,12 @@ public class UserResponseDto {
 
   // For programing use;
   private String fullName;
+  private CompletionRatingEnum completionRating;
 
 
 
   // For Spring Security use
   private UserAuthProviderEnum provider; // GOOGLE, LOCAL
-  private String role;
   private boolean enabled;
 
   public String getFullName() {

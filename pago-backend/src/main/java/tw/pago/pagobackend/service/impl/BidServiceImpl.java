@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,26 +36,18 @@ import tw.pago.pagobackend.util.UuidGenerator;
 
 
 @Component
+@AllArgsConstructor
 public class BidServiceImpl implements BidService {
 
-  @Autowired
-  private BidDao bidDao;
-  @Autowired
-  private UuidGenerator uuidGenerator;
-  @Autowired
-  private OrderService orderService;
-  @Autowired
-  private TripService tripService;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private ReviewService reviewService;
-  @Autowired
-  private BidAssembler bidAssembler;
-  @Autowired
-  private SesEmailService sesEmailService;
-  @Autowired
-  private CurrentUserInfoProvider currentUserInfoProvider;
+  private final BidDao bidDao;
+  private final UuidGenerator uuidGenerator;
+  private final OrderService orderService;
+  private final TripService tripService;
+  private final UserService userService;
+  private final ReviewService reviewService;
+  private final BidAssembler bidAssembler;
+  private final SesEmailService sesEmailService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
 
   @Override
   public Bid createBid(CreateBidRequestDto createBidRequestDto) {

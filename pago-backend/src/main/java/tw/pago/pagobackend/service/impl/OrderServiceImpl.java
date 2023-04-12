@@ -251,14 +251,16 @@ public class OrderServiceImpl implements OrderService {
     boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
 
     // If the order status has been changed, send the email notification
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    User currentLoginUser = userDao.getUserById(currentLoginUserId);
     if (orderStatusChanged) {
       System.out.println("status updated");
       // Get the current login user's email
-      String currentLoginUserEmail = currentUserInfoProvider.getCurrentLoginUser().getEmail();
+      String currentLoginUserEmail = currentLoginUser.getEmail();
       // Get the order item name
       String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
       // Get the user name
-      String username = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
+      String username = currentLoginUser.getFirstName();
       // Get current date
       Date now = new Date();
       String date = new SimpleDateFormat("yyyy-MM-dd").format(now);

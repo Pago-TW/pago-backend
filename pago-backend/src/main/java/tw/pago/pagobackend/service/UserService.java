@@ -18,4 +18,6 @@ public interface UserService {
   void updateUser(UpdateUserRequestDto updateUserRequestDto);
 
   void processOAuth2PostLogin(String userEmail);
+
+
 }

@@ -1,31 +1,42 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.server.ResponseStatusException;
+import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.CompletionRatingEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
+import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.dto.UserResponseDto;
 import tw.pago.pagobackend.dto.UserReviewDto;
+import tw.pago.pagobackend.model.Bid;
+import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
+import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.ReviewService;
+import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Service
-@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
   private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -34,6 +45,34 @@ public class UserServiceImpl implements UserService {
   private final UserDao userDao;
   private final ModelMapper modelMapper;
   private final ReviewService reviewService;
+  private OrderService orderService;
+  private final TripService tripService;
+  private BidService bidService;
+  private final CancellationRecordDao cancellationRecordDao;
+
+  public UserServiceImpl(UuidGenerator uuidGenerator,
+      UserDao userDao,
+      ModelMapper modelMapper,
+      ReviewService reviewService,
+      TripService tripService,
+      CancellationRecordDao cancellationRecordDao) {
+    this.uuidGenerator = uuidGenerator;
+    this.userDao = userDao;
+    this.modelMapper = modelMapper;
+    this.reviewService = reviewService;
+    this.tripService = tripService;
+    this.cancellationRecordDao = cancellationRecordDao;
+  }
+
+  @Autowired
+  public void setOrderService(@Lazy OrderService orderService) {
+    this.orderService = orderService;
+  }
+
+  @Autowired
+  public void setBidService(@Lazy BidService bidService) {
+    this.bidService = bidService;
+  }
 
   @Override
   @Deprecated
@@ -96,6 +135,11 @@ public class UserServiceImpl implements UserService {
     userResponseDto.setConsumerReview(consumerUserReviewDto);
 
 
+    // Get user completionRating
+    CompletionRatingEnum completionRating = getUserCompletionRating(user);
+    userResponseDto.setCompletionRating(completionRating);
+
+
     return userResponseDto;
   }
 
@@ -155,6 +199,75 @@ public class UserServiceImpl implements UserService {
           .build();
 
       userDao.createUser(newUser);
+    }
+  }
+
+
+  public int getUserTotalOrdersInProcurementProcess(String userId) {
+    final int startIndex = 0;
+    final int size = 999;
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .userId(userId)
+        .bidStatus(BidStatusEnum.IS_CHOSEN)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy("create_date")
+        .sort("DESC")
+        .build();
+
+
+    // Count orders where the user is the consumer
+    List<Order> orderList = orderService.getOrderList(listQueryParametersDto);
+    long consumerOrderCount = orderList.stream()
+        .filter(order -> {
+          listQueryParametersDto.setOrderId(order.getOrderId());
+          List<Bid> bidList = bidService.getBidList(listQueryParametersDto);
+          return !bidList.isEmpty();
+        })
+        .count();
+
+    listQueryParametersDto.setOrderId(null);
+
+    // Count orders where the user is the shopper
+    List<Trip> tripList = tripService.getTripList(listQueryParametersDto);
+    long shopperOrderCount = tripList.stream()
+        .filter(trip -> {
+          listQueryParametersDto.setTripId(trip.getTripId());
+          List<Bid> bidList = bidService.getBidList(listQueryParametersDto);
+          return !bidList.isEmpty();
+        })
+        .count();
+
+    return (int) (consumerOrderCount + shopperOrderCount);
+  }
+
+
+  public double calculateUserCancellationRating(int totalCancellations, int totalOrdersInProcurementProcess) {
+    if (totalOrdersInProcurementProcess == 0) {
+      return 0.0;
+    }
+
+    double cancellationRating = (totalCancellations / (double) totalOrdersInProcurementProcess) * 100;
+
+    return cancellationRating;
+  }
+
+  public CompletionRatingEnum getUserCompletionRating(User user) {
+
+    int totalOrdersInProcurementProcess = getUserTotalOrdersInProcurementProcess(user.getUserId());
+    int totalCancellationRecords = cancellationRecordDao.countCancellationRecord(user.getUserId());
+    double cancellationRating = calculateUserCancellationRating(totalCancellationRecords, totalOrdersInProcurementProcess);
+    System.out.println("Cancellation: " + cancellationRating);
+
+    if (cancellationRating >= 90) {
+      return CompletionRatingEnum.EXCELLENT;
+    } else if (cancellationRating >= 80) {
+      return CompletionRatingEnum.VERY_GOOD;
+    } else if (cancellationRating >= 60) {
+      return CompletionRatingEnum.GOOD;
+    } else {
+      return CompletionRatingEnum.POOR;
     }
   }
 }

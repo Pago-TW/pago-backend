@@ -219,6 +219,11 @@ public class BidDaoImpl implements BidDao {
       map.put("tripId", listQueryParametersDto.getTripId());
     }
 
+    if (listQueryParametersDto.getBidStatus() != null) {
+      sql = sql + " AND bid_status = :bidStatus ";
+      map.put("bidStatus", listQueryParametersDto.getBidStatus().name());
+    }
+
     return sql;
   }
 }

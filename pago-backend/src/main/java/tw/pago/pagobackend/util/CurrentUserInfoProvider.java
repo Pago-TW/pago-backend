@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.util;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.security.AuthenticationFacade;
@@ -12,7 +13,7 @@ public class CurrentUserInfoProvider {
   private final UserService userService;
   private final AuthenticationFacade authenticationFacade;
 
-  public CurrentUserInfoProvider(UserService userService, AuthenticationFacade authenticationFacade) {
+  public CurrentUserInfoProvider(@Lazy UserService userService, AuthenticationFacade authenticationFacade) {
     this.userService = userService;
     this.authenticationFacade = authenticationFacade;
   }

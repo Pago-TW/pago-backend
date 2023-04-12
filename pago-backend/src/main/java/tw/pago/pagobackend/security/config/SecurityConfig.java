@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.security.config;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,22 +30,14 @@ import tw.pago.pagobackend.service.impl.CustomOAuth2UserServiceImpl;
     jsr250Enabled = true,
     prePostEnabled = true
 )
+@AllArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-  @Autowired
-  private CustomUserDetailsServiceImpl customUserDetailsService;
-
-  @Autowired
-  private CustomOAuth2UserServiceImpl customOAuth2UserService;
-
-  @Autowired
-  private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-
-  @Autowired
-  private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
-
-  @Autowired
-  private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+  private final CustomUserDetailsServiceImpl customUserDetailsService;
+  private final CustomOAuth2UserServiceImpl customOAuth2UserService;
+  private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+  private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+  private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
   @Bean
   public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
