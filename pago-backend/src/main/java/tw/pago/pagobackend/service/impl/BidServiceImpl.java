@@ -8,8 +8,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.BidAssembler;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dto.BidCreatorReviewDto;
@@ -19,6 +21,8 @@ import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
+import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
+import tw.pago.pagobackend.dto.UpdateOrderItemDto;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
@@ -141,6 +145,7 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
+  @Transactional
   public void chooseBid(String orderId, String bidId) {
     Bid bid = getBidById(bidId);
 
@@ -188,11 +193,19 @@ public class BidServiceImpl implements BidService {
     emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
     emailRequest.setBody(emailBody);
 
+
+    // Choose bid will update the bidStatus & orderStatus
+    bidDao.chooseBid(bid);
+    UpdateOrderItemDto updateOrderItemDto = new UpdateOrderItemDto();
+    BeanUtils.copyProperties(order.getOrderItem(), updateOrderItemDto);
+    UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+        .orderStatus(OrderStatusEnum.TO_BE_PURCHASED)
+        .build();
+    orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+
     // Send the email notification
     sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent!");
-
-    bidDao.chooseBid(bid);
   }
 
   @Override

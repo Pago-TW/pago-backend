@@ -21,6 +21,7 @@ public class CreateBidRequestDto {
 
   private String orderId;
 
+  @NotNull
   private String tripId;
 
   @NotNull

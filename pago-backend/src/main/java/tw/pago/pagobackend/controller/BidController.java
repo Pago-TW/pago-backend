@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,17 +26,21 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.model.Bid;
+import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.JwtTokenProvider;
 
 @RestController
 @Validated
+@AllArgsConstructor
 public class BidController {
 
-  @Autowired
-  private BidService bidService;
+  private final BidService bidService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
+  private final OrderService orderService;
 
   @PostMapping("/orders/{orderId}/bids")
   public ResponseEntity<Bid> createBid(@PathVariable String orderId,
@@ -71,8 +76,18 @@ public class BidController {
   }
 
 
-  @DeleteMapping("/orders/{orderId}/bids/{bidId}")
-  public ResponseEntity<?> deleteBidById(@PathVariable String orderId, @PathVariable String bidId) {
+  @DeleteMapping("/bids/{bidId}")
+  public ResponseEntity<?> deleteBidById(@PathVariable String bidId) {
+
+    BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
+    String bidCreatorId = bidResponseDto.getCreator().getUserId();
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    if (!bidCreatorId.equals(currentLoginUserId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+
     bidService.deleteBidById(bidId);
     String s = UUID.randomUUID().toString().replaceAll("-", "");
     System.out.println("UUID: " + s);
@@ -80,11 +95,19 @@ public class BidController {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @PatchMapping("/orders/{orderId}/bids/{bidId}")
-  public ResponseEntity<Bid> updateBid(@PathVariable String orderId, @PathVariable String bidId, 
+  @PatchMapping("/bids/{bidId}")
+  public ResponseEntity<?> updateBid(@PathVariable String bidId,
   @RequestBody @Valid UpdateBidRequestDto updateBidRequestDto) {
 
-    updateBidRequestDto.setOrderId(orderId);
+    BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
+    String bidCreatorId = bidResponseDto.getCreator().getUserId();
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    if (!bidCreatorId.equals(currentLoginUserId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+
     updateBidRequestDto.setBidId(bidId);
     bidService.updateBid(updateBidRequestDto);
 
@@ -93,8 +116,23 @@ public class BidController {
   }
 
   // Consumer chooses a bid
-  @PatchMapping("/orders/{orderId}/bids/{bidId}/choose")
-  public ResponseEntity<Bid> chooseBid(@PathVariable String orderId, @PathVariable String bidId) {
+  @PatchMapping("/bids/{bidId}/choose")
+  public ResponseEntity<?> chooseBid(@PathVariable String bidId) {
+    BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    Order order = orderService.getOrderById(bidResponseDto.getOrderId());
+    String orderCreatorId = order.getConsumerId();
+    String orderId = bidResponseDto.getOrderId();
+
+    if (!orderCreatorId.equals(currentLoginUserId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+    if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Order Status is not REQUESTED");
+    }
+
+
       bidService.chooseBid(orderId, bidId);
       Bid updatedBid = bidService.getBidById(bidId);
       return ResponseEntity.status(HttpStatus.OK).body(updatedBid);
