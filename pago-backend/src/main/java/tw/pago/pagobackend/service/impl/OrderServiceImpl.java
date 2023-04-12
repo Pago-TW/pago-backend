@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,9 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.BidCreatorDto;
+import tw.pago.pagobackend.dto.BidCreatorReviewDto;
+import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -34,12 +39,15 @@ import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.OrderShopperDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
+import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
+import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
@@ -55,14 +63,39 @@ public class OrderServiceImpl implements OrderService {
 
   private static final String OBJECT_TYPE = "order";
 
-  private final OrderDao orderDao;
-  private final UuidGenerator uuidGenerator;
-  private final FileService fileService;
-  private final SesEmailService sesEmailService;
-  private final CurrentUserInfoProvider currentUserInfoProvider;
-  private final TripDao tripDao;
-  private final UserDao userDao;
-  private final ModelMapper modelMapper;
+  private OrderDao orderDao;
+  private UuidGenerator uuidGenerator;
+  private FileService fileService;
+  private SesEmailService sesEmailService;
+  private CurrentUserInfoProvider currentUserInfoProvider;
+  private TripDao tripDao;
+  private UserDao userDao;
+  private ModelMapper modelMapper;
+  private BidService bidService;
+
+  @Autowired
+  public OrderServiceImpl(OrderDao orderDao,
+      UuidGenerator uuidGenerator,
+      FileService fileService,
+      SesEmailService sesEmailService,
+      CurrentUserInfoProvider currentUserInfoProvider,
+      TripDao tripDao,
+      UserDao userDao,
+      ModelMapper modelMapper) {
+    this.orderDao = orderDao;
+    this.uuidGenerator = uuidGenerator;
+    this.fileService = fileService;
+    this.sesEmailService = sesEmailService;
+    this.currentUserInfoProvider = currentUserInfoProvider;
+    this.tripDao = tripDao;
+    this.userDao = userDao;
+    this.modelMapper = modelMapper;
+  }
+
+  @Autowired
+  public void setBidService(@Lazy BidService bidService) {
+    this.bidService = bidService;
+  }
 
   @Transactional
   @Override
@@ -117,6 +150,16 @@ public class OrderServiceImpl implements OrderService {
     // get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
+
+
+    // If the orderStatus is not REQUESTED, it means the order creator has already chosen a shopper(bid)
+    if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+      // Get the shopper for the order
+      OrderShopperDto orderShopperDto = getOrderShopperDetails(order);
+
+      // Set shopper to order
+      order.setShopper(orderShopperDto);
+    }
 
     return order;
   }
@@ -464,6 +507,25 @@ public class OrderServiceImpl implements OrderService {
       }
     }
     return randomPart.toString();
+  }
+
+  private OrderShopperDto getOrderShopperDetails(Order order) {
+    Bid chosenBid = bidService.getChosenBidByOrderId(order.getOrderId());
+    BidResponseDto chosenBidResponseDto = bidService.getBidResponseById(chosenBid.getBidId());
+    BidCreatorDto shopper = chosenBidResponseDto.getCreator();
+
+    OrderShopperDto orderShopperDto = modelMapper.map(shopper, OrderShopperDto.class);
+
+    // Convert Date to LocalDate
+    Date latestDeliveryDate = chosenBid.getLatestDeliveryDate();
+    LocalDate latestDeliveryLocalDate = latestDeliveryDate.toInstant()
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate();
+
+    orderShopperDto.setLatestDeliveryDate(latestDeliveryLocalDate);
+
+    return orderShopperDto;
+
   }
 
   // @Override

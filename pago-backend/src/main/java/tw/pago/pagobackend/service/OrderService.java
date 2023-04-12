@@ -37,7 +37,7 @@ public interface OrderService {
   void deleteOrderById(String orderId);
 
   void createFavoriteOrder(CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto);
-  
+
   List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto);
 
   List<Order> getMatchingOrderListForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);

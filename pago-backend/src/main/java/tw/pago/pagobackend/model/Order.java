@@ -12,6 +12,8 @@ import lombok.Setter;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.dto.BidCreatorDto;
+import tw.pago.pagobackend.dto.OrderShopperDto;
 
 @Getter
 @Setter
@@ -52,6 +54,7 @@ public class Order {
   private BigDecimal tariffFee;
   private BigDecimal platformFee;
   private BigDecimal totalAmount;
+  private OrderShopperDto shopper;
   private boolean hasNewActivity;
 
 }
