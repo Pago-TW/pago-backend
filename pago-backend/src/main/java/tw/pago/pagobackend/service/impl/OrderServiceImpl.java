@@ -19,7 +19,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +27,6 @@ import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.BidCreatorDto;
-import tw.pago.pagobackend.dto.BidCreatorReviewDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
@@ -39,7 +37,7 @@ import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
-import tw.pago.pagobackend.dto.OrderShopperDto;
+import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
 import tw.pago.pagobackend.model.Bid;
@@ -51,8 +49,6 @@ import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
-import tw.pago.pagobackend.service.TripService;
-import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -155,10 +151,10 @@ public class OrderServiceImpl implements OrderService {
     // If the orderStatus is not REQUESTED, it means the order creator has already chosen a shopper(bid)
     if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
       // Get the shopper for the order
-      OrderShopperDto orderShopperDto = getOrderShopperDetails(order);
+      OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
 
       // Set shopper to order
-      order.setShopper(orderShopperDto);
+      order.setShopper(orderChosenShopperDto);
     }
 
     return order;
@@ -213,6 +209,14 @@ public class OrderServiceImpl implements OrderService {
     // get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
+
+    if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+      // Get the shopper for the order
+      OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
+
+      // Set shopper to order
+      order.setShopper(orderChosenShopperDto);
+    }
 
     return order;
   }
@@ -341,7 +345,17 @@ public class OrderServiceImpl implements OrderService {
       // get file url
       List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
       order.getOrderItem().setFileUrls(fileUrls);
+
+      if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+        // Get the shopper for the order
+        OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
+
+        // Set shopper to order
+        order.setShopper(orderChosenShopperDto);
+      }
     }
+
+
     return orderList;
   }
 
@@ -509,12 +523,15 @@ public class OrderServiceImpl implements OrderService {
     return randomPart.toString();
   }
 
-  private OrderShopperDto getOrderShopperDetails(Order order) {
+  private OrderChosenShopperDto getOrderChosenShopper(Order order) {
     Bid chosenBid = bidService.getChosenBidByOrderId(order.getOrderId());
+    if (chosenBid == null) {
+      return null; // TODO 需要防呆，避免非REQUESTED order找不到對應的chosenBid;
+    }
     BidResponseDto chosenBidResponseDto = bidService.getBidResponseById(chosenBid.getBidId());
     BidCreatorDto shopper = chosenBidResponseDto.getCreator();
 
-    OrderShopperDto orderShopperDto = modelMapper.map(shopper, OrderShopperDto.class);
+    OrderChosenShopperDto orderChosenShopperDto = modelMapper.map(shopper, OrderChosenShopperDto.class);
 
     // Convert Date to LocalDate
     Date latestDeliveryDate = chosenBid.getLatestDeliveryDate();
@@ -522,9 +539,9 @@ public class OrderServiceImpl implements OrderService {
         .atZone(ZoneId.systemDefault())
         .toLocalDate();
 
-    orderShopperDto.setLatestDeliveryDate(latestDeliveryLocalDate);
+    orderChosenShopperDto.setLatestDeliveryDate(latestDeliveryLocalDate);
 
-    return orderShopperDto;
+    return orderChosenShopperDto;
 
   }
 

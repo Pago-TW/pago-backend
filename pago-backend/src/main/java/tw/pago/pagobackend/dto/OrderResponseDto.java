@@ -75,6 +75,6 @@ public class OrderResponseDto {
   private BigDecimal tariffFee;
   private BigDecimal platformFee;
   private BigDecimal totalAmount;
-  private OrderShopperDto shopper;
+  private OrderChosenShopperDto shopper;
   private boolean hasNewActivity;
 }

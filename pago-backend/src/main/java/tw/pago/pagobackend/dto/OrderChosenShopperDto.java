@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class OrderShopperDto {
+public class OrderChosenShopperDto {
   private String userId;
   private String fullName;
   private String avatarUrl;
