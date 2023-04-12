@@ -15,6 +15,8 @@ public interface BidService {
 
   Bid getBidByOrderIdAndBidId(String orderId, String bidId);
 
+  Bid getChosenBidByOrderId(String orderId);
+
   void deleteBidById(String bidId);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);

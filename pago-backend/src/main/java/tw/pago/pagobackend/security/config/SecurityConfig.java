@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
@@ -114,7 +115,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/cities/**"
            )
           .permitAll()
-        .antMatchers(HttpMethod.GET,  "/orders/**/bids")
+        .antMatchers(HttpMethod.GET,  "/orders/**/bids", "/reviews/**")
           .permitAll()
         .anyRequest()
         .authenticated()

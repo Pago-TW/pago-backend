@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -76,6 +77,28 @@ public class BidDaoImpl implements BidDao {
     Map<String, Object> map = new HashMap<>();
     map.put("orderId", orderId);
     map.put("bidId", bidId);
+
+
+    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidRowMapper());
+
+    if (bidList.size() > 0) {
+      return bidList.get(0);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public Bid getChosenBidByOrderId(String orderId) {
+    String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
+        + "update_date,latest_delivery_date, bid_status "
+        + "FROM bid "
+        + "WHERE order_id = :orderId "
+        + "AND bid_status = :bidStatus";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderId", orderId);
+    map.put("bidStatus", BidStatusEnum.IS_CHOSEN.name());
 
 
     List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidRowMapper());

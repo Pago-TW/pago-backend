@@ -3,9 +3,11 @@ package tw.pago.pagobackend.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,37 +26,58 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tw.pago.pagobackend.assembler.ReviewAssembler;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
+import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
 // import tw.pago.pagobackend.dto.UpdateReviewRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.ReviewResponseDto;
+import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Review;
+import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @RestController
 @Validated
+@AllArgsConstructor
 public class ReviewController {
 
-  @Autowired
-  private ReviewService reviewService;
-  @Autowired
-  private CurrentUserInfoProvider currentUserInfoProvider;
-  @Autowired
-  private ReviewAssembler reviewAssembler;
+  private final ReviewService reviewService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
+  private final ReviewAssembler reviewAssembler;
+  private final OrderService orderService;
 
   @PostMapping("/orders/{orderId}/reviews")
-  public ResponseEntity<ReviewResponseDto> createReview(
+  public ResponseEntity<?> createReview(
       @PathVariable String orderId, @RequestParam("file") List<MultipartFile> files, 
       @Valid @RequestParam("data") String createReviewRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
+    Order order = orderService.getOrderById(orderId);
+    String consumerId = order.getConsumerId();
+    String shopperId = Optional.ofNullable(order.getShopper())
+        .map(shopper -> shopper.getUserId())
+        .orElse(null);
+
+
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    if (!(currentLoginUserId.equals(consumerId) || currentLoginUserId.equals(shopperId))) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+    if (shopperId == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("This order have no chosenShopper");
+    }
+
+
 
     ObjectMapper objectMapper = new ObjectMapper();
     CreateReviewRequestDto createReviewRequestDto = objectMapper.readValue(createReviewRequestDtoString, CreateReviewRequestDto.class);
 
     // Set Parameter to DTO
+    createReviewRequestDto.setOrder(order);
     createReviewRequestDto.setOrderId(orderId);
     createReviewRequestDto.setCreatorId(currentLoginUserId);
 
@@ -67,7 +90,7 @@ public class ReviewController {
     return ResponseEntity.status(HttpStatus.CREATED).body(reviewResponseDto);
   }
 
-  @GetMapping("/users/{userId}/reviews/{reviewId}")
+  @GetMapping("/reviews/{reviewId}")
   public ResponseEntity<ReviewResponseDto> getReviewById(@PathVariable String reviewId) {
 
     Review review = reviewService.getReviewById(reviewId);
@@ -76,10 +99,10 @@ public class ReviewController {
   }
 
 
-  @GetMapping("/users/{userId}/reviews")
-  public ResponseEntity<ListResponseDto<ReviewResponseDto>> getReviewList(@PathVariable String userId,
+  @GetMapping("/reviews")
+  public ResponseEntity<ListResponseDto<ReviewResponseDto>> getReviewList(
+      @RequestParam(required = true) String userId,
       @RequestParam(required = false) ReviewTypeEnum type,
-      @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
@@ -88,7 +111,6 @@ public class ReviewController {
 
     // Set Query Parameters
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
-        .search(search)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)

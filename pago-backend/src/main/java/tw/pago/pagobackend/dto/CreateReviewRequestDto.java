@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
+import tw.pago.pagobackend.model.Order;
 
 
 @Getter
@@ -16,6 +17,7 @@ import tw.pago.pagobackend.constant.ReviewTypeEnum;
 public class CreateReviewRequestDto {
   private String reviewId;
   private String orderId;
+  private Order order;
   private String creatorId;
   private String targetId;
   private String content;

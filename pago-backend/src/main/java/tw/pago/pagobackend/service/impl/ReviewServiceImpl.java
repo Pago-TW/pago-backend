@@ -15,10 +15,13 @@ import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateReviewRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
+import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Review;
 import tw.pago.pagobackend.service.FileService;
+import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.UserService;
+import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 
@@ -31,10 +34,26 @@ public class ReviewServiceImpl implements ReviewService {
   private final ReviewDao reviewDao;
   private final UuidGenerator uuidGenerator;
   private final FileService fileService;
+  private final OrderService orderService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
 
   @Override
   public Review createReview(List<MultipartFile> files, CreateReviewRequestDto createReviewRequestDto) {
     String reviewId = uuidGenerator.getUuid();
+    Order order = createReviewRequestDto.getOrder();
+    String consumerId = order.getConsumerId();
+    String shopperId = order.getShopper().getUserId();
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+
+    // Determine the role of the currentLoginUser in the order and set the targetId and reviewType accordingly
+    if (currentLoginUserId.equals(consumerId)) {
+      createReviewRequestDto.setTargetId(shopperId);
+      createReviewRequestDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+    } else {
+      createReviewRequestDto.setTargetId(consumerId);
+      createReviewRequestDto.setReviewType(ReviewTypeEnum.FOR_CONSUMER);
+    }
 
     // Create Review
     createReviewRequestDto.setReviewId(reviewId);

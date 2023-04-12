@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -33,7 +34,7 @@ public class CustomOAuth2UserServiceImpl extends DefaultOAuth2UserService {
   @Autowired
   private UserDao userDao;
   @Autowired
-  private UserService userService;
+  private @Lazy UserService userService;
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {

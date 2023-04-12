@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.BidAssembler;
@@ -45,7 +46,7 @@ public class BidServiceImpl implements BidService {
 
   private final BidDao bidDao;
   private final UuidGenerator uuidGenerator;
-  private final OrderService orderService;
+  private final @Lazy OrderService orderService;
   private final TripService tripService;
   private final UserService userService;
   private final ReviewService reviewService;
@@ -117,6 +118,14 @@ public class BidServiceImpl implements BidService {
   public Bid getBidByOrderIdAndBidId(String orderId, String bidId) {
 
     Bid bid = bidDao.getBidByOrderIdAndBidId(orderId, bidId);
+
+    return bid;
+  }
+
+  @Override
+  public Bid getChosenBidByOrderId(String orderId) {
+
+    Bid bid = bidDao.getChosenBidByOrderId(orderId);
 
     return bid;
   }
