@@ -10,8 +10,8 @@ public enum CityCode {
   // TW
   TPE("台北市", "Taipei", TW),
   TPH("新北市", "New Taipei", TW),
-  TYC("桃園市", "Taoyuan ", TW),
-  TXG("台中市", "Taichung ", TW),
+  TYC("桃園市", "Taoyuan", TW),
+  TXG("台中市", "Taichung", TW),
   TNN("台南市", "Tainan", TW),
 
   // JP

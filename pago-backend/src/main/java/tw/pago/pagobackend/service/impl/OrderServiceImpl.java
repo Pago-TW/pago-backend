@@ -147,6 +147,10 @@ public class OrderServiceImpl implements OrderService {
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
 
+    // Check if the current logged-in user has placed a bid for the order
+    boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(orderId);
+    order.setBidder(isCurrentLoginUserPlaceBid);
+
 
     // If the orderStatus is not REQUESTED, it means the order creator has already chosen a shopper(bid)
     if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
@@ -209,6 +213,10 @@ public class OrderServiceImpl implements OrderService {
     // get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
+
+    // Check if the current logged-in user has placed a bid for the order
+    boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(orderId);
+    order.setBidder(isCurrentLoginUserPlaceBid);
 
     if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
       // Get the shopper for the order
@@ -346,6 +354,10 @@ public class OrderServiceImpl implements OrderService {
       List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
       order.getOrderItem().setFileUrls(fileUrls);
 
+      // Check if the current logged-in user has placed a bid for the order
+      boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(order.getOrderId());
+      order.setBidder(isCurrentLoginUserPlaceBid);
+
       if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
         // Get the shopper for the order
         OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
@@ -373,6 +385,18 @@ public class OrderServiceImpl implements OrderService {
       // get file url
       List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
       order.getOrderItem().setFileUrls(fileUrls);
+
+      // Check if the current logged-in user has placed a bid for the order
+      boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(order.getOrderId());
+      order.setBidder(isCurrentLoginUserPlaceBid);
+
+      if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+        // Get the shopper for the order
+        OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
+
+        // Set shopper to order
+        order.setShopper(orderChosenShopperDto);
+      }
     }
 
     return matchingOrderListForTrip;
@@ -549,4 +573,23 @@ public class OrderServiceImpl implements OrderService {
   // public void updateOrder(UpdateOrderRequestDto updateOrderRequestDto) {
   // orderDao.updateOrder(updateOrderRequestDto);
   // }
+
+
+  private boolean isCurrentLoginUserPlaceBid(String orderId) {
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .orderId(orderId)
+        .startIndex(0)
+        .size(999)
+        .orderBy("create_date")
+        .sort("DESC")
+        .build();
+
+    List<BidResponseDto> bidResponseDtoList = bidService.getBidResponseDtoList(listQueryParametersDto);
+    boolean isCurrentLoginUserPlaceBid = bidResponseDtoList.stream()
+        .anyMatch(bidResponseDto -> bidResponseDto.getCreator().getUserId().equals(currentLoginUserId));
+
+    return isCurrentLoginUserPlaceBid;
+  }
 }
