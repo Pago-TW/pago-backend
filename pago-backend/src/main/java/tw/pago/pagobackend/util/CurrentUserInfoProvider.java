@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.util;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.security.AuthenticationFacade;
@@ -19,12 +20,19 @@ public class CurrentUserInfoProvider {
   }
 
   public String getCurrentLoginUserId() {
-    UserPrincipal userPrincipal = (UserPrincipal) authenticationFacade.getAuthentication().getPrincipal();
-    return userPrincipal.getId();
+    Authentication authentication = authenticationFacade.getAuthentication();
+    if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {
+      UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+      return userPrincipal.getId();
+    }
+    return null;
   }
 
   public User getCurrentLoginUser() {
     String userId = getCurrentLoginUserId();
-    return userService.getUserById(userId);
+    if (userId != null) {
+      return userService.getUserById(userId);
+    }
+    return null;
   }
 }

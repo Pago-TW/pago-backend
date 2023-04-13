@@ -577,6 +577,9 @@ public class OrderServiceImpl implements OrderService {
 
   private boolean isCurrentLoginUserPlaceBid(String orderId) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    if (currentLoginUserId == null) {
+      return false;
+    }
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .orderId(orderId)

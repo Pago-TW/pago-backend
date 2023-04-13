@@ -115,7 +115,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/cities/**"
            )
           .permitAll()
-        .antMatchers(HttpMethod.GET,  "/orders/**/bids", "/reviews/**")
+        .antMatchers(HttpMethod.GET,  "/orders/**/bids", "/reviews/**", "/orders")
           .permitAll()
         .anyRequest()
         .authenticated()
