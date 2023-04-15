@@ -25,19 +25,14 @@ public class CreateOrderRequestDto {
 
   @NotNull
   private boolean packaging;
-
   @NotNull
   private boolean verification;
-
   @NotNull
   private CountryCode destinationCountry;
-
   @NotNull
   private CityCode destinationCity;
-
   @NotNull
   private BigDecimal travelerFee;
-
   @NotNull
   private CurrencyEnum currency;
 
@@ -48,7 +43,7 @@ public class CreateOrderRequestDto {
   private Double tariffFeePercent;
 
   @NotNull
-  @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+  @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   private Date latestReceiveItemDate;
 
   private String note;
