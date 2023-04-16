@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.constant;
 
 public enum CurrencyEnum {
+  TWD, // 新台幣
   USD, // 美金
   EUR, // 歐元
   GBP, // 英鎊
