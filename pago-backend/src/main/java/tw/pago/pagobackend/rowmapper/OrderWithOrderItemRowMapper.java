@@ -22,7 +22,6 @@ public class OrderWithOrderItemRowMapper implements RowMapper<Order> {
         .unitPrice(resultSet.getBigDecimal("unit_price"))
         .purchaseCountry(CountryCode.valueOf(resultSet.getString("purchase_country")))
         .purchaseCity(CityCode.valueOf(resultSet.getString("purchase_city")))
-        .purchaseDistrict(resultSet.getString("purchase_district"))
         .purchaseRoad(resultSet.getString("purchase_road"))
         .build();
 

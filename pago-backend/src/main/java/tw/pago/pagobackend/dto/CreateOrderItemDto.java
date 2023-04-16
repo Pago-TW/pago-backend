@@ -27,8 +27,7 @@ public class CreateOrderItemDto {
   private CountryCode purchaseCountry;
   @NotNull
   private CityCode purchaseCity;
-  @NotNull
-  private String purchaseDistrict;
+
   @NotNull
   private String purchaseRoad;
 

@@ -28,7 +28,6 @@ public class UpdateOrderItemDto {
 
   private CityCode purchaseCity;
 
-  private String purchaseDistrict;
 
   private String purchaseRoad;
 }

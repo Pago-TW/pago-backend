@@ -66,9 +66,9 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public void createOrderItem(CreateOrderRequestDto createOrderRequestDto) {
     String sql = "INSERT INTO order_item (order_item_id ,`name`, description, quantity, unit_price, "
-        + "purchase_country, purchase_city, purchase_district, purchase_road) "
+        + "purchase_country, purchase_city, purchase_road) "
         + "VALUES (:orderItemId ,:name, :description, :quantity, :unitPrice, :purchaseCountry, :purchaseCity,"
-        + ":purchaseDistrict, :purchaseRoad)";
+        + " :purchaseRoad)";
 
     Map<String, Object> map = new HashMap<>();
     map.put("orderItemId", createOrderRequestDto.getCreateOrderItemDto().getOrderItemId());
@@ -80,8 +80,6 @@ public class OrderDaoImpl implements OrderDao {
         createOrderRequestDto.getCreateOrderItemDto().getPurchaseCountry().name());
     map.put("purchaseCity",
         createOrderRequestDto.getCreateOrderItemDto().getPurchaseCity().name());
-    map.put("purchaseDistrict",
-        createOrderRequestDto.getCreateOrderItemDto().getPurchaseDistrict());
     map.put("purchaseRoad",
         createOrderRequestDto.getCreateOrderItemDto().getPurchaseRoad());
 
@@ -111,8 +109,8 @@ public class OrderDaoImpl implements OrderDao {
             + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, "
             + "om.currency, om.platform_fee_percent, "
             + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
-            + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
-            + "oi.purchase_district, oi.purchase_road "
+            + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city, "
+            + "oi.purchase_road "
             + "FROM order_main as om "
             + "LEFT JOIN order_item as oi ON om.order_item_id = oi.order_item_id "
             + "WHERE om.order_id = :orderId";
@@ -137,8 +135,8 @@ public class OrderDaoImpl implements OrderDao {
             + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, "
             + "om.currency, om.platform_fee_percent, "
             + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
-            + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
-            + "oi.purchase_district, oi.purchase_road "
+            + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city, "
+            + "oi.purchase_road "
             + "FROM order_main AS om "
             + "LEFT JOIN order_item AS oi ON om.order_item_id = oi.order_item_id "
             + "WHERE om.consumer_id = :userId "
@@ -184,7 +182,7 @@ public class OrderDaoImpl implements OrderDao {
   @Override
   public OrderItem getOrderItemById(String orderItemId) {
     String sql = "SELECT order_item_id, `name`, description, "
-        + "quantity, unit_price, purchase_country, purchase_city, purchase_district, purchase_road "
+        + "quantity, unit_price, purchase_country, purchase_city, purchase_road "
         + "FROM order_item "
         + "WHERE order_item_id = :orderItemId";
 
@@ -210,7 +208,7 @@ public class OrderDaoImpl implements OrderDao {
         + "SET oi.name = :name, oi.description = :description, "
         + "oi.quantity = :quantity, oi.unit_price = :unitPrice, "
         + "oi.purchase_country = :purchaseCountry, oi.purchase_city = :purchaseCity, "
-        + "oi.purchase_district = :purchaseDistrict, oi.purchase_road = :purchaseRoad, "
+        + "oi.purchase_road = :purchaseRoad, "
         + "om.packaging = :packaging, om.verification = :verification, "
         + "om.destination_country = :destinationCountry, om.destination_city = :destinationCity, "
         + "om.traveler_fee = :travelerFee, om.currency = :currency, "
@@ -225,7 +223,6 @@ public class OrderDaoImpl implements OrderDao {
     map.put("unitPrice", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getUnitPrice());
     map.put("purchaseCountry", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseCountry().name());
     map.put("purchaseCity", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseCity().name());
-    map.put("purchaseDistrict", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseDistrict());
     map.put("purchaseRoad", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseRoad());
     map.put("packaging", updateOrderAndOrderItemRequestDto.isPackagingRequired());
     map.put("verification", updateOrderAndOrderItemRequestDto.isVerificationRequired());
@@ -259,8 +256,8 @@ public class OrderDaoImpl implements OrderDao {
     String sql = "SELECT om.order_id, om.order_item_id, om.serial_number,om.consumer_id, om.create_date, om.update_date, om.packaging, "
         + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "
         + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
-        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
-        + "oi.purchase_district, oi.purchase_road "
+        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city, "
+        + "oi.purchase_road "
         + "FROM order_main AS om "
         + "LEFT JOIN order_item AS oi "
         + "ON om.order_item_id = oi.order_item_id "
@@ -293,8 +290,8 @@ public class OrderDaoImpl implements OrderDao {
     String sql = "SELECT om.order_id, om.order_item_id, om.serial_number, om.consumer_id, om.create_date, om.update_date, om.packaging, "
         + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "
         + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
-        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city,"
-        + "oi.purchase_district, oi.purchase_road "
+        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city, "
+        + "oi.purchase_road "
         + "FROM order_main AS om "
         + "LEFT JOIN order_item AS oi "
         + "ON om.order_item_id = oi.order_item_id "
