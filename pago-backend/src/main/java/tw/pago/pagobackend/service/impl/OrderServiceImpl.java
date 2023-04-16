@@ -28,6 +28,7 @@ import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
+import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -58,6 +59,8 @@ import tw.pago.pagobackend.util.UuidGenerator;
 public class OrderServiceImpl implements OrderService {
 
   private static final String OBJECT_TYPE = "order";
+  private static final Double PLATFORM_FEE_PERCENT = 4.5;
+  private static final Double TARIFF_FEE_PERCENT = 2.5;
 
   private OrderDao orderDao;
   private UuidGenerator uuidGenerator;
@@ -101,14 +104,11 @@ public class OrderServiceImpl implements OrderService {
     String orderUuid = uuidGenerator.getUuid();
     String orderSerialNumber = generateOrderSerialNumber(createOrderRequestDto);
 
-    Double platformFeePercent = 4.5;
-    Double tariffFeePercent = 2.5;
-
     createOrderRequestDto.getCreateOrderItemDto().setOrderItemId(orderItemUuid);
     createOrderRequestDto.setOrderId(orderUuid);
     createOrderRequestDto.setSerialNumber(orderSerialNumber);
-    createOrderRequestDto.setPlatformFeePercent(platformFeePercent);
-    createOrderRequestDto.setTariffFeePercent(tariffFeePercent);
+    createOrderRequestDto.setPlatformFeePercent(PLATFORM_FEE_PERCENT);
+    createOrderRequestDto.setTariffFeePercent(TARIFF_FEE_PERCENT);
     createOrderRequestDto.setOrderStatus(OrderStatusEnum.REQUESTED);
 
     orderDao.createOrderItem(createOrderRequestDto);
@@ -517,6 +517,50 @@ public class OrderServiceImpl implements OrderService {
     orderEachAmountMap.put("orderTotalAmount", orderTotalAmount);
 
     return orderEachAmountMap;
+  }
+
+  @Override
+  public CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(CreateOrderRequestDto createOrderRequestDto) {
+    createOrderRequestDto.setPlatformFeePercent(PLATFORM_FEE_PERCENT);
+    createOrderRequestDto.setTariffFeePercent(TARIFF_FEE_PERCENT);
+
+    // Init Variable
+    Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
+    BigDecimal orderItemUnitPrice = createOrderRequestDto.getCreateOrderItemDto().getUnitPrice();
+    BigDecimal orderItemQuantity = BigDecimal.valueOf(createOrderRequestDto.getCreateOrderItemDto().getQuantity());
+    BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(createOrderRequestDto.getPlatformFeePercent())
+        .multiply(BigDecimal.valueOf(0.01));
+    BigDecimal orderTariffFeePercent = BigDecimal.valueOf(createOrderRequestDto.getTariffFeePercent())
+        .multiply(BigDecimal.valueOf(0.01));
+
+    // Calculation
+    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity); // 1
+    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent); // 2
+    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent); // 3
+    BigDecimal travelerFee = createOrderRequestDto.getTravelerFee(); // 4
+
+    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3
+    // + 4
+
+    // Set only the second digit after the decimal point (Banker 's rounding)
+    tariffFee = tariffFee.setScale(2, RoundingMode.HALF_EVEN);
+    platformFee = platformFee.setScale(2, RoundingMode.HALF_EVEN);
+    orderTotalAmount = orderTotalAmount.setScale(2, RoundingMode.HALF_EVEN);
+
+    // Set return value
+    orderEachAmountMap.put("tariffFee", tariffFee);
+    orderEachAmountMap.put("platformFee", platformFee);
+    orderEachAmountMap.put("orderTotalAmount", orderTotalAmount);
+
+    // Set value to DTO
+    CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = new CalculateOrderAmountResponseDto();
+    calculateOrderAmountResponseDto.setTariffFee(orderEachAmountMap.get("tariffFee"));
+    calculateOrderAmountResponseDto.setPlatformFee(orderEachAmountMap.get("platformFee"));
+    calculateOrderAmountResponseDto.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
+    calculateOrderAmountResponseDto.setTravelerFee(createOrderRequestDto.getTravelerFee());
+    calculateOrderAmountResponseDto.setCurrency(createOrderRequestDto.getCurrency());
+
+    return calculateOrderAmountResponseDto;
   }
 
   @Override

@@ -3,14 +3,17 @@ package tw.pago.pagobackend.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -235,5 +239,16 @@ public class OrderController {
     orderService.createFavoriteOrder(createFavoriteOrderRequestDto);
 
     return ResponseEntity.status(HttpStatus.CREATED).body("Add Success");
+  }
+
+  @PostMapping("/calculate-order-amount")
+  public ResponseEntity<?> calculateOrderAmount(@RequestBody CreateOrderRequestDto createOrderRequestDto) {
+
+    CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringCreation(createOrderRequestDto);
+
+
+    return ResponseEntity.status(HttpStatus.OK).body(calculateOrderAmountResponseDto);
+
+
   }
 }

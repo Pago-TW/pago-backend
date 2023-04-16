@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -54,6 +55,8 @@ public interface OrderService {
   Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 
   Map<String, BigDecimal> calculateOrderEachAmount(Order order);
+
+  CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(CreateOrderRequestDto createOrderRequestDto);
 
   String generateOrderSerialNumber(CreateOrderRequestDto createOrderRequestDto);
 
