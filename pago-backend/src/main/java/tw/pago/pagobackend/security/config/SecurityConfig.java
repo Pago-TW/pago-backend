@@ -112,7 +112,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/auth/**",
             "/oauth2/**",
             "/countries**",
-            "/cities/**"
+            "/cities/**",
+            "/health"
            )
           .permitAll()
         .antMatchers(HttpMethod.GET,  "/orders/**/bids", "/reviews/**", "/orders")
