@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.TripDao;
@@ -50,6 +51,7 @@ import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
+import tw.pago.pagobackend.util.CurrencyUtil;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -507,9 +509,12 @@ public class OrderServiceImpl implements OrderService {
                                                                                                     // + 4
 
     // Set only the second digit after the decimal point (Banker 's rounding)
-    tariffFee = tariffFee.setScale(2, RoundingMode.HALF_EVEN);
-    platformFee = platformFee.setScale(2, RoundingMode.HALF_EVEN);
-    orderTotalAmount = orderTotalAmount.setScale(2, RoundingMode.HALF_EVEN);
+    CurrencyEnum currency = order.getCurrency();
+    int decimalScale = CurrencyUtil.getDecimalScale(currency);
+
+    tariffFee = tariffFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
+    platformFee = platformFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
+    orderTotalAmount = orderTotalAmount.setScale(decimalScale, RoundingMode.HALF_EVEN);
 
     // Set return value
     orderEachAmountMap.put("tariffFee", tariffFee);
@@ -523,6 +528,8 @@ public class OrderServiceImpl implements OrderService {
   public CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(CreateOrderRequestDto createOrderRequestDto) {
     createOrderRequestDto.setPlatformFeePercent(PLATFORM_FEE_PERCENT);
     createOrderRequestDto.setTariffFeePercent(TARIFF_FEE_PERCENT);
+
+
 
     // Init Variable
     Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
@@ -543,9 +550,12 @@ public class OrderServiceImpl implements OrderService {
     // + 4
 
     // Set only the second digit after the decimal point (Banker 's rounding)
-    tariffFee = tariffFee.setScale(2, RoundingMode.HALF_EVEN);
-    platformFee = platformFee.setScale(2, RoundingMode.HALF_EVEN);
-    orderTotalAmount = orderTotalAmount.setScale(2, RoundingMode.HALF_EVEN);
+    CurrencyEnum currency = createOrderRequestDto.getCurrency();
+    int decimalScale = CurrencyUtil.getDecimalScale(currency);
+
+    tariffFee = tariffFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
+    platformFee = platformFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
+    orderTotalAmount = orderTotalAmount.setScale(decimalScale, RoundingMode.HALF_EVEN);
 
     // Set return value
     orderEachAmountMap.put("tariffFee", tariffFee);
