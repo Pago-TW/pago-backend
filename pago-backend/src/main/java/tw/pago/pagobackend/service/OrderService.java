@@ -65,5 +65,7 @@ public interface OrderService {
 
   CancellationRecord requestCancelOrder(CreateCancellationRecordRequestDto createCancellationRecordRequestDto) throws BadRequestException;
 
+  CancellationRecord getCancellationRecordById(String cancellationRecordId);
+
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

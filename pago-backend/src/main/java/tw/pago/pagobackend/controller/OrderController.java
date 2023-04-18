@@ -38,6 +38,8 @@ import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.DuplicateKeyException;
+import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
@@ -257,15 +259,27 @@ public class OrderController {
   @PostMapping("/orders/{orderId}/request-cancel-order")
   public ResponseEntity<?> requestCancelOrder(@PathVariable String orderId, @RequestBody @Valid CreateCancellationRecordRequestDto createCancellationRecordRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
-    createCancellationRecordRequestDto.setUserId(currentLoginUserId);
-    createCancellationRecordRequestDto.setOrderId(orderId);
-    try {
-      orderService.requestCancelOrder(createCancellationRecordRequestDto);
-    } catch (BadRequestException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
+    // Permission checking
+    Order order = orderService.getOrderById(orderId);
+    String cosumerId = order.getConsumerId();
+    String shooperId = order.getShopper().getUserId();
+    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shooperId))) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
 
-    return ResponseEntity.status(HttpStatus.CREATED).build();
+    createCancellationRecordRequestDto.setUserId(currentLoginUserId);
+    createCancellationRecordRequestDto.setOrderId(orderId);
+    try {
+      CancellationRecord cancellationRecord = orderService.requestCancelOrder(createCancellationRecordRequestDto);
+      return ResponseEntity.status(HttpStatus.CREATED).body(cancellationRecord);
+    } catch (BadRequestException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    } catch (DuplicateKeyException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+
   }
 }

@@ -46,6 +46,7 @@ import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
@@ -605,13 +606,28 @@ public class OrderServiceImpl implements OrderService {
       }
     }
 
+    CancellationRecord cancellationReocrdByOrderId = cancellationRecordDao.getCancellationReocrdByOrderId(
+        createCancellationRecordRequestDto.getOrderId());
+
+    if (cancellationReocrdByOrderId != null) {
+      throw new DuplicateKeyException("This order has been requested canceled");
+    }
+
     String cancellationRecordId = uuidGenerator.getUuid();
     createCancellationRecordRequestDto.setCancellationRecordId(cancellationRecordId);
     createCancellationRecordRequestDto.setCanceled(false);
     cancellationRecordDao.createCancellationRecord(createCancellationRecordRequestDto);
 
+    CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);
 
-    return null;
+
+    return cancellationRecord;
+  }
+
+  @Override
+  public CancellationRecord getCancellationRecordById(String cancellationRecordId) {
+    CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);
+    return cancellationRecord;
   }
 
   public String generateRandomAlphaNumeric() {
