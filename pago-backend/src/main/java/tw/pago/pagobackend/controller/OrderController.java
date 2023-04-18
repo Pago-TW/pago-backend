@@ -40,6 +40,7 @@ import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
+import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.PostponeRecord;
@@ -286,6 +287,8 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     } catch (AccessDeniedException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    } catch (ResourceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
   }
@@ -306,15 +309,20 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
-    updateCancellationRecordRequestDto.setOrderId(orderId);
 
-    orderService.replyCancelOrder(order, updateCancellationRecordRequestDto);
+    try {
+      updateCancellationRecordRequestDto.setOrderId(orderId);
+      orderService.replyCancelOrder(order, updateCancellationRecordRequestDto);
+      CancellationRecord updateedCancellationRecord = orderService.getCancellationRecordByOrderId(orderId);
+      return ResponseEntity.status(HttpStatus.OK).body(updateedCancellationRecord);
 
-    CancellationRecord updateedCancellationRecord = orderService.getCancellationRecordByOrderId(orderId);
+    } catch (AccessDeniedException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
 
 
 
-    return ResponseEntity.status(HttpStatus.OK).body(updateedCancellationRecord);
+
   }
 
 
@@ -346,6 +354,8 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     } catch (AccessDeniedException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    } catch (ResourceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
   }
@@ -369,12 +379,17 @@ public class OrderController {
 
 
 
-    updatePostponeRecordRequestDto.setOrderId(orderId);
-    orderService.replyPostponeOrder(order, updatePostponeRecordRequestDto);
+    try {
+      updatePostponeRecordRequestDto.setOrderId(orderId);
+      orderService.replyPostponeOrder(order, updatePostponeRecordRequestDto);
+      PostponeRecord updatedPostponeRecord = orderService.getPostponeRecordByOrderId(orderId);
 
-    PostponeRecord updatedPostponeRecord = orderService.getPostponeRecordByOrderId(orderId);
+      return ResponseEntity.status(HttpStatus.OK).body(updatedPostponeRecord);
+    } catch (AccessDeniedException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
 
-    return ResponseEntity.status(HttpStatus.OK).body(updatedPostponeRecord);
+
   }
 
 

@@ -74,7 +74,7 @@ public interface OrderService {
 
   PostponeRecord requestPostponeOrder(Order order, CreatePostponeRecordRequestDto createPostponeRecordRequestDto);
 
-  PostponeRecord replyPostponeOrder(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto);
+  void replyPostponeOrder(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto);
 
   PostponeRecord getPostponeRecordByOrderId(String orderId);
 

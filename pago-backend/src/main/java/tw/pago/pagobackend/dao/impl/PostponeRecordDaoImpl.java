@@ -25,8 +25,9 @@ public class PostponeRecordDaoImpl implements PostponeRecordDao {
 
   @Override
   public void createPostponeRecord(CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
-    String sql = "INSERT INTO postpone_record (postpone_record_id, order_id, user_id, postpone_reason, note, create_date, update_date, is_postponed) "
-        + "VALUES (:postponeRecordId, :orderId, :userId, :postponeReason, :note, :createDate, :updateDate, :isPostponed)";
+    String sql = "INSERT INTO postpone_record (postpone_record_id, order_id, user_id, postpone_reason, "
+        + "note, create_date, update_date, is_postponed, original_order_status) "
+        + "VALUES (:postponeRecordId, :orderId, :userId, :postponeReason, :note, :createDate, :updateDate, :isPostponed, :originalOrderStatus)";
 
     Map<String, Object> map = new HashMap<>();
 
@@ -39,6 +40,7 @@ public class PostponeRecordDaoImpl implements PostponeRecordDao {
     map.put("createDate", now);
     map.put("updateDate", now);
     map.put("isPostponed", createPostponeRecordRequestDto.getIsPostponed());
+    map.put("originalOrderStatus", createPostponeRecordRequestDto.getOriginalOrderStatus().name());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
@@ -47,7 +49,8 @@ public class PostponeRecordDaoImpl implements PostponeRecordDao {
 
   @Override
   public PostponeRecord getPostponeRecordById(String postponeRecordId) {
-    String sql = "SELECT postpone_record_id, order_id, user_id, postpone_reason, note, create_date, update_date, is_postponed "
+    String sql = "SELECT postpone_record_id, order_id, user_id, postpone_reason, note, create_date, "
+        + "update_date, is_postponed, original_order_status "
         + "FROM postpone_record "
         + "WHERE postpone_record_id = :postponeRecordId ";
 
@@ -66,7 +69,8 @@ public class PostponeRecordDaoImpl implements PostponeRecordDao {
 
   @Override
   public PostponeRecord getPostponeRecordByOrderId(String orderId) {
-    String sql = "SELECT postpone_record_id, order_id, user_id, postpone_reason, note, create_date, update_date, is_postponed "
+    String sql = "SELECT postpone_record_id, order_id, user_id, postpone_reason, note, create_date, "
+        + "update_date, is_postponed, original_order_status "
         + "FROM postpone_record "
         + "WHERE order_id = :orderId ";
 

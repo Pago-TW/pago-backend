@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PostponeReasonCategoryEnum;
 
 @NoArgsConstructor
@@ -18,5 +19,6 @@ public class CreatePostponeRecordRequestDto {
   private LocalDate updateDate;
   @JsonProperty("isPostponed")
   private Boolean isPostponed;
+  private OrderStatusEnum originalOrderStatus;
 
 }

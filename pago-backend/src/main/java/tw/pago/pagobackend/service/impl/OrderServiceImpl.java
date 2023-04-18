@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
+import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
@@ -630,6 +632,11 @@ public class OrderServiceImpl implements OrderService {
     createCancellationRecordRequestDto.setCancellationRecordId(cancellationRecordId);
     cancellationRecordDao.createCancellationRecord(createCancellationRecordRequestDto);
 
+    CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);
+    if (cancellationRecord == null) {
+      throw new ResourceNotFoundException("Create data not found");
+    }
+
     // Change OrderStatus to TO_BE_CANCELED
     UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
         .orderStatus(OrderStatusEnum.TO_BE_CANCELED)
@@ -640,7 +647,6 @@ public class OrderServiceImpl implements OrderService {
 
     // TODO 信件通知對方要回覆是否取消訂單
 
-    CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);
 
 
     return cancellationRecord;
@@ -659,23 +665,93 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
+  @Transactional
   public PostponeRecord requestPostponeOrder(Order order,
       CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
 
+    if (createPostponeRecordRequestDto.getPostponeReason().equals(CancelReasonCategoryEnum.OTHER)) {
+      if (createPostponeRecordRequestDto.getNote() == null) {
+        throw new BadRequestException("Note should not be Null.");
+      }
+    }
+
+    PostponeRecord postponeRecordByOrderId = postponeRecordDao.getPostponeRecordByOrderId(
+        createPostponeRecordRequestDto.getOrderId());
+    if (postponeRecordByOrderId != null) {
+      throw new DuplicateKeyException("This order has been requested postponed");
+    }
+
+    if (!(order.getOrderStatus().equals(OrderStatusEnum.TO_BE_PURCHASED) || order.getOrderStatus().equals(OrderStatusEnum.TO_BE_DELIVERED))) {
+      throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED or TO_BE_DELIVERED, so you have no permission to request a cancellation.");
+    }
+
+
+    // Create postponeRecord
     String postponeRecordId = uuidGenerator.getUuid();
+    OrderStatusEnum originalOrderStatus = order.getOrderStatus();
     createPostponeRecordRequestDto.setPostponeRecordId(postponeRecordId);
+    createPostponeRecordRequestDto.setOriginalOrderStatus(originalOrderStatus);
     postponeRecordDao.createPostponeRecord(createPostponeRecordRequestDto);
 
     PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordById(postponeRecordId);
+
+    if (postponeRecord == null) {
+      throw new ResourceNotFoundException("Create data not found");
+    }
+
+    // Change OrderStatus to TO_BE_POSTPONED
+    UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+        .orderStatus(OrderStatusEnum.TO_BE_POSTPONED)
+        .build();
+
+    updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+
+
     return postponeRecord;
   }
 
   @Override
-  public PostponeRecord replyPostponeOrder(Order order,
+  @Transactional
+  public void replyPostponeOrder(Order order,
       UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto) {
 
+    // Check orderStatus is TO_BE_POSTPONED
+    if (!(order.getOrderStatus().equals(OrderStatusEnum.TO_BE_POSTPONED))) {
+      throw new AccessDeniedException("OrderStatus is not TO_BE_POSTPONED, so you have no permission to request a cancellation.");
+    }
+
+
+    // Get originalOrderStatus then set originalOrderStatus to Order
+    OrderStatusEnum originalOrderStatus = getPostponeRecordByOrderId(order.getOrderId()).getOriginalOrderStatus();
+
+    if (updatePostponeRecordRequestDto.getIsPostponed() == true) {
+
+      // Plus 7 days to latestReceiveItemDate
+      Date latestReceiveItemDate = order.getLatestReceiveItemDate();
+      LocalDate latestReceiveItemDateLocal = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+      LocalDate updatedLatestReceiveItemDateLocal = latestReceiveItemDateLocal.plusDays(7);
+      Date updatedLatestReceiveItemDate = Date.from(updatedLatestReceiveItemDateLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+
+
+      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+          .orderStatus(originalOrderStatus)
+          .latestReceiveItemDate(updatedLatestReceiveItemDate)
+          .build();
+
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
+    } else {
+      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+          .orderStatus(originalOrderStatus)
+          .build();
+
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
+    }
+
+
     postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
-    return null;
   }
 
   @Override
@@ -688,6 +764,11 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public void replyCancelOrder(
       Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
+    // Check orderStatus is TO_BE_CANCELED
+    if (!(order.getOrderStatus().equals(OrderStatusEnum.TO_BE_CANCELED))) {
+      throw new AccessDeniedException("OrderStatus is not TO_BE_CANCELED, so you have no permission to request a cancellation.");
+    }
+
 
     if (updateCancellationRecordRequestDto.getIsCanceled() == true) {
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()

@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
+import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PostponeReasonCategoryEnum;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.PostponeRecord;
@@ -23,6 +24,8 @@ public class PostponeRecordRowMapper implements RowMapper<PostponeRecord> {
     postponeRecord.setCreateDate(resultSet.getDate("create_date").toLocalDate());
     postponeRecord.setUpdateDate(resultSet.getDate("update_date").toLocalDate());
     postponeRecord.setIsPostponed(resultSet.getBoolean("is_postponed"));
+    postponeRecord.setOriginalOrderStatus(
+        OrderStatusEnum.valueOf(resultSet.getString("original_order_status")));
 
     return postponeRecord;
   }
