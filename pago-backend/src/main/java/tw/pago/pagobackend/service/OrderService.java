@@ -20,7 +20,6 @@ import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
-import tw.pago.pagobackend.model.User;
 
 public interface OrderService {
 
@@ -64,13 +63,13 @@ public interface OrderService {
 
   String generateOrderSerialNumber(CreateOrderRequestDto createOrderRequestDto);
 
-  CancellationRecord requestCancelOrder(CreateCancellationRecordRequestDto createCancellationRecordRequestDto) throws BadRequestException;
+  CancellationRecord requestCancelOrder(Order order, CreateCancellationRecordRequestDto createCancellationRecordRequestDto) throws BadRequestException;
 
   CancellationRecord getCancellationRecordById(String cancellationRecordId);
 
   CancellationRecord getCancellationRecordByOrderId(String orderId);
 
-  void replyCancelOrder(UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
+  void replyCancelOrder(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
 
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

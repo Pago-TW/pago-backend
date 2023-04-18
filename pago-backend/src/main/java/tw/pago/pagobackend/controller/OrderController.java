@@ -38,6 +38,7 @@ import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
+import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.model.CancellationRecord;
@@ -264,8 +265,12 @@ public class OrderController {
     // Permission checking
     Order order = orderService.getOrderById(orderId);
     String cosumerId = order.getConsumerId();
-    String shooperId = order.getShopper().getUserId();
-    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shooperId))) {
+    String shopperId = order.getShopper() != null ? order.getShopper().getUserId() : null;
+    if (shopperId == null) {
+      return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("The order does not have a shopper assigned.");
+    }
+
+    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shopperId))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
@@ -273,12 +278,14 @@ public class OrderController {
     createCancellationRecordRequestDto.setUserId(currentLoginUserId);
     createCancellationRecordRequestDto.setOrderId(orderId);
     try {
-      CancellationRecord cancellationRecord = orderService.requestCancelOrder(createCancellationRecordRequestDto);
+      CancellationRecord cancellationRecord = orderService.requestCancelOrder(order, createCancellationRecordRequestDto);
       return ResponseEntity.status(HttpStatus.CREATED).body(cancellationRecord);
     } catch (BadRequestException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     } catch (DuplicateKeyException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    } catch (AccessDeniedException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
   }
@@ -290,14 +297,18 @@ public class OrderController {
     // Permission checking
     Order order = orderService.getOrderById(orderId);
     String cosumerId = order.getConsumerId();
-    String shooperId = order.getShopper().getUserId();
-    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shooperId))) {
+    String shopperId = order.getShopper() != null ? order.getShopper().getUserId() : null;
+    if (shopperId == null) {
+      return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("The order does not have a shopper assigned.");
+    }
+
+    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shopperId))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
     updateCancellationRecordRequestDto.setOrderId(orderId);
 
-    orderService.replyCancelOrder(updateCancellationRecordRequestDto);
+    orderService.replyCancelOrder(order, updateCancellationRecordRequestDto);
 
     CancellationRecord updateedCancellationRecord = orderService.getCancellationRecordByOrderId(orderId);
 

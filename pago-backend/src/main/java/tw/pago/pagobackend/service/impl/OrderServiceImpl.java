@@ -46,6 +46,7 @@ import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
+import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.model.Bid;
@@ -599,7 +600,7 @@ public class OrderServiceImpl implements OrderService {
 
 
   @Override
-  public CancellationRecord requestCancelOrder (
+  public CancellationRecord requestCancelOrder (Order order,
       CreateCancellationRecordRequestDto createCancellationRecordRequestDto) throws BadRequestException {
     if (createCancellationRecordRequestDto.getCancelReason().equals(CancelReasonCategoryEnum.OTHER)) {
       if (createCancellationRecordRequestDto.getNote() == null) {
@@ -614,10 +615,23 @@ public class OrderServiceImpl implements OrderService {
       throw new DuplicateKeyException("This order has been requested canceled");
     }
 
+    if (!order.getOrderStatus().equals(OrderStatusEnum.TO_BE_PURCHASED)) {
+      throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED, so you have no permission to request a cancellation.");
+    }
+
     String cancellationRecordId = uuidGenerator.getUuid();
     createCancellationRecordRequestDto.setCancellationRecordId(cancellationRecordId);
-    createCancellationRecordRequestDto.setIsCanceled(false);
     cancellationRecordDao.createCancellationRecord(createCancellationRecordRequestDto);
+
+    // Change OrderStatus to TO_BE_CANCELED
+    UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+        .orderStatus(OrderStatusEnum.TO_BE_CANCELED)
+        .build();
+
+    updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+
+
+    // TODO 信件通知對方要回覆是否取消訂單
 
     CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);
 
@@ -638,10 +652,28 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
+  @Transactional
   public void replyCancelOrder(
-      UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
+      Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
 
-    cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
+    if (updateCancellationRecordRequestDto.getIsCanceled() == true) {
+      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+          .orderStatus(OrderStatusEnum.CANCELED)
+          .build();
+
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
+    } else {
+      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+          .orderStatus(OrderStatusEnum.TO_BE_PURCHASED)
+          .build();
+
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
+    }
+
+    // TODO 信件通知對方自己的答覆
+
   }
 
   public String generateRandomAlphaNumeric() {
