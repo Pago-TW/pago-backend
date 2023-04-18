@@ -7,7 +7,9 @@ public enum OrderStatusEnum {
     TO_BE_DELIVERED("待面交"),
     DELIVERED("已送達"), // 代購者按
     FINISHED("已完成"), // 委託者按
-    CANCELED("已取消");
+    CANCELED("已取消"),
+    TO_BE_CANCELED("申請取消"),
+    TO_BE_EXTENDED("申請延期");
 
     private final String description;
 

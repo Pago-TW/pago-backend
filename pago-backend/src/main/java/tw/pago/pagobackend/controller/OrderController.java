@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -36,6 +37,7 @@ import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
+import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
@@ -247,8 +249,23 @@ public class OrderController {
     CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringCreation(createOrderRequestDto);
 
 
-    return ResponseEntity.status(HttpStatus.OK).body(calculateOrderAmountResponseDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(calculateOrderAmountResponseDto);
 
 
+  }
+
+  @PostMapping("/orders/{orderId}/request-cancel-order")
+  public ResponseEntity<?> requestCancelOrder(@PathVariable String orderId, @RequestBody @Valid CreateCancellationRecordRequestDto createCancellationRecordRequestDto) {
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    createCancellationRecordRequestDto.setUserId(currentLoginUserId);
+    createCancellationRecordRequestDto.setOrderId(orderId);
+    try {
+      orderService.requestCancelOrder(createCancellationRecordRequestDto);
+    } catch (BadRequestException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -14,6 +15,8 @@ import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
+import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
@@ -59,6 +62,8 @@ public interface OrderService {
   CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(CreateOrderRequestDto createOrderRequestDto);
 
   String generateOrderSerialNumber(CreateOrderRequestDto createOrderRequestDto);
+
+  CancellationRecord requestCancelOrder(CreateCancellationRecordRequestDto createCancellationRecordRequestDto) throws BadRequestException;
 
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

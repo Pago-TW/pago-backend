@@ -22,14 +22,17 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -42,7 +45,9 @@ import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
+import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.model.Bid;
+import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.Trip;
@@ -73,6 +78,7 @@ public class OrderServiceImpl implements OrderService {
   private UserDao userDao;
   private ModelMapper modelMapper;
   private BidService bidService;
+  private CancellationRecordDao cancellationRecordDao;
 
   @Autowired
   public OrderServiceImpl(OrderDao orderDao,
@@ -82,7 +88,8 @@ public class OrderServiceImpl implements OrderService {
       CurrentUserInfoProvider currentUserInfoProvider,
       TripDao tripDao,
       UserDao userDao,
-      ModelMapper modelMapper) {
+      ModelMapper modelMapper,
+      CancellationRecordDao cancellationRecordDao) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
     this.fileService = fileService;
@@ -91,6 +98,7 @@ public class OrderServiceImpl implements OrderService {
     this.tripDao = tripDao;
     this.userDao = userDao;
     this.modelMapper = modelMapper;
+    this.cancellationRecordDao = cancellationRecordDao;
   }
 
   @Autowired
@@ -584,6 +592,26 @@ public class OrderServiceImpl implements OrderService {
 
     String serialNumber = datePart + destinationCityCode + randomAlphaNumericPart;
     return serialNumber;
+  }
+
+
+
+  @Override
+  public CancellationRecord requestCancelOrder (
+      CreateCancellationRecordRequestDto createCancellationRecordRequestDto) throws BadRequestException {
+    if (createCancellationRecordRequestDto.getCancelReason().equals(CancelReasonCategoryEnum.OTHER)) {
+      if (createCancellationRecordRequestDto.getNote() == null) {
+        throw new BadRequestException("Note should not be Null.");
+      }
+    }
+
+    String cancellationRecordId = uuidGenerator.getUuid();
+    createCancellationRecordRequestDto.setCancellationRecordId(cancellationRecordId);
+    createCancellationRecordRequestDto.setCanceled(false);
+    cancellationRecordDao.createCancellationRecord(createCancellationRecordRequestDto);
+
+
+    return null;
   }
 
   public String generateRandomAlphaNumeric() {
