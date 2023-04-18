@@ -48,6 +48,7 @@ import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
+import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
@@ -665,7 +666,22 @@ public class OrderServiceImpl implements OrderService {
     createPostponeRecordRequestDto.setPostponeRecordId(postponeRecordId);
     postponeRecordDao.createPostponeRecord(createPostponeRecordRequestDto);
 
+    PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordById(postponeRecordId);
+    return postponeRecord;
+  }
+
+  @Override
+  public PostponeRecord replyPostponeOrder(Order order,
+      UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto) {
+
+    postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
     return null;
+  }
+
+  @Override
+  public PostponeRecord getPostponeRecordByOrderId(String orderId) {
+    PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(orderId);
+    return postponeRecord;
   }
 
   @Override

@@ -36,6 +36,7 @@ import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
+import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
@@ -348,6 +349,34 @@ public class OrderController {
     }
 
   }
+
+  @PatchMapping("/orders/{orderId}/postpone-record")
+  public ResponseEntity<?> replyPostponeOrder(@PathVariable String orderId, @RequestBody @Valid
+      UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto) {
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    // Permission checking
+    Order order = orderService.getOrderById(orderId);
+    String cosumerId = order.getConsumerId();
+    String shopperId = order.getShopper() != null ? order.getShopper().getUserId() : null;
+    if (shopperId == null) {
+      return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("The order does not have a shopper assigned.");
+    }
+
+    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shopperId))) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
+    }
+
+
+
+    updatePostponeRecordRequestDto.setOrderId(orderId);
+    orderService.replyPostponeOrder(order, updatePostponeRecordRequestDto);
+
+    PostponeRecord updatedPostponeRecord = orderService.getPostponeRecordByOrderId(orderId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(updatedPostponeRecord);
+  }
+
 
 
 }
