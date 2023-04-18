@@ -40,9 +40,9 @@ import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
+import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
-import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
@@ -616,7 +616,7 @@ public class OrderServiceImpl implements OrderService {
 
     String cancellationRecordId = uuidGenerator.getUuid();
     createCancellationRecordRequestDto.setCancellationRecordId(cancellationRecordId);
-    createCancellationRecordRequestDto.setCanceled(false);
+    createCancellationRecordRequestDto.setIsCanceled(false);
     cancellationRecordDao.createCancellationRecord(createCancellationRecordRequestDto);
 
     CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);

@@ -54,7 +54,7 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
     map.put("note", createCancellationRecordRequestDto.getNote());
     map.put("createDate", now);
     map.put("updateDate", now);
-    map.put("isCanceled", createCancellationRecordRequestDto.isCanceled());
+    map.put("isCanceled", createCancellationRecordRequestDto.getIsCanceled());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 

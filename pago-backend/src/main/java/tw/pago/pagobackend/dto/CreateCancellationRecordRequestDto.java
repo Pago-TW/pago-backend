@@ -18,7 +18,7 @@ public class CreateCancellationRecordRequestDto {
   private String note;
   private LocalDate createDate;
   private LocalDate updateDate;
-  private boolean isCanceled;
+  private Boolean isCanceled;
 
 
 }

@@ -19,7 +19,7 @@ public class CancellationRecordRowMapper implements RowMapper<CancellationRecord
     cancellationRecord.setNote(resultSet.getString("note"));
     cancellationRecord.setCreateDate(resultSet.getDate("create_date").toLocalDate());
     cancellationRecord.setUpdateDate(resultSet.getDate("update_date").toLocalDate());
-    cancellationRecord.setCanceled(resultSet.getBoolean("is_canceled"));
+    cancellationRecord.setIsCanceled(resultSet.getBoolean("is_canceled"));
 
     return cancellationRecord;
   }
