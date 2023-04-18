@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.dao.impl;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
+import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.rowmapper.CancellationRecordRowMapper;
@@ -78,7 +80,7 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
   }
 
   @Override
-  public CancellationRecord getCancellationReocrdByOrderId(String orderId) {
+  public CancellationRecord getCancellationRecordByOrderId(String orderId) {
     String sql = "SELECT cancellation_record_id, order_id, user_id, cancel_reason, note, create_date, update_date, is_canceled "
         + "FROM cancellation_record "
         + "WHERE order_id = :orderId ";
@@ -94,5 +96,21 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
     } else {
       return null;
     }
+  }
+
+  @Override
+  public void updateCancellationRecord(UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
+    String sql = "UPDATE cancellation_record "
+        + "SET is_canceled = :isCanceled, "
+        + "    update_date = :updateDate "
+        + "WHERE order_id = :orderId";
+
+    Map<String, Object> map = new HashMap<>();
+    LocalDate now = LocalDate.now();
+    map.put("isCanceled", updateCancellationRecordRequestDto.getIsCanceled());
+    map.put("updateDate", now);
+    map.put("orderId", updateCancellationRecordRequestDto.getOrderId());
+
+    namedParameterJdbcTemplate.update(sql, map);
   }
 }

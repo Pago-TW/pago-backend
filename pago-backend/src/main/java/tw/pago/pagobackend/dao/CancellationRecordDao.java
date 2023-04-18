@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.dao;
 
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
+import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.model.CancellationRecord;
 
 public interface CancellationRecordDao {
@@ -10,6 +11,8 @@ public interface CancellationRecordDao {
 
   CancellationRecord getCancellationRecordById(String cancellationRecordId);
 
-  CancellationRecord getCancellationReocrdByOrderId(String orderId);
+  CancellationRecord getCancellationRecordByOrderId(String orderId);
+
+  void updateCancellationRecord(UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
 
 }

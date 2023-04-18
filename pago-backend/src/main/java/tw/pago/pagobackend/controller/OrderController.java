@@ -36,6 +36,7 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
@@ -256,7 +257,7 @@ public class OrderController {
 
   }
 
-  @PostMapping("/orders/{orderId}/request-cancel-order")
+  @PostMapping("/orders/{orderId}/cancellation-record")
   public ResponseEntity<?> requestCancelOrder(@PathVariable String orderId, @RequestBody @Valid CreateCancellationRecordRequestDto createCancellationRecordRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
@@ -280,6 +281,29 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
-
   }
+
+  @PatchMapping("/orders/{orderId}/cancellation-record")
+  public ResponseEntity<?> replyCancelOrder(@PathVariable String orderId, @RequestBody @Valid UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    // Permission checking
+    Order order = orderService.getOrderById(orderId);
+    String cosumerId = order.getConsumerId();
+    String shooperId = order.getShopper().getUserId();
+    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shooperId))) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
+    }
+
+    updateCancellationRecordRequestDto.setOrderId(orderId);
+
+    orderService.replyCancelOrder(updateCancellationRecordRequestDto);
+
+    CancellationRecord updateedCancellationRecord = orderService.getCancellationRecordByOrderId(orderId);
+
+
+
+    return ResponseEntity.status(HttpStatus.OK).body(updateedCancellationRecord);
+  }
+
 }

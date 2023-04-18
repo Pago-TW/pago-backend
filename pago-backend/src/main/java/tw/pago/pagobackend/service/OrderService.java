@@ -13,6 +13,7 @@ import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
@@ -66,6 +67,10 @@ public interface OrderService {
   CancellationRecord requestCancelOrder(CreateCancellationRecordRequestDto createCancellationRecordRequestDto) throws BadRequestException;
 
   CancellationRecord getCancellationRecordById(String cancellationRecordId);
+
+  CancellationRecord getCancellationRecordByOrderId(String orderId);
+
+  void replyCancelOrder(UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
 
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

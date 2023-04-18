@@ -43,6 +43,7 @@ import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.OrderChosenShopperDto;
+import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
 import tw.pago.pagobackend.exception.BadRequestException;
@@ -606,7 +607,7 @@ public class OrderServiceImpl implements OrderService {
       }
     }
 
-    CancellationRecord cancellationReocrdByOrderId = cancellationRecordDao.getCancellationReocrdByOrderId(
+    CancellationRecord cancellationReocrdByOrderId = cancellationRecordDao.getCancellationRecordByOrderId(
         createCancellationRecordRequestDto.getOrderId());
 
     if (cancellationReocrdByOrderId != null) {
@@ -628,6 +629,19 @@ public class OrderServiceImpl implements OrderService {
   public CancellationRecord getCancellationRecordById(String cancellationRecordId) {
     CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);
     return cancellationRecord;
+  }
+
+  @Override
+  public CancellationRecord getCancellationRecordByOrderId(String orderId) {
+    CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(orderId);
+    return cancellationRecord;
+  }
+
+  @Override
+  public void replyCancelOrder(
+      UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
+
+    cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
   }
 
   public String generateRandomAlphaNumeric() {
