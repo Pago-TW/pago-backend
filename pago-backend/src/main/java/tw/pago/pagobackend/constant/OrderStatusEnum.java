@@ -9,7 +9,7 @@ public enum OrderStatusEnum {
     FINISHED("已完成"), // 委託者按
     CANCELED("已取消"),
     TO_BE_CANCELED("申請取消"),
-    TO_BE_EXTENDED("申請延期");
+    TO_BE_POSTPONED("申請延期");
 
     private final String description;
 

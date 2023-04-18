@@ -10,6 +10,7 @@ import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
@@ -19,6 +20,7 @@ import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.model.PostponeRecord;
 import tw.pago.pagobackend.model.Trip;
 
 public interface OrderService {
@@ -68,6 +70,8 @@ public interface OrderService {
   CancellationRecord getCancellationRecordById(String cancellationRecordId);
 
   CancellationRecord getCancellationRecordByOrderId(String orderId);
+
+  PostponeRecord requestPostponeOrder(Order order, CreatePostponeRecordRequestDto createPostponeRecordRequestDto);
 
   void replyCancelOrder(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
 

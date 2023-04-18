@@ -3,17 +3,14 @@ package tw.pago.pagobackend.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +29,7 @@ import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
@@ -43,6 +41,7 @@ import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.model.PostponeRecord;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
@@ -316,5 +315,39 @@ public class OrderController {
 
     return ResponseEntity.status(HttpStatus.OK).body(updateedCancellationRecord);
   }
+
+
+  @PostMapping("/orders/{orderId}/postpone-record")
+  public ResponseEntity<?> requestPostponeOrder(@PathVariable String orderId, @RequestBody @Valid CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    // Permission checking
+    Order order = orderService.getOrderById(orderId);
+    String cosumerId = order.getConsumerId();
+    String shopperId = order.getShopper() != null ? order.getShopper().getUserId() : null;
+    if (shopperId == null) {
+      return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("The order does not have a shopper assigned.");
+    }
+
+    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shopperId))) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
+    }
+
+
+    createPostponeRecordRequestDto.setUserId(currentLoginUserId);
+    createPostponeRecordRequestDto.setOrderId(orderId);
+    try {
+      PostponeRecord postponeRecord = orderService.requestPostponeOrder(order, createPostponeRecordRequestDto);
+      return ResponseEntity.status(HttpStatus.CREATED).body(postponeRecord);
+    } catch (BadRequestException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    } catch (DuplicateKeyException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    } catch (AccessDeniedException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
+
+  }
+
 
 }

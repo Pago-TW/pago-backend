@@ -27,6 +27,7 @@ import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dao.OrderDao;
+import tw.pago.pagobackend.dao.PostponeRecordDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.BidCreatorDto;
@@ -36,6 +37,7 @@ import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
+import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
@@ -53,6 +55,7 @@ import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
+import tw.pago.pagobackend.model.PostponeRecord;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
@@ -82,6 +85,7 @@ public class OrderServiceImpl implements OrderService {
   private ModelMapper modelMapper;
   private BidService bidService;
   private CancellationRecordDao cancellationRecordDao;
+  private PostponeRecordDao postponeRecordDao;
 
   @Autowired
   public OrderServiceImpl(OrderDao orderDao,
@@ -92,7 +96,8 @@ public class OrderServiceImpl implements OrderService {
       TripDao tripDao,
       UserDao userDao,
       ModelMapper modelMapper,
-      CancellationRecordDao cancellationRecordDao) {
+      CancellationRecordDao cancellationRecordDao,
+      PostponeRecordDao postponeRecordDao) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
     this.fileService = fileService;
@@ -102,6 +107,7 @@ public class OrderServiceImpl implements OrderService {
     this.userDao = userDao;
     this.modelMapper = modelMapper;
     this.cancellationRecordDao = cancellationRecordDao;
+    this.postponeRecordDao = postponeRecordDao;
   }
 
   @Autowired
@@ -649,6 +655,17 @@ public class OrderServiceImpl implements OrderService {
   public CancellationRecord getCancellationRecordByOrderId(String orderId) {
     CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(orderId);
     return cancellationRecord;
+  }
+
+  @Override
+  public PostponeRecord requestPostponeOrder(Order order,
+      CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
+
+    String postponeRecordId = uuidGenerator.getUuid();
+    createPostponeRecordRequestDto.setPostponeRecordId(postponeRecordId);
+    postponeRecordDao.createPostponeRecord(createPostponeRecordRequestDto);
+
+    return null;
   }
 
   @Override
