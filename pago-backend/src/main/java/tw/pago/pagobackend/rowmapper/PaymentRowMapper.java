@@ -13,6 +13,7 @@ public class PaymentRowMapper implements RowMapper<Payment> {
     Payment payment = new Payment();
     payment.setPaymentId(resultSet.getString("payment_id"));
     payment.setOrderId(resultSet.getString("order_id"));
+    payment.setBidId(resultSet.getString("bid_id"));
     payment.setIsPaid(resultSet.getBoolean("is_paid"));
     payment.setCreateDate(resultSet.getTimestamp("create_date").toLocalDateTime());
     payment.setUpdateDate(resultSet.getTimestamp("update_date").toLocalDateTime());

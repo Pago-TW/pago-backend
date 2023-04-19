@@ -26,14 +26,15 @@ public class PaymentDaoImpl implements PaymentDao {
 
   @Override
   public void createPayment(CreatePaymentRequestDto createPaymentRequestDto) {
-    String sql = "INSERT INTO payment (payment_id, order_id, is_paid, create_date, update_date) "
-        + "VALUES (:paymentId, :orderId, :isPaid, :createDate, :updateDate)";
+    String sql = "INSERT INTO payment (payment_id, order_id, bid_id, is_paid, create_date, update_date) "
+        + "VALUES (:paymentId, :orderId, :bidId, :isPaid, :createDate, :updateDate)";
 
     Map<String, Object> map = new HashMap<>();
 
     LocalDateTime now = LocalDateTime.now();
     map.put("paymentId", createPaymentRequestDto.getPaymentId());
     map.put("orderId", createPaymentRequestDto.getOrderId());
+    map.put("bidId", createPaymentRequestDto.getBidId());
     map.put("isPaid", createPaymentRequestDto.getIsPaid());
     map.put("createDate", now);
     map.put("updateDate", now);
@@ -43,7 +44,7 @@ public class PaymentDaoImpl implements PaymentDao {
 
   @Override
   public Payment getPaymentById(String paymentId) {
-    String sql = "SELECT payment_id, order_id, is_paid, create_date, update_date "
+    String sql = "SELECT payment_id, order_id, bid_id, is_paid, create_date, update_date "
         + "FROM payment "
         + "WHERE payment_id = :paymentId ";
 
