@@ -1,5 +1,13 @@
 package tw.pago.pagobackend.service.impl;
 
+import static tw.pago.pagobackend.constant.OrderStatusEnum.CANCELED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.DELIVERED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.FINISHED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_CANCELED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_DELIVERED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_POSTPONED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_PURCHASED;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -53,6 +61,7 @@ import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
+import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.CancellationRecord;
@@ -304,8 +313,13 @@ public class OrderServiceImpl implements OrderService {
       return;
     }
 
+
     // Store the old order status
     OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
+    if (updateOrderAndOrderItemRequestDto.getOrderStatus() != null){
+      OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
+    }
+
 
     OrderItem oldOrderItem = oldOrder.getOrderItem();
 
@@ -325,7 +339,21 @@ public class OrderServiceImpl implements OrderService {
 
     updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
 
-    orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
+    // if status will be modified
+    if (!oldOrderStatus.equals(updateOrderAndOrderItemRequestDto.getOrderStatus())) {
+      OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
+      // Check if the Status Transition is legal
+      if (isValidOrderStatusTransition(oldOrderStatus, newOrderStatus)) {
+        orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
+      } else {
+        throw new IllegalStatusTransitionException("Invalid status transition from " + oldOrderStatus.toString() + " to " + newOrderStatus.toString());
+      }
+      // if status won't be modified, directly update Order
+    } else {
+      orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
+    }
+
+
 
     // Check if the order status has been modified
     boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
@@ -624,7 +652,7 @@ public class OrderServiceImpl implements OrderService {
       throw new DuplicateKeyException("This order has been requested canceled");
     }
 
-    if (!order.getOrderStatus().equals(OrderStatusEnum.TO_BE_PURCHASED)) {
+    if (!order.getOrderStatus().equals(TO_BE_PURCHASED)) {
       throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED, so you have no permission to request a cancellation.");
     }
 
@@ -639,7 +667,7 @@ public class OrderServiceImpl implements OrderService {
 
     // Change OrderStatus to TO_BE_CANCELED
     UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-        .orderStatus(OrderStatusEnum.TO_BE_CANCELED)
+        .orderStatus(TO_BE_CANCELED)
         .build();
 
     updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
@@ -681,7 +709,8 @@ public class OrderServiceImpl implements OrderService {
       throw new DuplicateKeyException("This order has been requested postponed");
     }
 
-    if (!(order.getOrderStatus().equals(OrderStatusEnum.TO_BE_PURCHASED) || order.getOrderStatus().equals(OrderStatusEnum.TO_BE_DELIVERED))) {
+    if (!(order.getOrderStatus().equals(TO_BE_PURCHASED) || order.getOrderStatus().equals(
+        TO_BE_DELIVERED))) {
       throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED or TO_BE_DELIVERED, so you have no permission to request a cancellation.");
     }
 
@@ -701,7 +730,7 @@ public class OrderServiceImpl implements OrderService {
 
     // Change OrderStatus to TO_BE_POSTPONED
     UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-        .orderStatus(OrderStatusEnum.TO_BE_POSTPONED)
+        .orderStatus(TO_BE_POSTPONED)
         .build();
 
     updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
@@ -716,7 +745,7 @@ public class OrderServiceImpl implements OrderService {
       UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto) {
 
     // Check orderStatus is TO_BE_POSTPONED
-    if (!(order.getOrderStatus().equals(OrderStatusEnum.TO_BE_POSTPONED))) {
+    if (!(order.getOrderStatus().equals(TO_BE_POSTPONED))) {
       throw new AccessDeniedException("OrderStatus is not TO_BE_POSTPONED, so you have no permission to request a cancellation.");
     }
 
@@ -765,21 +794,21 @@ public class OrderServiceImpl implements OrderService {
   public void replyCancelOrder(
       Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
     // Check orderStatus is TO_BE_CANCELED
-    if (!(order.getOrderStatus().equals(OrderStatusEnum.TO_BE_CANCELED))) {
+    if (!(order.getOrderStatus().equals(TO_BE_CANCELED))) {
       throw new AccessDeniedException("OrderStatus is not TO_BE_CANCELED, so you have no permission to request a cancellation.");
     }
 
 
     if (updateCancellationRecordRequestDto.getIsCanceled() == true) {
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-          .orderStatus(OrderStatusEnum.CANCELED)
+          .orderStatus(CANCELED)
           .build();
 
       updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
       cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
     } else {
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-          .orderStatus(OrderStatusEnum.TO_BE_PURCHASED)
+          .orderStatus(TO_BE_PURCHASED)
           .build();
 
       updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
@@ -852,5 +881,28 @@ public class OrderServiceImpl implements OrderService {
         .anyMatch(bidResponseDto -> bidResponseDto.getCreator().getUserId().equals(currentLoginUserId));
 
     return isCurrentLoginUserPlaceBid;
+  }
+
+  private boolean isValidOrderStatusTransition(OrderStatusEnum oldOrderStatus, OrderStatusEnum newOrderStatus) {
+    switch (oldOrderStatus) {
+      case REQUESTED:
+        return newOrderStatus == TO_BE_PURCHASED;
+      case TO_BE_PURCHASED:
+        return newOrderStatus == TO_BE_DELIVERED || newOrderStatus == TO_BE_CANCELED || newOrderStatus == TO_BE_POSTPONED;
+      case TO_BE_DELIVERED:
+        return newOrderStatus == DELIVERED || newOrderStatus == TO_BE_POSTPONED;
+      case DELIVERED:
+        return newOrderStatus == FINISHED;
+      case FINISHED:
+        return false;
+      case CANCELED:
+        return false;
+      case TO_BE_CANCELED:
+        return newOrderStatus == CANCELED || newOrderStatus == TO_BE_PURCHASED;
+      case TO_BE_POSTPONED:
+        return newOrderStatus == TO_BE_PURCHASED || newOrderStatus == TO_BE_DELIVERED;
+      default:
+        throw new IllegalStatusTransitionException("Unexpected current status: " + oldOrderStatus);
+    }
   }
 }

@@ -40,6 +40,7 @@ import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
+import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
@@ -78,7 +79,7 @@ public class OrderController {
 
 
   @PatchMapping("/orders/{orderId}")
-  public ResponseEntity<Order> updateOrder(
+  public ResponseEntity<?> updateOrder(
       @PathVariable String orderId, @RequestBody @Valid
   UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
 
@@ -100,13 +101,19 @@ public class OrderController {
     }
 
     // Update Order
-    updateOrderAndOrderItemRequestDto.setConsumerId(currentLoginUserId);
-    updateOrderAndOrderItemRequestDto.setOrderId(orderId);
-    orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+    try {
+      updateOrderAndOrderItemRequestDto.setConsumerId(currentLoginUserId);
+      updateOrderAndOrderItemRequestDto.setOrderId(orderId);
+      orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
 
-    Order updatedOrder = orderService.getOrderById(orderId);
+      Order updatedOrder = orderService.getOrderById(orderId);
 
-    return ResponseEntity.status(HttpStatus.OK).body(updatedOrder);
+      return ResponseEntity.status(HttpStatus.OK).body(updatedOrder);
+
+    } catch (IllegalStatusTransitionException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
   }
 
   @DeleteMapping("/orders/{orderId}")
