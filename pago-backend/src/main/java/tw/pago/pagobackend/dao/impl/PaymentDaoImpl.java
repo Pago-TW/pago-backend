@@ -1,7 +1,9 @@
 package tw.pago.pagobackend.dao.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -11,6 +13,9 @@ import tw.pago.pagobackend.dao.PaymentDao;
 import tw.pago.pagobackend.dto.CreatePaymentRequestDto;
 import tw.pago.pagobackend.dto.UpdatePaymentRequestDto;
 import tw.pago.pagobackend.model.Payment;
+import tw.pago.pagobackend.model.PostponeRecord;
+import tw.pago.pagobackend.rowmapper.PaymentRowMapper;
+import tw.pago.pagobackend.rowmapper.PostponeRecordRowMapper;
 
 @Repository
 @AllArgsConstructor
@@ -26,7 +31,7 @@ public class PaymentDaoImpl implements PaymentDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
     map.put("paymentId", createPaymentRequestDto.getPaymentId());
     map.put("orderId", createPaymentRequestDto.getOrderId());
     map.put("isPaid", createPaymentRequestDto.getIsPaid());
@@ -38,9 +43,21 @@ public class PaymentDaoImpl implements PaymentDao {
 
   @Override
   public Payment getPaymentById(String paymentId) {
+    String sql = "SELECT payment_id, order_id, is_paid, create_date, update_date "
+        + "FROM payment "
+        + "WHERE payment_id = :paymentId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("paymentId", paymentId);
 
 
-    return null;
+    List<Payment> paymentList = namedParameterJdbcTemplate.query(sql, map, new PaymentRowMapper());
+
+    if (paymentList.size() > 0) {
+      return paymentList.get(0);
+    } else {
+      return null;
+    }
   }
 
   @Override

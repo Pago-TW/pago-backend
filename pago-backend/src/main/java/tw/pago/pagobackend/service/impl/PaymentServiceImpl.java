@@ -44,6 +44,8 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   public Payment gePaymentById(String paymentId) {
-    return null;
+
+
+    return paymentDao.getPaymentById(paymentId);
   }
 }
