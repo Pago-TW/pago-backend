@@ -62,6 +62,18 @@ public class PaymentDaoImpl implements PaymentDao {
 
   @Override
   public void updatePayment(UpdatePaymentRequestDto updatePaymentRequestDto) {
+    String sql = "UPDATE payment "
+        + "SET is_paid = :isPaid, "
+        + "    update_date = :updateDate "
+        + "WHERE payment_id = :paymentId";
+
+    Map<String, Object> map = new HashMap<>();
+    LocalDateTime now = LocalDateTime.now();
+    map.put("isPaid", updatePaymentRequestDto.getIsPaid());
+    map.put("updateDate", now);
+    map.put("paymentId", updatePaymentRequestDto.getPaymentId());
+
+    namedParameterJdbcTemplate.update(sql, map);
 
   }
 }
