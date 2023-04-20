@@ -45,7 +45,9 @@ import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.PostponeRecord;
+import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.service.PaymentService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
@@ -57,6 +59,8 @@ public class OrderController {
   private final OrderService orderService;
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final TripService tripService;
+  private final PaymentService paymentService;
+  private final BidService bidService;
 
   @PostMapping("/orders")
   public ResponseEntity<OrderResponseDto> createOrder(@RequestParam("file") List<MultipartFile> files,
@@ -261,7 +265,7 @@ public class OrderController {
     CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringCreation(createOrderRequestDto);
 
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(calculateOrderAmountResponseDto);
+    return ResponseEntity.status(HttpStatus.OK).body(calculateOrderAmountResponseDto);
 
 
   }
@@ -398,6 +402,49 @@ public class OrderController {
 
 
   }
+
+
+
+//  @PostMapping("/ecpay-checkout/callback")
+//  public String paymentCallback(
+//      @RequestParam(value = "MerchantTradeNo", required = true) String merchantTradeNo,
+//      @RequestParam(value = "PaymentDate", required = false) String paymentDate,
+//      @RequestParam(value = "PaymentType",required = false) String paymentType,
+//      @RequestParam(value = "PaymentTypeChargeFee", required = false) String paymentTypeChargeFee,
+//      @RequestParam(value = "RtnCode", required = true) String rtnCode,
+//      @RequestParam(value = "RtnMsg", required = false) String rtnMsg,
+//      @RequestParam(value = "SimulatePaid", required = false) String simulatePaid,
+//      @RequestParam(value = "StoreID", required = false) String storeId,
+//      @RequestParam(value = "TradeAmt", required = false) String tradeAmt,
+//      @RequestParam(value = "TradeDate", required = false) String tradeDate,
+//      @RequestParam(value = "TradeNo", required = false) String tradeNo,
+//      @RequestParam(value = "CheckMacValue", required = false) String checkMacValue
+//      ) {
+//    System.out.println("ECpay-checkout Callback");
+//
+//    if (rtnCode.equals("1")) {
+//      UpdatePaymentRequestDto updatePaymentRequestDto = new UpdatePaymentRequestDto();
+//      updatePaymentRequestDto.setPaymentId(merchantTradeNo);
+//      updatePaymentRequestDto.setIsPaid(true);
+//
+//      paymentService.updatePayment(updatePaymentRequestDto);
+//
+//      Payment payment = paymentService.getPaymentById(merchantTradeNo);
+//
+//      try {
+//        bidService.chooseBid(payment.getOrderId(), payment.getBidId());
+//
+//      } catch (IllegalStatusTransitionException e) {
+//        return e.getMessage();
+//      }
+//
+//    } else {
+//      return null;
+//    }
+//
+//
+//    return "1|OK";
+//  }
 
 
 

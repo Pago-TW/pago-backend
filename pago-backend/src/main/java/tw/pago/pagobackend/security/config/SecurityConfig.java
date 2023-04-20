@@ -27,11 +27,7 @@ import tw.pago.pagobackend.service.impl.CustomOAuth2UserServiceImpl;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-    securedEnabled = true,
-    jsr250Enabled = true,
-    prePostEnabled = true
-)
+@EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 @AllArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -68,9 +64,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     return new BCryptPasswordEncoder();
   }
 
-
-
-
   @Bean(BeanIds.AUTHENTICATION_MANAGER)
   @Override
   public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -81,19 +74,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http
         .cors()
-          .and()
+        .and()
         .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-          .and()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
         .csrf()
-          .disable()
+        .disable()
         .formLogin()
-          .disable()
+        .disable()
         .httpBasic()
-          .disable()
+        .disable()
         .exceptionHandling()
         .authenticationEntryPoint(new RestAuthenticationEntryPoint())
-          .and()
+        .and()
         .authorizeRequests()
         .antMatchers(
             "/",
@@ -105,33 +98,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/**/*.jpg",
             "/**/*.html",
             "/**/*.css",
-            "/**/*.js"
-            )
-          .permitAll()
+            "/**/*.js")
+        .permitAll()
         .antMatchers(
             "/auth/**",
             "/oauth2/**",
             "/countries**",
             "/cities/**",
-            "/health"
-           )
-          .permitAll()
-        .antMatchers(HttpMethod.GET,  "/orders/**/bids", "/reviews/**", "/orders")
-          .permitAll()
+            "/health",
+            "/ecpay-checkout/callback")
+        .permitAll()
+        .antMatchers(HttpMethod.GET, "/orders/**/bids", "/reviews/**", "/orders")
+        .permitAll()
         .anyRequest()
         .authenticated()
-          .and()
+        .and()
         .oauth2Login()
         .authorizationEndpoint()
-          .baseUri("/oauth2/authorize")
+        .baseUri("/oauth2/authorize")
         .authorizationRequestRepository(cookieAuthorizationRequestRepository())
-          .and()
+        .and()
         .redirectionEndpoint()
-          .baseUri("/oauth2/callback/*")
-          .and()
+        .baseUri("/oauth2/callback/*")
+        .and()
         .userInfoEndpoint()
-          .userService(customOAuth2UserService)
-          .and()
+        .userService(customOAuth2UserService)
+        .and()
         .successHandler(oAuth2AuthenticationSuccessHandler)
         .failureHandler(oAuth2AuthenticationFailureHandler);
 

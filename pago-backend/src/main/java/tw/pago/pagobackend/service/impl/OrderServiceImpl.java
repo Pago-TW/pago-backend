@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +108,8 @@ public class OrderServiceImpl implements OrderService {
       UserDao userDao,
       ModelMapper modelMapper,
       CancellationRecordDao cancellationRecordDao,
-      PostponeRecordDao postponeRecordDao) {
+      PostponeRecordDao postponeRecordDao
+      ) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
     this.fileService = fileService;
@@ -359,16 +359,16 @@ public class OrderServiceImpl implements OrderService {
     boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
 
     // If the order status has been changed, send the email notification
-    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
-    User currentLoginUser = userDao.getUserById(currentLoginUserId);
+    String consumerId = oldOrder.getConsumerId();
+    User consumer = userDao.getUserById(consumerId);
     if (orderStatusChanged) {
       System.out.println("status updated");
       // Get the current login user's email
-      String currentLoginUserEmail = currentLoginUser.getEmail();
+      String currentLoginUserEmail = consumer.getEmail();
       // Get the order item name
       String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
       // Get the user name
-      String username = currentLoginUser.getFirstName();
+      String username = consumer.getFirstName();
       // Get current date
       Date now = new Date();
       String date = new SimpleDateFormat("yyyy-MM-dd").format(now);

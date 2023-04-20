@@ -2,12 +2,11 @@ package tw.pago.pagobackend.service;
 
 import tw.pago.pagobackend.dto.CreatePaymentRequestDto;
 import tw.pago.pagobackend.dto.UpdatePaymentRequestDto;
-import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Payment;
 
 public interface PaymentService {
 
-  String ecpayCheckout(Order order);
+  String ecpayCheckout(String bidId);
 
   String paymentCallback();
 
@@ -15,6 +14,6 @@ public interface PaymentService {
 
   void updatePayment(UpdatePaymentRequestDto updatePaymentRequestDto);
 
-  Payment gePaymentById(String paymentId);
+  Payment getPaymentById(String paymentId);
 
 }

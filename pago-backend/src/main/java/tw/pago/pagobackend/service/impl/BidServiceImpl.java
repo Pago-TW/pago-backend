@@ -1,12 +1,12 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
+import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
@@ -155,14 +156,42 @@ public class BidServiceImpl implements BidService {
 
   @Override
   @Transactional
-  public void chooseBid(String orderId, String bidId) {
+  public void chooseBid(String orderId, String bidId)  {
     Bid bid = getBidById(bidId);
+    BigDecimal bidAmount = bid.getBidAmount();
+    Order order = orderService.getOrderById(orderId);
 
     if (bid == null) {
         throw new ResourceNotFoundException(bidId, "Bid not found", bidId);
     }
 
+    if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+      throw new IllegalStatusTransitionException("The status of this order is not REQUESTED");
+    }
+
+    if (bid.getBidStatus().equals(BidStatusEnum.IS_CHOSEN)) {
+      throw new IllegalStatusTransitionException("This bid has been chosen");
+    }
+
+
     bid.setBidStatus(BidStatusEnum.IS_CHOSEN);
+
+
+
+    // Choose bid will update the bidStatus
+    bidDao.chooseBid(bid);
+    UpdateOrderItemDto updateOrderItemDto = new UpdateOrderItemDto();
+    BeanUtils.copyProperties(order.getOrderItem(), updateOrderItemDto);
+    UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
+        .travelerFee(bidAmount)
+        .orderStatus(OrderStatusEnum.TO_BE_PURCHASED)
+        .build();
+
+    // Update orderStatus & travelerFee
+    orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+
+
+
 
     /*
       * Send email to the bidder
@@ -182,7 +211,6 @@ public class BidServiceImpl implements BidService {
     String bidderEmail = bidder.getEmail();
 
     // Get the order item name
-    Order order = orderService.getOrderById(orderId);
     String orderItemName = order.getOrderItem().getName();
     // Get the user name
     String orderCreatorId = order.getConsumerId();
@@ -202,19 +230,12 @@ public class BidServiceImpl implements BidService {
     emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
     emailRequest.setBody(emailBody);
 
-
-    // Choose bid will update the bidStatus & orderStatus
-    bidDao.chooseBid(bid);
-    UpdateOrderItemDto updateOrderItemDto = new UpdateOrderItemDto();
-    BeanUtils.copyProperties(order.getOrderItem(), updateOrderItemDto);
-    UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-        .orderStatus(OrderStatusEnum.TO_BE_PURCHASED)
-        .build();
-    orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
-
     // Send the email notification
     sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent!");
+
+
+
   }
 
   @Override

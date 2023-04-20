@@ -1,12 +1,12 @@
 package tw.pago.pagobackend.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import tw.pago.pagobackend.assembler.BidAssembler;
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
@@ -27,11 +27,10 @@ import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
-import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.service.PaymentService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
-import tw.pago.pagobackend.util.JwtTokenProvider;
 
 @RestController
 @Validated
@@ -41,6 +40,7 @@ public class BidController {
   private final BidService bidService;
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final OrderService orderService;
+  private final PaymentService paymentService;
 
   @PostMapping("/orders/{orderId}/bids")
   public ResponseEntity<Bid> createBid(@PathVariable String orderId,
@@ -117,12 +117,12 @@ public class BidController {
 
   // Consumer chooses a bid
   @PatchMapping("/bids/{bidId}/choose")
-  public ResponseEntity<?> chooseBid(@PathVariable String bidId) {
+  public ResponseEntity<String> chooseBid(@PathVariable String bidId)
+      throws UnsupportedEncodingException {
     BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
     Order order = orderService.getOrderById(bidResponseDto.getOrderId());
     String orderCreatorId = order.getConsumerId();
-    String orderId = bidResponseDto.getOrderId();
 
     if (!orderCreatorId.equals(currentLoginUserId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
@@ -132,10 +132,14 @@ public class BidController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Order Status is not REQUESTED");
     }
 
+    if (bidResponseDto.getBidStatus().equals(BidStatusEnum.IS_CHOSEN)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("The bid has been chosen");
+    }
 
-      bidService.chooseBid(orderId, bidId);
-      Bid updatedBid = bidService.getBidById(bidId);
-      return ResponseEntity.status(HttpStatus.OK).body(updatedBid);
+    // Direct consumer to ECpay payment page, if payment success, ECpay will callback and update orderStatus & bidStatus
+    String aioCheckoutALLForm = paymentService.ecpayCheckout(bidId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(aioCheckoutALLForm);
   }
 
 
