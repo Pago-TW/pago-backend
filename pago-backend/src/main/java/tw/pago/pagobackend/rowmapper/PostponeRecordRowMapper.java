@@ -21,8 +21,8 @@ public class PostponeRecordRowMapper implements RowMapper<PostponeRecord> {
     postponeRecord.setPostponeReason(
         PostponeReasonCategoryEnum.valueOf(resultSet.getString("postpone_reason")));
     postponeRecord.setNote(resultSet.getString("note"));
-    postponeRecord.setCreateDate(resultSet.getDate("create_date").toLocalDate());
-    postponeRecord.setUpdateDate(resultSet.getDate("update_date").toLocalDate());
+    postponeRecord.setCreateDate(resultSet.getDate("create_date").toLocalDate()); // TODO 要改LocalDateTime
+    postponeRecord.setUpdateDate(resultSet.getDate("update_date").toLocalDate()); // TODO 要改LocalDateTime
     postponeRecord.setIsPostponed(resultSet.getBoolean("is_postponed"));
     postponeRecord.setOriginalOrderStatus(
         OrderStatusEnum.valueOf(resultSet.getString("original_order_status")));
