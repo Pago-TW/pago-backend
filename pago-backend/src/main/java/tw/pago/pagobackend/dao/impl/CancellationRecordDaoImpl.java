@@ -1,7 +1,6 @@
 package tw.pago.pagobackend.dao.impl;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +12,7 @@ import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.model.CancellationRecord;
-import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.rowmapper.CancellationRecordRowMapper;
-import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 
 @Repository
 @AllArgsConstructor
