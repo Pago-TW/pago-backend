@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class CreateChatRoomRequestDto {
-  private CreateChatRoomUserMappingRequestDto createChatRoomUserMappingRequestDto;
   private String chatroomId;
   private LocalDate createDate;
   private LocalDate updateDate;

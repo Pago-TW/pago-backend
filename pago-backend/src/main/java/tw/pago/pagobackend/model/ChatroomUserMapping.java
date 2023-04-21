@@ -1,7 +1,7 @@
 package tw.pago.pagobackend.model;
 
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,7 @@ public class ChatroomUserMapping {
   private String chatroomUserMappingId;
   private String chatroomId;
   private String userId;
-  private LocalDate createDate;
-  private LocalDate updateDate;
+  private LocalDateTime createDate;
+  private LocalDateTime updateDate;
 
 }

@@ -11,8 +11,8 @@ public class ChatroomRowMapper implements RowMapper<Chatroom> {
   public Chatroom mapRow(ResultSet resultSet, int rowNum) throws SQLException {
     Chatroom chatroom = new Chatroom();
     chatroom.setChatroomId(resultSet.getString("chatroom_id"));
-    chatroom.setCreateDate(resultSet.getDate("create_date").toLocalDate());
-    chatroom.setUpdateDate(resultSet.getDate("update_date").toLocalDate());
+    chatroom.setCreateDate(resultSet.getTimestamp("create_date").toLocalDateTime());
+    chatroom.setUpdateDate(resultSet.getTimestamp("update_date").toLocalDateTime());
 
     return chatroom;
   }
