@@ -24,6 +24,8 @@ public class ChatServiceImpl implements ChatService {
     String messageId = uuidGenerator.getUuid();
     sendMessageRequestDto.setMessageId(messageId);
 
+    messageDao.createMessage(sendMessageRequestDto);
+
     Message message = messageDao.getMessageById(messageId);
 
     return message;

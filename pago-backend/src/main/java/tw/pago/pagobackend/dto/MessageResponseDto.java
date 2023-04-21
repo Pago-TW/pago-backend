@@ -1,17 +1,18 @@
 package tw.pago.pagobackend.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.MessageTypeEnum;
-import tw.pago.pagobackend.model.User;
 
 @NoArgsConstructor
 @Data
 public class MessageResponseDto {
+  private String senderId;
+  private String chatroomId;
   private String content;
   private String senderName;
-  private LocalDate sendDate;
+  private LocalDateTime sendDate;
   private MessageTypeEnum messageType;
 
 }

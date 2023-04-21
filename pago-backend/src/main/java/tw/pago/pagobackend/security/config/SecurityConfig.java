@@ -106,7 +106,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/countries**",
             "/cities/**",
             "/health",
-            "/ecpay-checkout/callback")
+            "/ecpay-checkout/callback",
+            "/ws/**")
         .permitAll()
         .antMatchers(HttpMethod.GET, "/orders/**/bids", "/reviews/**", "/orders")
         .permitAll()

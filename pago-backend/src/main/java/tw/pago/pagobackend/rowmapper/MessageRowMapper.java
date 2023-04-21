@@ -17,7 +17,7 @@ public class MessageRowMapper implements RowMapper<Message> {
         .content(resultSet.getString("content"))
         .senderId(resultSet.getString("sender_id"))
         .messageType(MessageTypeEnum.valueOf(resultSet.getString("message_type")))
-        .sendDate(resultSet.getDate("send_date").toLocalDate())
+        .sendDate(resultSet.getTimestamp("send_date").toLocalDateTime())
         .build();
 
 

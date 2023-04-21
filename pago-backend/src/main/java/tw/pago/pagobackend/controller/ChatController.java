@@ -54,9 +54,17 @@ public class ChatController {
   @MessageMapping("/send-message")
   public void receiveMessage(@Payload SendMessageRequestDto sendMessageRequestDto) {
 
-    System.out.println("sendMessage");
-    User sender = currentUserInfoProvider.getCurrentLoginUser();
+    System.out.println("Frontend send Message");
+    User sender = User.builder().build();
+    sender.setUserId("cc0fc75a5a854b1e9980d4acbe82086d");
+    sender.setFirstName("LILY ");
+    sender.setLastName("LILY");
+    sender.setEmail("a0923183408@gmail.com");
+    sender.setAvatarUrl("https://lh3.googleusercontent.com/a/AGNmyxYCn5ZTzVOK_r0TIN829tKCiI1zxd7e84okgIpI_TA=s96-c");
+
+
     sendMessageRequestDto.setSenderId(sender.getUserId());
+    sendMessageRequestDto.setChatRoomId("a10fc75a5a854b1e9980d4aaaa82086d");
 
     Message message = chatService.createMessage(sendMessageRequestDto);
 
@@ -66,13 +74,12 @@ public class ChatController {
 
     messagingTemplate.convertAndSend("/chatroom/message", messageResponseDto);
 
-
-
-
   }
 
   @SendTo("/chatroom/message")
   public MessageResponseDto broadcastMessage(@Payload MessageResponseDto messageResponseDto) {
+
+//    System.out.println("Broadcast Message!");
 
     return messageResponseDto;
   }

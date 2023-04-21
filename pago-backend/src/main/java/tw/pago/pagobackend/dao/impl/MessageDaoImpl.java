@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.dao.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class MessageDaoImpl implements MessageDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
 
     map.put("messageId", sendMessageRequestDto.getMessageId());
     map.put("chatroomId", sendMessageRequestDto.getChatRoomId());
@@ -41,7 +42,7 @@ public class MessageDaoImpl implements MessageDao {
 
   @Override
   public Message getMessageById(String messageId) {
-    String sql = "SELECT message_id, chatroom_id, sender_id, content, message_type, send_date, "
+    String sql = "SELECT message_id, chatroom_id, sender_id, content, message_type, send_date "
         + "FROM message "
         + "WHERE message_id = :messageId ";
 
