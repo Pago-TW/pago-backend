@@ -1,5 +1,9 @@
 package tw.pago.pagobackend.controller;
 
+import java.util.List;
+import java.util.Optional;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -10,12 +14,18 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.dto.JoinRoomRequest;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.MessageResponseDto;
 import tw.pago.pagobackend.dto.SendMessageRequestDto;
+import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.Message;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.ChatService;
@@ -24,6 +34,7 @@ import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @Controller
 @AllArgsConstructor
+@Validated
 public class ChatController {
 
   private final SimpMessagingTemplate messagingTemplate;
@@ -95,6 +106,58 @@ public class ChatController {
 
     return JoinRoomRequest.getUserName() + " 加入了 " + roomName + " 聊天室";
   }
+
+
+  @GetMapping("/chatrooms")
+  public ResponseEntity<?> enterChatroom(
+      @RequestParam(required = false) String chatWith,
+      @RequestParam(required = false) String search,
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "update_date") String orderBy,
+      @RequestParam(defaultValue = "DESC") String sort) {
+
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    if (chatWith != null) {
+      Optional<Chatroom> optionalChatroom = chatService.findChatroomByUserIds(currentLoginUserId,
+          chatWith);
+
+      // If the chatroom doesn't exist, create a new one
+      Chatroom chatroom = optionalChatroom.orElseGet(() -> {
+        CreateChatRoomRequestDto createChatRoomRequestDto = new CreateChatRoomRequestDto();
+        System.out.println("Create a new chatroom...!");
+        return chatService.createChatroom(createChatRoomRequestDto, currentLoginUserId, chatWith);
+      });
+
+      return ResponseEntity.status(HttpStatus.OK).body(chatroom);
+    }
+
+
+    // Chatroom List
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .userId(currentLoginUserId)
+        .search(search)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
+        .build();
+
+
+    List<Chatroom> chatroomList = chatService.getChatroomList(listQueryParametersDto);
+    Integer total = chatService.countChatroom(listQueryParametersDto);
+
+    ListResponseDto<Chatroom> chatroomListResponseDto = ListResponseDto.<Chatroom>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .data(chatroomList)
+        .build();
+
+    return ResponseEntity.status(HttpStatus.OK).body(chatroomListResponseDto);
+  }
+
 
 
 }

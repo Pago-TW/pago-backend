@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import tw.pago.pagobackend.dao.ChatroomDao;
 import tw.pago.pagobackend.dao.MessageDao;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.dto.CreateChatRoomUserMappingRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.SendMessageRequestDto;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.ChatroomUserMapping;
@@ -38,10 +40,10 @@ public class ChatServiceImpl implements ChatService {
   @Override
   @Transactional
   public Chatroom createChatroom(CreateChatRoomRequestDto createChatRoomRequestDto,
-      String currentLoginUserId, String toUserId) {
+      String currentLoginUserId, String otherUserId) {
     String chatroomId = uuidGenerator.getUuid();
     String loginUserChatroomUserMappingId = uuidGenerator.getUuid();
-    String toUserChatroomUserMappingId = uuidGenerator.getUuid();
+    String otherUserChatroomUserMappingId = uuidGenerator.getUuid();
 
 
 
@@ -57,11 +59,11 @@ public class ChatServiceImpl implements ChatService {
     chatroomDao.createChatroomUserMapping(loginUserCreateChatRoomUserMappingRequestDto);
 
     // Create toUser's chatroomUserMapping
-    CreateChatRoomUserMappingRequestDto toUserChatRoomUserMappingRequestDto = new CreateChatRoomUserMappingRequestDto();
-    toUserChatRoomUserMappingRequestDto.setChatroomUserMappingId(toUserChatroomUserMappingId);
-    toUserChatRoomUserMappingRequestDto.setUserId(toUserId);
-    toUserChatRoomUserMappingRequestDto.setChatroomId(chatroomId);
-    chatroomDao.createChatroomUserMapping(toUserChatRoomUserMappingRequestDto);
+    CreateChatRoomUserMappingRequestDto otherUserChatRoomUserMappingRequestDto = new CreateChatRoomUserMappingRequestDto();
+    otherUserChatRoomUserMappingRequestDto.setChatroomUserMappingId(otherUserChatroomUserMappingId);
+    otherUserChatRoomUserMappingRequestDto.setUserId(otherUserId);
+    otherUserChatRoomUserMappingRequestDto.setChatroomId(chatroomId);
+    chatroomDao.createChatroomUserMapping(otherUserChatRoomUserMappingRequestDto);
 
     // Get Chatroom
 
@@ -86,5 +88,17 @@ public class ChatServiceImpl implements ChatService {
   @Override
   public Optional<Chatroom> findChatroomByUserIds(String userIdA, String userIdB) {
     return chatroomDao.findChatroomByUserIds(userIdA, userIdB);
+  }
+
+  @Override
+  public List<Chatroom> getChatroomList(ListQueryParametersDto listQueryParametersDto) {
+
+
+    return chatroomDao.getChatroomList(listQueryParametersDto);
+  }
+
+  @Override
+  public Integer countChatroom(ListQueryParametersDto listQueryParametersDto) {
+    return chatroomDao.countChatroom(listQueryParametersDto);
   }
 }

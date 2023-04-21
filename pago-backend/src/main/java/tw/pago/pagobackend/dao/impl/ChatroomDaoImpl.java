@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.dao.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -12,10 +13,13 @@ import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.ChatroomDao;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.dto.CreateChatRoomUserMappingRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.ChatroomUserMapping;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 import tw.pago.pagobackend.rowmapper.ChatroomUserMappingRowMapper;
+import tw.pago.pagobackend.rowmapper.TripRowMapper;
 
 @Repository
 @AllArgsConstructor
@@ -115,5 +119,72 @@ public class ChatroomDaoImpl implements ChatroomDao {
     } else {
       return Optional.empty();
     }
+  }
+
+  @Override
+  public List<Chatroom> getChatroomList(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT DISTINCT cr.chatroom_id, cr.create_date, cr.update_date "
+        + "FROM chatroom AS cr "
+        + "JOIN chatroom_user_mapping AS cum ON cr.chatroom_id = cum.chatroom_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. currentLoginUserId, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+
+    List<Chatroom> chatroomList = namedParameterJdbcTemplate.query(sql, map, new ChatroomRowMapper());
+
+    return chatroomList;
+  }
+
+  @Override
+  public Integer countChatroom(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(DISTINCT cr.chatroom_id) "
+        + "FROM chatroom AS cr "
+        + "JOIN chatroom_user_mapping AS cum ON cr.chatroom_id = cum.chatroom_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. status, search
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
+
+  private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+
+    if (listQueryParametersDto.getUserId() != null) {
+      sql = sql + " AND cum.user_id = :userId ";
+      map.put("userId", listQueryParametersDto.getUserId());
+    }
+
+
+
+    if (listQueryParametersDto.getSearch() != null) {
+      sql = sql + " AND cr.chatroom_id IN ("
+          + "  SELECT chatroom_id "
+          + "  FROM chatroom_user_mapping AS cum2 "
+          + "  JOIN user AS u2 ON cum2.user_id = u2.user_id "
+          + "  WHERE cum2.user_id != :userId AND (u2.first_name LIKE :search OR u2.last_name LIKE :search)"
+          + ") ";
+      map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+
+    return sql;
   }
 }
