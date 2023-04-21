@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class Chatroom {
-  private String chatRoomId;
+  private String chatroomId;
   private LocalDate createDate;
   private LocalDate updateDate;
 

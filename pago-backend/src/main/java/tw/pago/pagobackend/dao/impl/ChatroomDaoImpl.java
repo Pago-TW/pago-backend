@@ -11,10 +11,7 @@ import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.ChatroomDao;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.model.Chatroom;
-import tw.pago.pagobackend.model.ChatroomUserMapping;
-import tw.pago.pagobackend.model.Message;
 import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
-import tw.pago.pagobackend.rowmapper.MessageRowMapper;
 
 @Repository
 @AllArgsConstructor
