@@ -24,4 +24,7 @@ public interface ChatroomDao {
 
   Integer countChatroom(ListQueryParametersDto listQueryParametersDto);
 
+  boolean isChatroomUserMappingExists(String chatroomId, String userId);
+
+
 }

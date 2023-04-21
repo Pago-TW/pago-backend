@@ -45,28 +45,31 @@ public class ChatServiceImpl implements ChatService {
     String loginUserChatroomUserMappingId = uuidGenerator.getUuid();
     String otherUserChatroomUserMappingId = uuidGenerator.getUuid();
 
-
-
     // Create Chatroom
     createChatRoomRequestDto.setChatroomId(chatroomId);
     chatroomDao.createChatroom(createChatRoomRequestDto);
 
-    // Create currentLoginUser's chatroomUserMapping
-    CreateChatRoomUserMappingRequestDto loginUserCreateChatRoomUserMappingRequestDto = new CreateChatRoomUserMappingRequestDto();
-    loginUserCreateChatRoomUserMappingRequestDto.setChatroomUserMappingId(loginUserChatroomUserMappingId);
-    loginUserCreateChatRoomUserMappingRequestDto.setUserId(currentLoginUserId);
-    loginUserCreateChatRoomUserMappingRequestDto.setChatroomId(chatroomId);
-    chatroomDao.createChatroomUserMapping(loginUserCreateChatRoomUserMappingRequestDto);
+    // Check isChatroomUserMappingExists
+    if (!chatroomDao.isChatroomUserMappingExists(chatroomId, currentLoginUserId)) {
+      // Create currentLoginUser's chatroomUserMapping
+      CreateChatRoomUserMappingRequestDto loginUserCreateChatRoomUserMappingRequestDto = new CreateChatRoomUserMappingRequestDto();
+      loginUserCreateChatRoomUserMappingRequestDto.setChatroomUserMappingId(loginUserChatroomUserMappingId);
+      loginUserCreateChatRoomUserMappingRequestDto.setUserId(currentLoginUserId);
+      loginUserCreateChatRoomUserMappingRequestDto.setChatroomId(chatroomId);
+      chatroomDao.createChatroomUserMapping(loginUserCreateChatRoomUserMappingRequestDto);
+    }
 
-    // Create toUser's chatroomUserMapping
-    CreateChatRoomUserMappingRequestDto otherUserChatRoomUserMappingRequestDto = new CreateChatRoomUserMappingRequestDto();
-    otherUserChatRoomUserMappingRequestDto.setChatroomUserMappingId(otherUserChatroomUserMappingId);
-    otherUserChatRoomUserMappingRequestDto.setUserId(otherUserId);
-    otherUserChatRoomUserMappingRequestDto.setChatroomId(chatroomId);
-    chatroomDao.createChatroomUserMapping(otherUserChatRoomUserMappingRequestDto);
+    // Check isChatroomUserMappingExists
+    if (!chatroomDao.isChatroomUserMappingExists(chatroomId, otherUserId)) {
+      // Create otherUser's chatroomUserMapping
+      CreateChatRoomUserMappingRequestDto otherUserChatRoomUserMappingRequestDto = new CreateChatRoomUserMappingRequestDto();
+      otherUserChatRoomUserMappingRequestDto.setChatroomUserMappingId(otherUserChatroomUserMappingId);
+      otherUserChatRoomUserMappingRequestDto.setUserId(otherUserId);
+      otherUserChatRoomUserMappingRequestDto.setChatroomId(chatroomId);
+      chatroomDao.createChatroomUserMapping(otherUserChatRoomUserMappingRequestDto);
+    }
 
     // Get Chatroom
-
     Chatroom chatroom = chatroomDao.getChatroomById(chatroomId);
 
 

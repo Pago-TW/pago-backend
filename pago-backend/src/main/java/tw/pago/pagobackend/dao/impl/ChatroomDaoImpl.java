@@ -164,6 +164,20 @@ public class ChatroomDaoImpl implements ChatroomDao {
     return total;
   }
 
+  @Override
+  public boolean isChatroomUserMappingExists(String chatroomId, String userId) {
+    String sql = "SELECT COUNT(*) FROM chatroom_user_mapping WHERE chatroom_id = :chatroomId AND user_id = :userId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("chatroomId", chatroomId);
+    map.put("userId", userId);
+
+    boolean isExistsChatroomUserMapping = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class) > 0;
+
+    return isExistsChatroomUserMapping;
+  }
+
+
 
   private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
 
