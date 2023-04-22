@@ -76,6 +76,8 @@ public class OrderResponseDto {
   private BigDecimal platformFee;
   private BigDecimal totalAmount;
   private OrderChosenShopperDto shopper;
+  @JsonProperty("isApplicant")
+  private Boolean isApplicant;
   @JsonProperty("isBidder")
   private boolean isBidder;
   private boolean hasNewActivity;

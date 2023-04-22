@@ -3,6 +3,7 @@ package tw.pago.pagobackend.service.impl;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.CANCELED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.DELIVERED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.FINISHED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.REQUESTED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_CANCELED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_DELIVERED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_POSTPONED;
@@ -140,7 +141,7 @@ public class OrderServiceImpl implements OrderService {
     createOrderRequestDto.setSerialNumber(orderSerialNumber);
     createOrderRequestDto.setPlatformFeePercent(PLATFORM_FEE_PERCENT);
     createOrderRequestDto.setTariffFeePercent(TARIFF_FEE_PERCENT);
-    createOrderRequestDto.setOrderStatus(OrderStatusEnum.REQUESTED);
+    createOrderRequestDto.setOrderStatus(REQUESTED);
 
     orderDao.createOrderItem(createOrderRequestDto);
     orderDao.createOrder(userId, createOrderRequestDto);
@@ -167,6 +168,7 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public Order getOrderById(String orderId) {
     Order order = orderDao.getOrderById(orderId);
+    OrderStatusEnum orderStatus = order.getOrderStatus();
 
     // Calculate Fee
     Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
@@ -184,13 +186,20 @@ public class OrderServiceImpl implements OrderService {
 
 
     // If the orderStatus is not REQUESTED, it means the order creator has already chosen a shopper(bid)
-    if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+    if (!orderStatus.equals(REQUESTED)) {
       // Get the shopper for the order
       OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
 
       // Set shopper to order
       order.setShopper(orderChosenShopperDto);
     }
+
+
+    // If the orderStatus is TO_BE_CANCELED or TO_BE_POSTPONED, check is loginUser is Applicant
+    if (orderStatus.equals(TO_BE_CANCELED) || orderStatus.equals(TO_BE_POSTPONED)) {
+      order.setIsApplicant(isCurrentLoginUserApplicant(order));
+    }
+
 
     return order;
   }
@@ -249,7 +258,7 @@ public class OrderServiceImpl implements OrderService {
     boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(orderId);
     order.setBidder(isCurrentLoginUserPlaceBid);
 
-    if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+    if (!order.getOrderStatus().equals(REQUESTED)) {
       // Get the shopper for the order
       OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
 
@@ -408,12 +417,17 @@ public class OrderServiceImpl implements OrderService {
       boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(order.getOrderId());
       order.setBidder(isCurrentLoginUserPlaceBid);
 
-      if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+      if (!order.getOrderStatus().equals(REQUESTED)) {
         // Get the shopper for the order
         OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
 
         // Set shopper to order
         order.setShopper(orderChosenShopperDto);
+      }
+
+      // If the orderStatus is TO_BE_CANCELED or TO_BE_POSTPONED, check is loginUser is Applicant
+      if (order.getOrderStatus().equals(TO_BE_CANCELED) || order.getOrderStatus().equals(TO_BE_POSTPONED)) {
+        order.setIsApplicant(isCurrentLoginUserApplicant(order));
       }
     }
 
@@ -440,7 +454,7 @@ public class OrderServiceImpl implements OrderService {
       boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(order.getOrderId());
       order.setBidder(isCurrentLoginUserPlaceBid);
 
-      if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+      if (!order.getOrderStatus().equals(REQUESTED)) {
         // Get the shopper for the order
         OrderChosenShopperDto orderChosenShopperDto = getOrderChosenShopper(order);
 
@@ -905,4 +919,24 @@ public class OrderServiceImpl implements OrderService {
         throw new IllegalStatusTransitionException("Unexpected current status: " + oldOrderStatus);
     }
   }
+
+
+  private boolean isCurrentLoginUserApplicant(Order order) {
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    if (currentLoginUserId == null) {
+      return false;
+    }
+
+    switch (order.getOrderStatus()) {
+      case TO_BE_CANCELED:
+        CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(order.getOrderId());
+        return cancellationRecord.getUserId().equals(currentLoginUserId);
+      case TO_BE_POSTPONED:
+        PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(order.getOrderId());
+        return postponeRecord.getUserId().equals(currentLoginUserId);
+      default:
+        return false;
+    }
+  }
+
 }
