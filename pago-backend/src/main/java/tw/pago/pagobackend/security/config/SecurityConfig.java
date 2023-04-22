@@ -107,9 +107,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/cities/**",
             "/health",
             "/ecpay-checkout/callback",
-            "/ws/**")
+            "/ws/**",
+            "/files/**" ) // TODO 暫時為了測試聊天室用，之後要改回來
         .permitAll()
-        .antMatchers(HttpMethod.GET, "/orders/**/bids", "/reviews/**", "/orders")
+        .antMatchers(
+            HttpMethod.GET,
+            "/orders/**/bids",
+            "/reviews/**",
+            "/orders",
+            "/users/{userId}")
         .permitAll()
         .anyRequest()
         .authenticated()
