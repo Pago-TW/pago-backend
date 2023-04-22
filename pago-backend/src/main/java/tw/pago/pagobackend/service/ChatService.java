@@ -29,6 +29,8 @@ public interface ChatService {
 
   List<Chatroom> getChatroomList(ListQueryParametersDto listQueryParametersDto);
 
+  List<ChatroomResponseDto> getChatroomResponseDtoListByChatroomListAndUser(List<Chatroom> chatroomList, User user);
+
   Integer countChatroom(ListQueryParametersDto listQueryParametersDto);
 
 

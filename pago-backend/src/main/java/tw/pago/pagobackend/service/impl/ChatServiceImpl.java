@@ -2,6 +2,7 @@ package tw.pago.pagobackend.service.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -154,6 +155,18 @@ public class ChatServiceImpl implements ChatService {
 
     return chatroomDao.getChatroomList(listQueryParametersDto);
   }
+
+  @Override
+  public List<ChatroomResponseDto> getChatroomResponseDtoListByChatroomListAndUser(
+      List<Chatroom> chatroomList, User user) {
+
+    List<ChatroomResponseDto> chatroomResponseDtoList = chatroomList.stream()
+        .map(chatroom -> getChatroomResponseDtoByChatroomAndUser(chatroom, user))
+        .collect(Collectors.toList());
+
+    return chatroomResponseDtoList;
+  }
+
 
   @Override
   public Integer countChatroom(ListQueryParametersDto listQueryParametersDto) {

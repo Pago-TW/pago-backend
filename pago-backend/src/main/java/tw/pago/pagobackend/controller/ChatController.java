@@ -121,12 +121,15 @@ public class ChatController {
       @RequestParam(defaultValue = "update_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
+    // Get the current logged-in user's ID
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    // Get the current logged-in user object
     User currentLoginUser = currentUserInfoProvider.getCurrentLoginUser();
 
+    // If the request is to chat with a specific user
     if (chatWith != null) {
-      Optional<Chatroom> optionalChatroom = chatService.findChatroomByUserIds(currentLoginUserId,
-          chatWith);
+      // Find the existing chatroom for the two users
+      Optional<Chatroom> optionalChatroom = chatService.findChatroomByUserIds(currentLoginUserId, chatWith);
 
       // If the chatroom doesn't exist, create a new one
       Chatroom chatroom = optionalChatroom.orElseGet(() -> {
@@ -135,13 +138,14 @@ public class ChatController {
         return chatService.createChatroom(createChatRoomRequestDto, currentLoginUserId, chatWith);
       });
 
+      // Get chatroom details with the ChatroomResponseDto object
       ChatroomResponseDto chatroomResponseDto = chatService.getChatroomResponseDtoByChatroomAndUser(chatroom, currentLoginUser);
 
       return ResponseEntity.status(HttpStatus.OK).body(chatroomResponseDto);
     }
 
-
-    // Chatroom List
+    // If the request is to get the chatroom list
+    // Create a list query parameters DTO with the given parameters
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .userId(currentLoginUserId)
         .search(search)
@@ -151,19 +155,25 @@ public class ChatController {
         .sort(sort)
         .build();
 
-
+    // Get the chatroom list based on the query parameters
     List<Chatroom> chatroomList = chatService.getChatroomList(listQueryParametersDto);
+    // Get the chatroom response DTO list for the chatroomList and current user
+    List<ChatroomResponseDto> chatroomResponseDtoList = chatService.getChatroomResponseDtoListByChatroomListAndUser(chatroomList, currentLoginUser);
+
+    // Count the total number of chatroomList
     Integer total = chatService.countChatroom(listQueryParametersDto);
 
-    ListResponseDto<Chatroom> chatroomListResponseDto = ListResponseDto.<Chatroom>builder()
+    // Create a list response DTO with the chatroom response DTOs
+    ListResponseDto<ChatroomResponseDto> chatroomListResponseDto = ListResponseDto.<ChatroomResponseDto>builder()
         .total(total)
         .startIndex(startIndex)
         .size(size)
-        .data(chatroomList)
+        .data(chatroomResponseDtoList)
         .build();
 
     return ResponseEntity.status(HttpStatus.OK).body(chatroomListResponseDto);
   }
+
 
 
 
