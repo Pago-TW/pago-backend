@@ -13,6 +13,7 @@ public class ChatroomUserMappingRowMapper implements RowMapper<ChatroomUserMappi
     chatroomUserMapping.setChatroomUserMappingId(resultSet.getString("chatroom_user_mapping_id"));
     chatroomUserMapping.setChatroomId(resultSet.getString("chatroom_id"));
     chatroomUserMapping.setUserId(resultSet.getString("user_id"));
+    chatroomUserMapping.setLastReadMessageId(resultSet.getString("last_read_message_id"));
     chatroomUserMapping.setCreateDate(resultSet.getTimestamp("create_date").toLocalDateTime());
     chatroomUserMapping.setUpdateDate(resultSet.getTimestamp("update_date").toLocalDateTime());
 

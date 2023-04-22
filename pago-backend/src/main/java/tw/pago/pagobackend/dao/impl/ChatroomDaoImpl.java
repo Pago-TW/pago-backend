@@ -1,6 +1,5 @@
 package tw.pago.pagobackend.dao.impl;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +15,8 @@ import tw.pago.pagobackend.dto.CreateChatRoomUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.ChatroomUserMapping;
-import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 import tw.pago.pagobackend.rowmapper.ChatroomUserMappingRowMapper;
-import tw.pago.pagobackend.rowmapper.TripRowMapper;
 
 @Repository
 @AllArgsConstructor
@@ -65,8 +62,8 @@ public class ChatroomDaoImpl implements ChatroomDao {
   @Override
   public void createChatroomUserMapping(
       CreateChatRoomUserMappingRequestDto createChatRoomUserMappingRequestDto) {
-    String sql = "INSERT INTO chatroom_user_mapping (chatroom_user_mapping_id, chatroom_id, user_id, create_date, update_date) "
-        + "VALUES (:chatroomUserMappingId, :chatroomId, :userId, :createDate, :updateDate)";
+    String sql = "INSERT INTO chatroom_user_mapping (chatroom_user_mapping_id, chatroom_id, user_id, last_read_message_id, create_date, update_date) "
+        + "VALUES (:chatroomUserMappingId, :chatroomId, :userId, :lastReadMessageId, :createDate, :updateDate)";
 
     Map<String, Object> map = new HashMap<>();
 
@@ -74,6 +71,7 @@ public class ChatroomDaoImpl implements ChatroomDao {
     map.put("chatroomUserMappingId", createChatRoomUserMappingRequestDto.getChatroomUserMappingId());
     map.put("chatroomId", createChatRoomUserMappingRequestDto.getChatroomId());
     map.put("userId", createChatRoomUserMappingRequestDto.getUserId());
+    map.put("lastReadMessageId", null);
     map.put("createDate", now);
     map.put("updateDate", now);
 
@@ -82,7 +80,7 @@ public class ChatroomDaoImpl implements ChatroomDao {
 
   @Override
   public ChatroomUserMapping getChatroomUserMappingByUserId(String userId) {
-    String sql = "SELECT chatroom_user_mapping_id, chatroom_id, user_id, create_date, update_date "
+    String sql = "SELECT chatroom_user_mapping_id, chatroom_id, user_id, last_read_message_id, create_date, update_date "
         + "FROM chatroom_user_mapping "
         + "WHERE user_id = :userId ";
 
@@ -101,7 +99,7 @@ public class ChatroomDaoImpl implements ChatroomDao {
 
   @Override
   public List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId) {
-    String sql = "SELECT chatroom_user_mapping_id, chatroom_id, user_id, create_date, update_date "
+    String sql = "SELECT chatroom_user_mapping_id, chatroom_id, user_id, last_read_message_id, create_date, update_date "
         + "FROM chatroom_user_mapping "
         + "WHERE chatroom_id = :chatroomId ";
 

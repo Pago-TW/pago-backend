@@ -11,6 +11,7 @@ public class ChatroomUserMapping {
   private String chatroomUserMappingId;
   private String chatroomId;
   private String userId;
+  private String lastReadMessageId;
   private LocalDateTime createDate;
   private LocalDateTime updateDate;
 
