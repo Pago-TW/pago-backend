@@ -109,40 +109,43 @@ public class ChatServiceImpl implements ChatService {
 
   @Override
   public ChatroomResponseDto getChatroomResponseDtoByChatroomAndUser(Chatroom chatroom, User user) {
+
+    // Retrieve the list of ChatroomUserMapping based on the chatroomId
     List<ChatroomUserMapping> chatroomUserMappingList = chatroomDao.getChatroomUserMappingListByChatroomId(chatroom.getChatroomId());
 
     String loginUserId = user.getUserId();
-    String otherUserId = null;
 
+    // Find the other user's ID using Java Stream and Lambda
+    String otherUserId = chatroomUserMappingList.stream()
+        .filter(chatroomUserMapping -> !chatroomUserMapping.getUserId().equals(loginUserId))
+        .map(ChatroomUserMapping::getUserId)
+        .findFirst()
+        .orElse(null);
 
-    for (ChatroomUserMapping chatroomUserMapping: chatroomUserMappingList) {
-      if (!chatroomUserMapping.getUserId().equals(loginUserId)) {
-        otherUserId = chatroomUserMapping.getUserId();
-        break;
-      }
-    }
-
+    // Get the other user's information
     User otherUser = userService.getUserById(otherUserId);
     if (otherUser == null) {
       throw new ResourceNotFoundException("Other user not found");
     }
 
+    // Create a ChatroomOtherUserDto to store the other user's information
     ChatroomOtherUserDto chatroomOtherUserDto = new ChatroomOtherUserDto();
     chatroomOtherUserDto.setUserId(otherUserId);
     chatroomOtherUserDto.setFullName(otherUser.getFullName());
     chatroomOtherUserDto.setAvatarUrl(otherUser.getAvatarUrl());
 
-
+    // Create a ChatroomResponseDto to store the chatroom and user information
     ChatroomResponseDto chatroomResponseDto = new ChatroomResponseDto();
     chatroomResponseDto.setChatroomId(chatroom.getChatroomId());
     chatroomResponseDto.setCurrentLoginUserId(user.getUserId());
-    chatroomResponseDto.setTotalUnreadMessage(0); // TODO 根據目前使用者做出他的unreadMessage
+    chatroomResponseDto.setTotalUnreadMessage(0); // TODO: Calculate unread messages based on the current user
     chatroomResponseDto.setUpdateDate(chatroom.getUpdateDate());
-    chatroomResponseDto.setLatestMessageContent("// TODO LatestMessageContent"); // TODO 撈出該聊天室LatestMessageContent
+    chatroomResponseDto.setLatestMessageContent("// TODO LatestMessageContent"); // TODO: Retrieve the latest message content for the chatroom
     chatroomResponseDto.setOtherUser(chatroomOtherUserDto);
 
     return chatroomResponseDto;
   }
+
 
   @Override
   public List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId) {
