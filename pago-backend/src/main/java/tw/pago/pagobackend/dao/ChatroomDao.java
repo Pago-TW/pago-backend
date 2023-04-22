@@ -18,6 +18,8 @@ public interface ChatroomDao {
 
   ChatroomUserMapping getChatroomUserMappingByUserId(String userId);
 
+  List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId);
+
   Optional<Chatroom> findChatroomByUserIds(String userIdA, String userIdB);
 
   List<Chatroom> getChatroomList(ListQueryParametersDto listQueryParametersDto);

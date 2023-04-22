@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import tw.pago.pagobackend.dto.ChatroomResponseDto;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.dto.JoinRoomRequest;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -66,12 +67,15 @@ public class ChatController {
   public void receiveMessage(@Payload SendMessageRequestDto sendMessageRequestDto) {
 
     System.out.println("Frontend send Message");
-    User sender = User.builder().build();
-    sender.setUserId("cc0fc75a5a854b1e9980d4acbe82086d");
-    sender.setFirstName("LILY ");
-    sender.setLastName("LILY");
-    sender.setEmail("a0923183408@gmail.com");
-    sender.setAvatarUrl("https://lh3.googleusercontent.com/a/AGNmyxYCn5ZTzVOK_r0TIN829tKCiI1zxd7e84okgIpI_TA=s96-c");
+    String senderId =  sendMessageRequestDto.getSenderId();
+    User sender = userService.getUserById(senderId);
+
+//    User sender = User.builder().build();
+//    sender.setUserId("cc0fc75a5a854b1e9980d4acbe82086d");
+//    sender.setFirstName("LILY ");
+//    sender.setLastName("LILY");
+//    sender.setEmail("a0923183408@gmail.com");
+//    sender.setAvatarUrl("https://lh3.googleusercontent.com/a/AGNmyxYCn5ZTzVOK_r0TIN829tKCiI1zxd7e84okgIpI_TA=s96-c");
 
 
     sendMessageRequestDto.setSenderId(sender.getUserId());
@@ -109,7 +113,7 @@ public class ChatController {
 
 
   @GetMapping("/chatrooms")
-  public ResponseEntity<?> enterChatroom(
+  public ResponseEntity<Object> enterChatroom(
       @RequestParam(required = false) String chatWith,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
@@ -118,6 +122,7 @@ public class ChatController {
       @RequestParam(defaultValue = "DESC") String sort) {
 
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    User currentLoginUser = currentUserInfoProvider.getCurrentLoginUser();
 
     if (chatWith != null) {
       Optional<Chatroom> optionalChatroom = chatService.findChatroomByUserIds(currentLoginUserId,
@@ -130,7 +135,9 @@ public class ChatController {
         return chatService.createChatroom(createChatRoomRequestDto, currentLoginUserId, chatWith);
       });
 
-      return ResponseEntity.status(HttpStatus.OK).body(chatroom);
+      ChatroomResponseDto chatroomResponseDto = chatService.getChatroomResponseDtoByChatroomAndUser(chatroom, currentLoginUser);
+
+      return ResponseEntity.status(HttpStatus.OK).body(chatroomResponseDto);
     }
 
 

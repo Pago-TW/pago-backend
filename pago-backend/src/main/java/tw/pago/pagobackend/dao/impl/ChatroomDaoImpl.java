@@ -100,6 +100,21 @@ public class ChatroomDaoImpl implements ChatroomDao {
   }
 
   @Override
+  public List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId) {
+    String sql = "SELECT chatroom_user_mapping_id, chatroom_id, user_id, create_date, update_date "
+        + "FROM chatroom_user_mapping "
+        + "WHERE chatroom_id = :chatroomId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("chatroomId", chatroomId);
+
+    List<ChatroomUserMapping> chatroomUserMappingList = namedParameterJdbcTemplate.query(sql, map, new ChatroomUserMappingRowMapper());
+
+    return chatroomUserMappingList;
+
+  }
+
+  @Override
   public Optional<Chatroom> findChatroomByUserIds(String userIdA, String userIdB) {
     String sql = "SELECT cr.chatroom_id, cr.create_date, cr.update_date "
         + "FROM chatroom AS cr "
