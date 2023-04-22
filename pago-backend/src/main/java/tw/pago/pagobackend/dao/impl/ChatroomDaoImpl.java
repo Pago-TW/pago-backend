@@ -98,6 +98,28 @@ public class ChatroomDaoImpl implements ChatroomDao {
   }
 
   @Override
+  public ChatroomUserMapping getChatroomUserMappingByChatroomIdAndUserId(String chatroomId,
+      String userId) {
+    String sql = "SELECT chatroom_user_mapping_id, chatroom_id, user_id, last_read_message_id, create_date, update_date "
+        + "FROM chatroom_user_mapping "
+        + "WHERE chatroom_id = :chatroomId AND user_id = :userId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("chatroomId", chatroomId);
+    map.put("userId", userId);
+
+
+    List<ChatroomUserMapping> chatroomUserMappingList = namedParameterJdbcTemplate.query(sql, map, new ChatroomUserMappingRowMapper());
+
+    if (chatroomUserMappingList.size() > 0) {
+      return chatroomUserMappingList.get(0);
+    } else {
+      return null;
+    }
+  }
+
+
+  @Override
   public List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId) {
     String sql = "SELECT chatroom_user_mapping_id, chatroom_id, user_id, last_read_message_id, create_date, update_date "
         + "FROM chatroom_user_mapping "
@@ -176,6 +198,34 @@ public class ChatroomDaoImpl implements ChatroomDao {
 
     return total;
   }
+
+  @Override
+  public Integer countMessagesAfterMessageId(String chatroomId, String lastReadMessageId) {
+    // Base SQL query to count messages in the chatroom
+    String sql = "SELECT COUNT(*) "
+        + "FROM message "
+        + "WHERE chatroom_id = :chatroomId ";
+
+    // Additional SQL condition to count messages only after the last read message
+    String lastReadMessageCondition = "AND send_date > ("
+        + "    SELECT send_date "
+        + "    FROM message "
+        + "    WHERE message_id = :lastReadMessageId "
+        + "  )";
+
+    // Check for a null last_read_message_id since the chatroom may have just been created,
+    // in which case we don't add the lastReadMessageCondition
+    sql = sql + (lastReadMessageId == null ? "" : lastReadMessageCondition);
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("chatroomId", chatroomId);
+    map.put("lastReadMessageId", lastReadMessageId);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
 
   @Override
   public boolean isChatroomUserMappingExists(String chatroomId, String userId) {

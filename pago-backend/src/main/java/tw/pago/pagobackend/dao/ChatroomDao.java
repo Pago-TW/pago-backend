@@ -18,6 +18,8 @@ public interface ChatroomDao {
 
   ChatroomUserMapping getChatroomUserMappingByUserId(String userId);
 
+  ChatroomUserMapping getChatroomUserMappingByChatroomIdAndUserId(String chatroomId, String userId);
+
   List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId);
 
   Optional<Chatroom> findChatroomByUserIds(String userIdA, String userIdB);
@@ -25,6 +27,8 @@ public interface ChatroomDao {
   List<Chatroom> getChatroomList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countChatroom(ListQueryParametersDto listQueryParametersDto);
+
+  Integer countMessagesAfterMessageId(String chatroomId, String lastReadMessageId);
 
   boolean isChatroomUserMappingExists(String chatroomId, String userId);
 

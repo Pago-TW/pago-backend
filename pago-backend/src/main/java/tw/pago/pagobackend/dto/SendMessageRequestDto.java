@@ -1,9 +1,11 @@
 package tw.pago.pagobackend.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.MessageTypeEnum;
 import tw.pago.pagobackend.model.User;
 
@@ -20,7 +22,7 @@ public class SendMessageRequestDto {
   @NotNull
   private String content;
   @NotNull
-  private MessageTypeEnum messageType;
+  private MessageTypeEnum messageType; // TEXT, FILE
 
 
 }

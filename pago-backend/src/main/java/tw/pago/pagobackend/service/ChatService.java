@@ -33,5 +33,9 @@ public interface ChatService {
 
   Integer countChatroom(ListQueryParametersDto listQueryParametersDto);
 
+  Integer countUnreadMessage(String chatroomId, String userId);
+
+  Integer countUnreadMessage(String chatroomId, ChatroomUserMapping chatroomUserMapping);
+
 
 }

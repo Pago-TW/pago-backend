@@ -63,7 +63,7 @@ public class ChatController {
 
   }
 
-  @MessageMapping("/send-message")
+  @MessageMapping("/send-message") // TODO 若有發送訊息，更新 last_read_message_id 為他剛剛發送的message_id
   public void receiveMessage(@Payload SendMessageRequestDto sendMessageRequestDto) {
 
     System.out.println("Frontend send Message");
@@ -112,7 +112,7 @@ public class ChatController {
   }
 
 
-  @GetMapping("/chatrooms")
+  @GetMapping("/chatrooms") // TODO 進入聊天室就要更新 last_read_message_id 為該聊天室最新的 message
   public ResponseEntity<Object> enterChatroom(
       @RequestParam(required = false) String chatWith,
       @RequestParam(required = false) String search,

@@ -122,11 +122,19 @@ public class ChatServiceImpl implements ChatService {
         .findFirst()
         .orElse(null);
 
+    // Find the login-ed ChatroomUserMapping using Java Stream and Lambda
+    ChatroomUserMapping currentLoginUserChatroomUserMapping = chatroomUserMappingList.stream()
+        .filter(chatroomUserMapping -> chatroomUserMapping.getUserId().equals(loginUserId))
+        .findFirst()
+        .orElse(null);
+
     // Get the other user's information
     User otherUser = userService.getUserById(otherUserId);
     if (otherUser == null) {
       throw new ResourceNotFoundException("Other user not found");
     }
+
+    Integer totalUnreadMessage = countUnreadMessage(chatroom.getChatroomId(), currentLoginUserChatroomUserMapping);
 
     // Create a ChatroomOtherUserDto to store the other user's information
     ChatroomOtherUserDto chatroomOtherUserDto = new ChatroomOtherUserDto();
@@ -138,7 +146,7 @@ public class ChatServiceImpl implements ChatService {
     ChatroomResponseDto chatroomResponseDto = new ChatroomResponseDto();
     chatroomResponseDto.setChatroomId(chatroom.getChatroomId());
     chatroomResponseDto.setCurrentLoginUserId(user.getUserId());
-    chatroomResponseDto.setTotalUnreadMessage(0); // TODO: Calculate unread messages based on the current user
+    chatroomResponseDto.setTotalUnreadMessage(totalUnreadMessage);
     chatroomResponseDto.setUpdateDate(chatroom.getUpdateDate());
     chatroomResponseDto.setLatestMessageContent("// TODO LatestMessageContent"); // TODO: Retrieve the latest message content for the chatroom
     chatroomResponseDto.setOtherUser(chatroomOtherUserDto);
@@ -174,5 +182,30 @@ public class ChatServiceImpl implements ChatService {
   @Override
   public Integer countChatroom(ListQueryParametersDto listQueryParametersDto) {
     return chatroomDao.countChatroom(listQueryParametersDto);
+  }
+
+  @Override
+  public Integer countUnreadMessage(String chatroomId, String userId) {
+    // Get the ChatroomUserMapping for the specified chatroom and user
+    ChatroomUserMapping chatroomUserMapping = chatroomDao.getChatroomUserMappingByChatroomIdAndUserId(chatroomId, userId);
+
+    // Get the last read message ID from the ChatroomUserMapping
+    String lastReadMessageId = chatroomUserMapping.getLastReadMessageId();
+
+    // Count the messages in the chatroom that were sent after the last read message
+    int unreadMessageCount = chatroomDao.countMessagesAfterMessageId(chatroomId, lastReadMessageId);
+
+    return unreadMessageCount;
+  }
+
+  @Override
+  public Integer countUnreadMessage(String chatroomId, ChatroomUserMapping chatroomUserMapping) {
+    // Get the last read message ID from the ChatroomUserMapping
+    String lastReadMessageId = chatroomUserMapping.getLastReadMessageId();
+
+    // Count the messages in the chatroom that were sent after the last read message
+    int unreadMessageCount = chatroomDao.countMessagesAfterMessageId(chatroomId, lastReadMessageId);
+
+    return unreadMessageCount;
   }
 }
