@@ -213,5 +213,63 @@ public class ChatController {
     return ResponseEntity.status(HttpStatus.OK).body(messageResponseDtoListResponseDto);
   }
 
+  @GetMapping("/messages")
+  public ResponseEntity<?> getChatHistoryByChatWithQueryParams(
+      @RequestParam String chatWith,
+      @RequestParam(required = false) String search,
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "send_date") String orderBy,
+      @RequestParam(defaultValue = "DESC") String sort
+  ) {
+
+    // Get the current logged-in user's ID
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    // Get the current logged-in user object
+    User currentLoginUser = currentUserInfoProvider.getCurrentLoginUser();
+
+
+    // Find the existing chatroom for the two users
+    Optional<Chatroom> optionalChatroom = chatService.findChatroomByUserIds(currentLoginUserId, chatWith);
+
+    // If the chatroom doesn't exist, create a new one
+    Chatroom chatroom = optionalChatroom.orElseGet(() -> {
+      CreateChatRoomRequestDto createChatRoomRequestDto = new CreateChatRoomRequestDto();
+      System.out.println("Create a new chatroom...!");
+      return chatService.createChatroom(createChatRoomRequestDto, currentLoginUserId, chatWith);
+    });
+
+    // Get chatroom details with the ChatroomResponseDto object
+    String chatroomId = chatroom.getChatroomId();
+
+
+    // Build the query parameters DTO
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .chatroomId(chatroomId)
+        .search(search)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
+        .build();
+
+    // Get the chatroom list based on the query parameters
+    List<Message> messageList = chatService.getChatHistory(listQueryParametersDto);
+    List<MessageResponseDto> messageResponseDtoList = chatService.getMessageResponseDtoListByMessageList(messageList);
+
+    // Count the total number of chatroomList
+    Integer total = chatService.countMessage(listQueryParametersDto);
+
+    // Create a list response DTO with the chatroom response DTOs
+    ListResponseDto<MessageResponseDto> messageResponseDtoListResponseDto = ListResponseDto.<MessageResponseDto>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .data(messageResponseDtoList)
+        .build();
+
+    return ResponseEntity.status(HttpStatus.OK).body(messageResponseDtoListResponseDto);
+  }
+
 
 }

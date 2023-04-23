@@ -133,6 +133,7 @@ public class ChatServiceImpl implements ChatService {
     // Get the other user's information
     User otherUser = userService.getUserById(otherUserId);
     if (otherUser == null) {
+      System.out.println("Other user not found");
       throw new ResourceNotFoundException("Other user not found");
     }
 
