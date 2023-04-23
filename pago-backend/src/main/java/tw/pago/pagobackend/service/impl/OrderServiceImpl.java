@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.constant.PostponeReasonCategoryEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.PostponeRecordDao;
@@ -362,39 +363,12 @@ public class OrderServiceImpl implements OrderService {
       orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
     }
 
-
-
     // Check if the order status has been modified
     boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
 
     // If the order status has been changed, send the email notification
-    String consumerId = oldOrder.getConsumerId();
-    User consumer = userDao.getUserById(consumerId);
     if (orderStatusChanged) {
-      System.out.println("status updated");
-      // Get the current login user's email
-      String currentLoginUserEmail = consumer.getEmail();
-      // Get the order item name
-      String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
-      // Get the user name
-      String username = consumer.getFirstName();
-      // Get current date
-      Date now = new Date();
-      String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
-
-      String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
-          "您的訂單 %s，已於%s更新為「%s」", username, orderItemName, date,
-          updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
-
-      // Prepare the email content
-      EmailRequestDto emailRequest = new EmailRequestDto();
-      emailRequest.setTo(currentLoginUserEmail);
-      emailRequest.setSubject("【Pago 訂單狀態更新通知】" + orderItemName);
-      emailRequest.setBody(emailBody);
-
-      // Send the email notification
-      sesEmailService.sendEmail(emailRequest);
-      System.out.println("......Email sent!");
+      sendOrderUpdateEmail(oldOrder, updateOrderAndOrderItemRequestDto);
     }
   }
 
@@ -686,10 +660,8 @@ public class OrderServiceImpl implements OrderService {
 
     updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
 
-
-    // TODO 信件通知對方要回覆是否取消訂單
-
-
+    // Send email to notify the other party to reply
+    sendCancelRequestEmail(order, cancellationRecord);
 
     return cancellationRecord;
   }
@@ -711,7 +683,7 @@ public class OrderServiceImpl implements OrderService {
   public PostponeRecord requestPostponeOrder(Order order,
       CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
 
-    if (createPostponeRecordRequestDto.getPostponeReason().equals(CancelReasonCategoryEnum.OTHER)) {
+    if (createPostponeRecordRequestDto.getPostponeReason().equals(PostponeReasonCategoryEnum.OTHER)) {
       if (createPostponeRecordRequestDto.getNote() == null) {
         throw new BadRequestException("Note should not be Null.");
       }
@@ -749,6 +721,8 @@ public class OrderServiceImpl implements OrderService {
 
     updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
 
+    // Send email to notify the other party to reply
+    sendPostponeRequestEmail(order, postponeRecord);
 
     return postponeRecord;
   }
@@ -937,6 +911,135 @@ public class OrderServiceImpl implements OrderService {
       default:
         return false;
     }
+  }
+
+  public void sendPostponeRequestEmail(Order order, PostponeRecord postponeRecord) {
+    String postponingUserId = postponeRecord.getUserId();
+    String orderCreatorId = order.getConsumerId();
+    String recipientId;
+  
+    // Check if the postponing user is the order creator or the bidder
+    if (postponingUserId.equals(orderCreatorId)) {
+      // If the postponing user is the order creator, send the email to the bidder
+      recipientId = order.getShopper().getUserId();
+    } else {
+      // If the postponing user is the bidder, send the email to the order creator
+      recipientId = orderCreatorId;
+    }
+  
+    // Get postpone requester user information
+    User postponeRequesterUser = userDao.getUserById(postponingUserId);
+    String postponeRequesterFirstName = postponeRequesterUser.getFirstName();
+    
+    // Retrieve recipient user information (email)
+    User recipientUser = userDao.getUserById(recipientId);
+    // Get the recipient email
+    String recipientUserEmail = recipientUser.getEmail();
+    // Get the order item name
+    String orderItemName = order.getOrderItem().getName();
+    // Get the user name
+    String username = recipientUser.getFirstName();
+    // Get current date
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String postponeNote = postponeRecord.getNote();
+    String noteLine = (postponeNote != null) ? String.format("延期原因描述：%s", postponeNote) : "";
+    
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+        "於%s，%s想要為「%s」的訂單申請延期，請至Pago網站確認並回覆。\n" +
+        "以下為%s申請延期之詳細資訊：\n" +
+        "延期原因：%s\n%s",
+        username, date, postponeRequesterFirstName, orderItemName, postponeRequesterFirstName, postponeRecord.getPostponeReason().getDescription(), noteLine);
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(recipientUserEmail);
+    emailRequest.setSubject("【Pago 訂單延期申請通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (postponeRequest)");
+  }
+
+  public void sendCancelRequestEmail(Order order, CancellationRecord cancellationRecord) {
+    String cancellingUserId = cancellationRecord.getUserId();
+    String orderCreatorId = order.getConsumerId();
+    String recipientId;
+  
+    // Check if the cancelling user is the order creator or the bidder
+    if (cancellingUserId.equals(orderCreatorId)) {
+      // If the cancelling user is the order creator, send the email to the bidder
+      recipientId = order.getShopper().getUserId();
+    } else {
+      // If the cancelling user is the bidder, send the email to the order creator
+      recipientId = orderCreatorId;
+    }
+  
+    // Get cancel requester user information
+    User cancelRequesterUser = userDao.getUserById(cancellingUserId);
+    String cancelRequesterFirstName = cancelRequesterUser.getFirstName();
+    
+    // Retrieve recipient user information (email)
+    User recipientUser = userDao.getUserById(recipientId);
+    // Get the recipient email
+    String recipientUserEmail = recipientUser.getEmail();
+    // Get the order item name
+    String orderItemName = order.getOrderItem().getName();
+    // Get the user name
+    String username = recipientUser.getFirstName();
+    // Get current date
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String cancelNote = cancellationRecord.getNote();
+    String noteLine = (cancelNote != null) ? String.format("取消原因描述：%s", cancelNote) : "";
+    
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+        "於%s，%s想要將「%s」的訂單取消，請至Pago網站確認並回覆。\n" +
+        "以下為%s申請取消之詳細資訊：\n" +
+        "取消原因：%s\n%s",
+        username, date, cancelRequesterFirstName, orderItemName, cancelRequesterFirstName, cancellationRecord.getCancelReason().getDescription(), noteLine);
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(recipientUserEmail);
+    emailRequest.setSubject("【Pago 訂單申請取消通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (cancelRequest)");
+  }
+
+  public void sendOrderUpdateEmail(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
+    String consumerId = oldOrder.getConsumerId();
+    User consumer = userDao.getUserById(consumerId);
+  
+    // Get the current login user's email
+    String currentLoginUserEmail = consumer.getEmail();
+    // Get the order item name
+    String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
+    // Get the user name
+    String username = consumer.getFirstName();
+    // Get current date
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+        "您的訂單 %s，已於%s更新為「%s」", username, orderItemName, date,
+        updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(currentLoginUserEmail);
+    emailRequest.setSubject("【Pago 訂單狀態更新通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (orderUpdate)");
   }
 
 }

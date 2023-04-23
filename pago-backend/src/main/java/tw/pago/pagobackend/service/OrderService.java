@@ -80,5 +80,11 @@ public interface OrderService {
 
   void replyCancelOrder(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
 
+  void sendPostponeRequestEmail(Order order, PostponeRecord postponeRecord);
+
+  void sendCancelRequestEmail(Order order, CancellationRecord cancellationRecord);
+
+  void sendOrderUpdateEmail(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
+  
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }
