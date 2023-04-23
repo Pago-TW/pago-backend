@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -196,7 +197,13 @@ public class ChatServiceImpl implements ChatService {
   @Override
   public List<Message> getChatHistory(ListQueryParametersDto listQueryParametersDto) {
 
-    return messageDao.getMessageList(listQueryParametersDto);
+    List<Message> messageList = messageDao.getMessageList(listQueryParametersDto);
+
+    // The latest messages in the frontend UI will be displayed at the bottom
+    Collections.reverse(messageList);
+
+
+    return messageList;
   }
 
   @Override

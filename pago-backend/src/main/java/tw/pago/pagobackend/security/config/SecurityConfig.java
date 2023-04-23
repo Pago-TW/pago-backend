@@ -108,7 +108,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/health",
             "/ecpay-checkout/callback",
             "/ws/**",
-            "/files/**" ) // TODO 暫時為了測試聊天室用，之後要改回來
+            "/files/**",// TODO 暫時為了測試聊天室用，之後要改回來
+            "/chatrooms/{chatroomId}/messages") // TODO 暫時為了測試聊天室用，之後要改回來
         .permitAll()
         .antMatchers(
             HttpMethod.GET,

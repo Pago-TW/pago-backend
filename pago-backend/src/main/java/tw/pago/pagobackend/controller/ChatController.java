@@ -183,7 +183,7 @@ public class ChatController {
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "send_date") String orderBy,
-      @RequestParam(defaultValue = "ASC") String sort
+      @RequestParam(defaultValue = "DESC") String sort
   ) {
     // Build the query parameters DTO
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
