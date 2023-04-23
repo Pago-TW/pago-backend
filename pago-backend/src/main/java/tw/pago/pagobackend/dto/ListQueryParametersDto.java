@@ -48,5 +48,6 @@ public class ListQueryParametersDto {
   // Trip
   private String tripId;
 
-  //
+  // Chatroom
+  private String chatroomId;
 }

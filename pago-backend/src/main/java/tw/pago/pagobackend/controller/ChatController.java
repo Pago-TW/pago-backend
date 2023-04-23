@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,6 +68,7 @@ public class ChatController {
   public void receiveMessage(@Payload SendMessageRequestDto sendMessageRequestDto) {
 
     System.out.println("Frontend send Message");
+    System.out.println("收到的消息: " + sendMessageRequestDto);
     String senderId =  sendMessageRequestDto.getSenderId();
     User sender = userService.getUserById(senderId);
 
@@ -173,6 +175,44 @@ public class ChatController {
 
     return ResponseEntity.status(HttpStatus.OK).body(chatroomListResponseDto);
   }
+
+  @GetMapping("/chatrooms/{chatroomId}/messages")
+  public ResponseEntity<?> getChatHistory(
+      @PathVariable String chatroomId,
+      @RequestParam(required = false) String search,
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "send_date") String orderBy,
+      @RequestParam(defaultValue = "ASC") String sort
+  ) {
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .chatroomId(chatroomId)
+        .search(search)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
+        .build();
+
+    // Get the chatroom list based on the query parameters
+    List<Message> messageList = chatService.getChatHistory(listQueryParametersDto);
+
+    // Count the total number of chatroomList
+    Integer total = chatService.countMessage(listQueryParametersDto);
+
+    // Create a list response DTO with the chatroom response DTOs
+    ListResponseDto<Message> messageListResponseDto = ListResponseDto.<Message>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .data(messageList)
+        .build();
+
+
+    return ResponseEntity.status(HttpStatus.OK).body(messageListResponseDto);
+  }
+
 
 
 

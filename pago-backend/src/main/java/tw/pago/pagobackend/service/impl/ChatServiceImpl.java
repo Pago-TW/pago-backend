@@ -178,6 +178,12 @@ public class ChatServiceImpl implements ChatService {
     return chatroomResponseDtoList;
   }
 
+  @Override
+  public List<Message> getChatHistory(ListQueryParametersDto listQueryParametersDto) {
+
+    return messageDao.getMessageList(listQueryParametersDto);
+  }
+
 
   @Override
   public Integer countChatroom(ListQueryParametersDto listQueryParametersDto) {
@@ -193,7 +199,7 @@ public class ChatServiceImpl implements ChatService {
     String lastReadMessageId = chatroomUserMapping.getLastReadMessageId();
 
     // Count the messages in the chatroom that were sent after the last read message
-    int unreadMessageCount = chatroomDao.countMessagesAfterMessageId(chatroomId, lastReadMessageId);
+    int unreadMessageCount = messageDao.countMessagesAfterMessageId(chatroomId, lastReadMessageId);
 
     return unreadMessageCount;
   }
@@ -204,8 +210,14 @@ public class ChatServiceImpl implements ChatService {
     String lastReadMessageId = chatroomUserMapping.getLastReadMessageId();
 
     // Count the messages in the chatroom that were sent after the last read message
-    int unreadMessageCount = chatroomDao.countMessagesAfterMessageId(chatroomId, lastReadMessageId);
+    int unreadMessageCount = messageDao.countMessagesAfterMessageId(chatroomId, lastReadMessageId);
 
     return unreadMessageCount;
+  }
+
+  @Override
+  public Integer countMessage(ListQueryParametersDto listQueryParametersDto) {
+
+    return messageDao.countMessage(listQueryParametersDto);
   }
 }

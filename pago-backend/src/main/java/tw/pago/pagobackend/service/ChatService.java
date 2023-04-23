@@ -31,11 +31,15 @@ public interface ChatService {
 
   List<ChatroomResponseDto> getChatroomResponseDtoListByChatroomListAndUser(List<Chatroom> chatroomList, User user);
 
+  List<Message> getChatHistory(ListQueryParametersDto listQueryParametersDto);
+
   Integer countChatroom(ListQueryParametersDto listQueryParametersDto);
 
   Integer countUnreadMessage(String chatroomId, String userId);
 
   Integer countUnreadMessage(String chatroomId, ChatroomUserMapping chatroomUserMapping);
+
+  Integer countMessage(ListQueryParametersDto listQueryParametersDto);
 
 
 }

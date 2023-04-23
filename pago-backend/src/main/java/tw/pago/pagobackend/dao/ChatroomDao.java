@@ -28,7 +28,6 @@ public interface ChatroomDao {
 
   Integer countChatroom(ListQueryParametersDto listQueryParametersDto);
 
-  Integer countMessagesAfterMessageId(String chatroomId, String lastReadMessageId);
 
   boolean isChatroomUserMappingExists(String chatroomId, String userId);
 

@@ -199,32 +199,6 @@ public class ChatroomDaoImpl implements ChatroomDao {
     return total;
   }
 
-  @Override
-  public Integer countMessagesAfterMessageId(String chatroomId, String lastReadMessageId) {
-    // Base SQL query to count messages in the chatroom
-    String sql = "SELECT COUNT(*) "
-        + "FROM message "
-        + "WHERE chatroom_id = :chatroomId ";
-
-    // Additional SQL condition to count messages only after the last read message
-    String lastReadMessageCondition = "AND send_date > ("
-        + "    SELECT send_date "
-        + "    FROM message "
-        + "    WHERE message_id = :lastReadMessageId "
-        + "  )";
-
-    // Check for a null last_read_message_id since the chatroom may have just been created,
-    // in which case we don't add the lastReadMessageCondition
-    sql = sql + (lastReadMessageId == null ? "" : lastReadMessageCondition);
-
-    Map<String, Object> map = new HashMap<>();
-    map.put("chatroomId", chatroomId);
-    map.put("lastReadMessageId", lastReadMessageId);
-
-    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
-
-    return total;
-  }
 
 
   @Override
@@ -259,6 +233,11 @@ public class ChatroomDaoImpl implements ChatroomDao {
           + "  WHERE cum2.user_id != :userId AND (u2.first_name LIKE :search OR u2.last_name LIKE :search)"
           + ") ";
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+    if (listQueryParametersDto.getChatroomId() != null) {
+      sql = sql + " AND chatroom_id = :chatroomId ";
+      map.put("chatroomId", listQueryParametersDto.getChatroomId());
     }
 
 
