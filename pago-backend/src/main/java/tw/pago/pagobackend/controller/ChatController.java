@@ -185,7 +185,7 @@ public class ChatController {
       @RequestParam(defaultValue = "send_date") String orderBy,
       @RequestParam(defaultValue = "ASC") String sort
   ) {
-
+    // Build the query parameters DTO
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .chatroomId(chatroomId)
         .search(search)
@@ -197,24 +197,21 @@ public class ChatController {
 
     // Get the chatroom list based on the query parameters
     List<Message> messageList = chatService.getChatHistory(listQueryParametersDto);
+    List<MessageResponseDto> messageResponseDtoList = chatService.getMessageResponseDtoListByMessageList(messageList);
 
     // Count the total number of chatroomList
     Integer total = chatService.countMessage(listQueryParametersDto);
 
     // Create a list response DTO with the chatroom response DTOs
-    ListResponseDto<Message> messageListResponseDto = ListResponseDto.<Message>builder()
+    ListResponseDto<MessageResponseDto> messageResponseDtoListResponseDto = ListResponseDto.<MessageResponseDto>builder()
         .total(total)
         .startIndex(startIndex)
         .size(size)
-        .data(messageList)
+        .data(messageResponseDtoList)
         .build();
 
-
-    return ResponseEntity.status(HttpStatus.OK).body(messageListResponseDto);
+    return ResponseEntity.status(HttpStatus.OK).body(messageResponseDtoListResponseDto);
   }
-
-
-
 
 
 }

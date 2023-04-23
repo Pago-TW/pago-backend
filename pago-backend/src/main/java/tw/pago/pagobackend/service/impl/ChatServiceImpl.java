@@ -15,6 +15,7 @@ import tw.pago.pagobackend.dto.ChatroomResponseDto;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.dto.CreateChatRoomUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.MessageResponseDto;
 import tw.pago.pagobackend.dto.SendMessageRequestDto;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Chatroom;
@@ -154,6 +155,20 @@ public class ChatServiceImpl implements ChatService {
     return chatroomResponseDto;
   }
 
+  @Override
+  public MessageResponseDto getMessageResponseDtoByMessage(Message message) {
+
+    MessageResponseDto messageResponseDto = modelMapper.map(message, MessageResponseDto.class);
+
+    User sender = userService.getUserById(message.getSenderId());
+    String senderFullName = sender.getFullName();
+    messageResponseDto.setSenderName(senderFullName);
+
+
+
+    return messageResponseDto;
+  }
+
 
   @Override
   public List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId) {
@@ -182,6 +197,17 @@ public class ChatServiceImpl implements ChatService {
   public List<Message> getChatHistory(ListQueryParametersDto listQueryParametersDto) {
 
     return messageDao.getMessageList(listQueryParametersDto);
+  }
+
+  @Override
+  public List<MessageResponseDto> getMessageResponseDtoListByMessageList(
+      List<Message> messageList) {
+
+    List<MessageResponseDto> messageResponseDtoList = messageList.stream()
+        .map(this::getMessageResponseDtoByMessage)
+        .collect(Collectors.toList());
+
+    return messageResponseDtoList;
   }
 
 
