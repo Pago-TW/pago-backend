@@ -30,7 +30,7 @@ public class MessageDaoImpl implements MessageDao {
     LocalDateTime now = LocalDateTime.now();
 
     map.put("messageId", sendMessageRequestDto.getMessageId());
-    map.put("chatroomId", sendMessageRequestDto.getChatRoomId());
+    map.put("chatroomId", sendMessageRequestDto.getChatroomId());
     map.put("senderId", sendMessageRequestDto.getSenderId());
     map.put("content", sendMessageRequestDto.getContent());
     map.put("messageType", sendMessageRequestDto.getMessageType().name());

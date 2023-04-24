@@ -81,7 +81,7 @@ public class ChatController {
 
 
     sendMessageRequestDto.setSenderId(sender.getUserId());
-    sendMessageRequestDto.setChatRoomId("a10fc75a5a854b1e9980d4aaaa82086d");
+    String destinationChatroomId =  sendMessageRequestDto.getChatroomId();
 
     Message message = chatService.createMessage(sendMessageRequestDto);
 
@@ -89,7 +89,7 @@ public class ChatController {
     String senderName = sender.getFullName();
     messageResponseDto.setSenderName(senderName);
 
-    messagingTemplate.convertAndSend("/chatroom/message", messageResponseDto);
+    messagingTemplate.convertAndSend("/chatrooms/" + destinationChatroomId + "/message", messageResponseDto); // TODO 如何只推播訊息到指定聊天室
 
   }
 
@@ -101,17 +101,17 @@ public class ChatController {
     return messageResponseDto;
   }
 
-  @MessageMapping("/join")
-  @SendTo("/topic/{roomName}/join")
-  public String joinRoom(@Payload JoinRoomRequest JoinRoomRequest, @DestinationVariable String roomName) {
-    // ... 處理加入聊天室的邏輯，如保存用戶信息等
-//    User currentLoginUser = currentUserInfoProvider.getCurrentLoginUser();
-//    String currentLoginUserName = currentLoginUser.getFullName();
-    System.out.println("Join");
-
-
-    return JoinRoomRequest.getUserName() + " 加入了 " + roomName + " 聊天室";
-  }
+//  @MessageMapping("/join")
+//  @SendTo("/topic/{roomName}/join")
+//  public String joinRoom(@Payload JoinRoomRequest JoinRoomRequest, @DestinationVariable String roomName) {
+//    // ... 處理加入聊天室的邏輯，如保存用戶信息等
+////    User currentLoginUser = currentUserInfoProvider.getCurrentLoginUser();
+////    String currentLoginUserName = currentLoginUser.getFullName();
+//    System.out.println("Join");
+//
+//
+//    return JoinRoomRequest.getUserName() + " 加入了 " + roomName + " 聊天室";
+//  }
 
 
   @GetMapping("/chatrooms") // TODO 進入聊天室就要更新 last_read_message_id 為該聊天室最新的 message
