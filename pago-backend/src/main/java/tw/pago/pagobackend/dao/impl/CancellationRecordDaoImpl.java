@@ -38,8 +38,8 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
   @Override
   public void createCancellationRecord(
       CreateCancellationRecordRequestDto createCancellationRecordRequestDto) {
-    String sql = "INSERT INTO cancellation_record (cancellation_record_id, order_id, user_id, cancel_reason, note, create_date, update_date, is_canceled) "
-        + "VALUES (:cancellationRecordId, :orderId, :userId, :cancelReason, :note, :createDate, :updateDate, :isCanceled)";
+    String sql = "INSERT INTO cancellation_record (cancellation_record_id, order_id, user_id, cancel_reason, note, create_date, update_date, is_cancelled) "
+        + "VALUES (:cancellationRecordId, :orderId, :userId, :cancelReason, :note, :createDate, :updateDate, :isCancelled)";
 
     Map<String, Object> map = new HashMap<>();
 
@@ -51,7 +51,7 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
     map.put("note", createCancellationRecordRequestDto.getNote());
     map.put("createDate", now);
     map.put("updateDate", now);
-    map.put("isCanceled", createCancellationRecordRequestDto.getIsCanceled());
+    map.put("isCancelled", createCancellationRecordRequestDto.getIsCancelled());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
@@ -59,7 +59,7 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
 
   @Override
   public CancellationRecord getCancellationRecordById(String cancellationRecordId) {
-    String sql = "SELECT cancellation_record_id, order_id, user_id, cancel_reason, note, create_date, update_date, is_canceled "
+    String sql = "SELECT cancellation_record_id, order_id, user_id, cancel_reason, note, create_date, update_date, is_cancelled "
         + "FROM cancellation_record "
         + "WHERE cancellation_record_id = :cancellationRecordId ";
 
@@ -78,7 +78,7 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
 
   @Override
   public CancellationRecord getCancellationRecordByOrderId(String orderId) {
-    String sql = "SELECT cancellation_record_id, order_id, user_id, cancel_reason, note, create_date, update_date, is_canceled "
+    String sql = "SELECT cancellation_record_id, order_id, user_id, cancel_reason, note, create_date, update_date, is_cancelled "
         + "FROM cancellation_record "
         + "WHERE order_id = :orderId ";
 
@@ -98,13 +98,13 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
   @Override
   public void updateCancellationRecord(UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
     String sql = "UPDATE cancellation_record "
-        + "SET is_canceled = :isCanceled, "
+        + "SET is_cancelled = :isCancelled, "
         + "    update_date = :updateDate "
         + "WHERE order_id = :orderId";
 
     Map<String, Object> map = new HashMap<>();
     LocalDate now = LocalDate.now();
-    map.put("isCanceled", updateCancellationRecordRequestDto.getIsCanceled());
+    map.put("isCancelled", updateCancellationRecordRequestDto.getIsCancelled());
     map.put("updateDate", now);
     map.put("orderId", updateCancellationRecordRequestDto.getOrderId());
 

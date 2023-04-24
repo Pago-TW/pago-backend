@@ -16,7 +16,7 @@ public class CancellationRecord {
   private String note;
   private LocalDate createDate;
   private LocalDate updateDate;
-  @JsonProperty("isCanceled")
-  private Boolean isCanceled;
+  @JsonProperty("isCancelled")
+  private Boolean isCancelled;
 
 }
