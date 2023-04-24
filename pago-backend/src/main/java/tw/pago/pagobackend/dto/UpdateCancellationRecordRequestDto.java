@@ -16,7 +16,7 @@ public class UpdateCancellationRecordRequestDto {
   private LocalDate updateDate;
 
   @NotNull
-  private Boolean isCanceled;
+  private Boolean isCancelled;
 
 
 }
