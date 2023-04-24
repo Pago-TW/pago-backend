@@ -140,6 +140,11 @@ public class BidController {
     String aioCheckoutALLForm = paymentService.ecpayCheckout(bidId);
 
     return ResponseEntity.status(HttpStatus.OK).body(aioCheckoutALLForm);
+
+
+    // for testing
+    // bidService.chooseBid(order.getOrderId(), bidId);
+    // return ResponseEntity.status(HttpStatus.OK).body("Choose bid successfully");
   }
 
 
