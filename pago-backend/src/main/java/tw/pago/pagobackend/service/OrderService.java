@@ -86,5 +86,9 @@ public interface OrderService {
 
   void sendOrderUpdateEmail(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
   
+  void sendReplyPostponeOrderEmail(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto, PostponeRecord postponeRecord);
+
+  void sendReplyCancelOrderEmail(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto, CancellationRecord cancellationRecord);
+  
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

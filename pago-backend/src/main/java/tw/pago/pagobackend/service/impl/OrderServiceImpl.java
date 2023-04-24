@@ -1,10 +1,10 @@
 package tw.pago.pagobackend.service.impl;
 
-import static tw.pago.pagobackend.constant.OrderStatusEnum.CANCELED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.CANCELLED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.DELIVERED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.FINISHED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.REQUESTED;
-import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_CANCELED;
+import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_CANCELLED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_DELIVERED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_POSTPONED;
 import static tw.pago.pagobackend.constant.OrderStatusEnum.TO_BE_PURCHASED;
@@ -196,8 +196,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-    // If the orderStatus is TO_BE_CANCELED or TO_BE_POSTPONED, check is loginUser is Applicant
-    if (orderStatus.equals(TO_BE_CANCELED) || orderStatus.equals(TO_BE_POSTPONED)) {
+    // If the orderStatus is TO_BE_CANCELLED or TO_BE_POSTPONED, check is loginUser is Applicant
+    if (orderStatus.equals(TO_BE_CANCELLED) || orderStatus.equals(TO_BE_POSTPONED)) {
       order.setIsApplicant(isCurrentLoginUserApplicant(order));
     }
 
@@ -399,8 +399,8 @@ public class OrderServiceImpl implements OrderService {
         order.setShopper(orderChosenShopperDto);
       }
 
-      // If the orderStatus is TO_BE_CANCELED or TO_BE_POSTPONED, check is loginUser is Applicant
-      if (order.getOrderStatus().equals(TO_BE_CANCELED) || order.getOrderStatus().equals(TO_BE_POSTPONED)) {
+      // If the orderStatus is TO_BE_CANCELLED or TO_BE_POSTPONED, check is loginUser is Applicant
+      if (order.getOrderStatus().equals(TO_BE_CANCELLED) || order.getOrderStatus().equals(TO_BE_POSTPONED)) {
         order.setIsApplicant(isCurrentLoginUserApplicant(order));
       }
     }
@@ -637,7 +637,7 @@ public class OrderServiceImpl implements OrderService {
         createCancellationRecordRequestDto.getOrderId());
 
     if (cancellationReocrdByOrderId != null) {
-      throw new DuplicateKeyException("This order has been requested canceled");
+      throw new DuplicateKeyException("This order has been requested cancelled");
     }
 
     if (!order.getOrderStatus().equals(TO_BE_PURCHASED)) {
@@ -653,9 +653,9 @@ public class OrderServiceImpl implements OrderService {
       throw new ResourceNotFoundException("Create data not found");
     }
 
-    // Change OrderStatus to TO_BE_CANCELED
+    // Change OrderStatus to TO_BE_CANCELLED
     UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-        .orderStatus(TO_BE_CANCELED)
+        .orderStatus(TO_BE_CANCELLED)
         .build();
 
     // Pass false to prevent the order from being updated again
@@ -769,8 +769,10 @@ public class OrderServiceImpl implements OrderService {
       postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
     }
 
+    PostponeRecord postponeRecord = getPostponeRecordByOrderId(order.getOrderId());
 
-    postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
+    // Send email to notify the other party about the reply
+    sendReplyPostponeOrderEmail(order, updatePostponeRecordRequestDto, postponeRecord);
   }
 
   @Override
@@ -783,15 +785,15 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public void replyCancelOrder(
       Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
-    // Check orderStatus is TO_BE_CANCELED
-    if (!(order.getOrderStatus().equals(TO_BE_CANCELED))) {
-      throw new AccessDeniedException("OrderStatus is not TO_BE_CANCELED, so you have no permission to request a cancellation.");
+    // Check orderStatus is TO_BE_CANCELLED
+    if (!(order.getOrderStatus().equals(TO_BE_CANCELLED))) {
+      throw new AccessDeniedException("OrderStatus is not TO_BE_CANCELLED, so you have no permission to request a cancellation.");
     }
 
 
-    if (updateCancellationRecordRequestDto.getIsCanceled() == true) {
+    if (updateCancellationRecordRequestDto.getIsCancelled() == true) {
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-          .orderStatus(CANCELED)
+          .orderStatus(CANCELLED)
           .build();
 
       // Pass false to prevent the order from being updated again
@@ -807,7 +809,9 @@ public class OrderServiceImpl implements OrderService {
       cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
     }
 
-    // TODO 信件通知對方自己的答覆
+    CancellationRecord cancellationRecord = getCancellationRecordByOrderId(order.getOrderId());
+    // Send email to notify the other party about the reply
+    sendReplyCancelOrderEmail(order, updateCancellationRecordRequestDto, cancellationRecord);
 
   }
 
@@ -880,17 +884,17 @@ public class OrderServiceImpl implements OrderService {
       case REQUESTED:
         return newOrderStatus == TO_BE_PURCHASED;
       case TO_BE_PURCHASED:
-        return newOrderStatus == TO_BE_DELIVERED || newOrderStatus == TO_BE_CANCELED || newOrderStatus == TO_BE_POSTPONED;
+        return newOrderStatus == TO_BE_DELIVERED || newOrderStatus == TO_BE_CANCELLED || newOrderStatus == TO_BE_POSTPONED;
       case TO_BE_DELIVERED:
         return newOrderStatus == DELIVERED || newOrderStatus == TO_BE_POSTPONED;
       case DELIVERED:
         return newOrderStatus == FINISHED;
       case FINISHED:
         return false;
-      case CANCELED:
+      case CANCELLED:
         return false;
-      case TO_BE_CANCELED:
-        return newOrderStatus == CANCELED || newOrderStatus == TO_BE_PURCHASED;
+      case TO_BE_CANCELLED:
+        return newOrderStatus == CANCELLED || newOrderStatus == TO_BE_PURCHASED;
       case TO_BE_POSTPONED:
         return newOrderStatus == TO_BE_PURCHASED || newOrderStatus == TO_BE_DELIVERED;
       default:
@@ -906,7 +910,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     switch (order.getOrderStatus()) {
-      case TO_BE_CANCELED:
+      case TO_BE_CANCELLED:
         CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(order.getOrderId());
         return cancellationRecord.getUserId().equals(currentLoginUserId);
       case TO_BE_POSTPONED:
@@ -1046,4 +1050,61 @@ public class OrderServiceImpl implements OrderService {
     System.out.println("......Email sent! (orderUpdate)");
   }
 
+  public void sendReplyPostponeOrderEmail(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto, 
+      PostponeRecord postponeRecord) {
+    String recipientId = postponeRecord.getUserId();
+    User recipientUser = userDao.getUserById(recipientId);
+    String recipientUserEmail = recipientUser.getEmail();
+  
+    String orderItemName = order.getOrderItem().getName();
+    String username = recipientUser.getFirstName();
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+  
+    String result = updatePostponeRecordRequestDto.getIsPostponed() ? "通過" : "被拒絕";
+    String updatedOrderStatus = order.getOrderStatus().getDescription();
+  
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+        "於%s，「%s」的訂單延期申請已%s。現在的訂單狀態為%s，請至Pago網站進行確認並查看詳情\n",
+        username, date, orderItemName, result, updatedOrderStatus);
+  
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(recipientUserEmail);
+    emailRequest.setSubject("【Pago 訂單延期申請回覆通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+  
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (postponeReply)");
+  }
+
+  public void sendReplyCancelOrderEmail(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto, 
+      CancellationRecord cancellationRecord) {
+    String recipientId = cancellationRecord.getUserId();
+    User recipientUser = userDao.getUserById(recipientId);
+    String recipientUserEmail = recipientUser.getEmail();
+
+    String orderItemName = order.getOrderItem().getName();
+    String username = recipientUser.getFirstName();
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String result = updateCancellationRecordRequestDto.getIsCancelled() ? "通過" : "被拒絕";
+    String updatedOrderStatus = order.getOrderStatus().getDescription();
+
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+            "於%s，「%s」的訂單取消申請已%s。現在的訂單狀態為%s，請至Pago網站進行確認並查看詳情\n",
+            username, date, orderItemName, result, updatedOrderStatus);
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(recipientUserEmail);
+    emailRequest.setSubject("【Pago 訂單取消申請回覆通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (cancelReply)");
+  }
 }
