@@ -42,6 +42,7 @@ import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
+import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
@@ -561,32 +562,35 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(CreateOrderRequestDto createOrderRequestDto) {
-    createOrderRequestDto.setPlatformFeePercent(PLATFORM_FEE_PERCENT);
-    createOrderRequestDto.setTariffFeePercent(TARIFF_FEE_PERCENT);
+  public CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(
+      CalculateOrderAmountRequestDto calculateOrderAmountRequestDto) {
+    calculateOrderAmountRequestDto.setPlatformFeePercent(PLATFORM_FEE_PERCENT);
+    calculateOrderAmountRequestDto.setTariffFeePercent(TARIFF_FEE_PERCENT);
 
 
 
     // Init Variable
     Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
-    BigDecimal orderItemUnitPrice = createOrderRequestDto.getCreateOrderItemDto().getUnitPrice();
-    BigDecimal orderItemQuantity = BigDecimal.valueOf(createOrderRequestDto.getCreateOrderItemDto().getQuantity());
-    BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(createOrderRequestDto.getPlatformFeePercent())
+    BigDecimal orderItemUnitPrice = calculateOrderAmountRequestDto.getCreateOrderItemDto().getUnitPrice();
+    BigDecimal orderItemQuantity = BigDecimal.valueOf(
+        calculateOrderAmountRequestDto.getCreateOrderItemDto().getQuantity());
+    BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(calculateOrderAmountRequestDto.getPlatformFeePercent())
         .multiply(BigDecimal.valueOf(0.01));
-    BigDecimal orderTariffFeePercent = BigDecimal.valueOf(createOrderRequestDto.getTariffFeePercent())
+    BigDecimal orderTariffFeePercent = BigDecimal.valueOf(calculateOrderAmountRequestDto.getTariffFeePercent())
         .multiply(BigDecimal.valueOf(0.01));
 
+    // TODO 碰到錢的一定要做好防呆，不能有值是NULL，不能有缺值，一定要確保程式正確執行，若不正確，程式要跳出
     // Calculation
     BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity); // 1
     BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent); // 2
     BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent); // 3
-    BigDecimal travelerFee = createOrderRequestDto.getTravelerFee(); // 4
+    BigDecimal travelerFee = calculateOrderAmountRequestDto.getTravelerFee(); // 4
 
     BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3
     // + 4
 
     // Set only the second digit after the decimal point (Banker 's rounding)
-    CurrencyEnum currency = createOrderRequestDto.getCurrency();
+    CurrencyEnum currency = calculateOrderAmountRequestDto.getCurrency();
     int decimalScale = CurrencyUtil.getDecimalScale(currency);
 
     tariffFee = tariffFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
@@ -603,8 +607,58 @@ public class OrderServiceImpl implements OrderService {
     calculateOrderAmountResponseDto.setTariffFee(orderEachAmountMap.get("tariffFee"));
     calculateOrderAmountResponseDto.setPlatformFee(orderEachAmountMap.get("platformFee"));
     calculateOrderAmountResponseDto.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
-    calculateOrderAmountResponseDto.setTravelerFee(createOrderRequestDto.getTravelerFee());
-    calculateOrderAmountResponseDto.setCurrency(createOrderRequestDto.getCurrency());
+    calculateOrderAmountResponseDto.setTravelerFee(calculateOrderAmountRequestDto.getTravelerFee());
+    calculateOrderAmountResponseDto.setCurrency(calculateOrderAmountRequestDto.getCurrency());
+
+    return calculateOrderAmountResponseDto;
+  }
+
+  @Override
+  public CalculateOrderAmountResponseDto calculateOrderEachAmountDuringChooseBid(String bidId) {
+    BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
+    Order order = getOrderById(bidResponseDto.getOrderId());
+    OrderItem orderItem = order.getOrderItem();
+
+
+    // Init Variable
+    Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
+    BigDecimal orderItemUnitPrice = orderItem.getUnitPrice();
+    BigDecimal orderItemQuantity = BigDecimal.valueOf(orderItem.getQuantity());
+    BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(order.getPlatformFeePercent())
+        .multiply(BigDecimal.valueOf(0.01));
+    BigDecimal orderTariffFeePercent = BigDecimal.valueOf(order.getTariffFeePercent())
+        .multiply(BigDecimal.valueOf(0.01));
+
+    // Calculation
+    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity); // 1
+    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent); // 2
+    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent); // 3
+    BigDecimal travelerFee = bidResponseDto.getBidAmount(); // 4
+
+    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3
+    // + 4
+
+    // Set only the second digit after the decimal point (Banker 's rounding)
+    CurrencyEnum currency = order.getCurrency();
+    int decimalScale = CurrencyUtil.getDecimalScale(currency);
+
+    tariffFee = tariffFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
+    platformFee = platformFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
+    orderTotalAmount = orderTotalAmount.setScale(decimalScale, RoundingMode.HALF_EVEN);
+
+    // Set return value
+    orderEachAmountMap.put("tariffFee", tariffFee);
+    orderEachAmountMap.put("platformFee", platformFee);
+    orderEachAmountMap.put("orderTotalAmount", orderTotalAmount);
+
+    // Set value to DTO
+    CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = new CalculateOrderAmountResponseDto();
+    calculateOrderAmountResponseDto.setTariffFee(orderEachAmountMap.get("tariffFee"));
+    calculateOrderAmountResponseDto.setPlatformFee(orderEachAmountMap.get("platformFee"));
+    calculateOrderAmountResponseDto.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
+    calculateOrderAmountResponseDto.setTravelerFee(travelerFee);
+    calculateOrderAmountResponseDto.setCurrency(order.getCurrency());
+    calculateOrderAmountResponseDto.setBidder(bidResponseDto.getCreator());
 
     return calculateOrderAmountResponseDto;
   }

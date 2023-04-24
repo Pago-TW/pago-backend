@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
@@ -62,7 +63,10 @@ public interface OrderService {
 
   Map<String, BigDecimal> calculateOrderEachAmount(Order order);
 
-  CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(CreateOrderRequestDto createOrderRequestDto);
+  CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(
+      CalculateOrderAmountRequestDto calculateOrderAmountRequestDto);
+
+  CalculateOrderAmountResponseDto calculateOrderEachAmountDuringChooseBid(String bidId);
 
   String generateOrderSerialNumber(CreateOrderRequestDto createOrderRequestDto);
 

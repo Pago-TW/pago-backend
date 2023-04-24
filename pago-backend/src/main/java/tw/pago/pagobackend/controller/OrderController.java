@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
@@ -260,11 +261,15 @@ public class OrderController {
   }
 
   @PostMapping("/calculate-order-amount")
-  public ResponseEntity<?> calculateOrderAmount(@RequestBody CreateOrderRequestDto createOrderRequestDto) {
+  public ResponseEntity<Object> calculateOrderAmount(@RequestBody CalculateOrderAmountRequestDto calculateOrderAmountRequestDto) {
 
-    CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringCreation(createOrderRequestDto);
-
-
+    CalculateOrderAmountResponseDto calculateOrderAmountResponseDto;
+    if (calculateOrderAmountRequestDto.getBidId() != null) {
+      calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringChooseBid(calculateOrderAmountRequestDto.getBidId());
+    } else {
+      calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringCreation(
+          calculateOrderAmountRequestDto);
+    }
     return ResponseEntity.status(HttpStatus.OK).body(calculateOrderAmountResponseDto);
 
 
