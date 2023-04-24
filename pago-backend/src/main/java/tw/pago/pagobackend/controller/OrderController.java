@@ -108,7 +108,7 @@ public class OrderController {
     try {
       updateOrderAndOrderItemRequestDto.setConsumerId(currentLoginUserId);
       updateOrderAndOrderItemRequestDto.setOrderId(orderId);
-      orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, true);
 
       Order updatedOrder = orderService.getOrderById(orderId);
 

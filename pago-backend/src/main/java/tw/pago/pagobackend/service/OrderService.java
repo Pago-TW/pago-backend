@@ -39,7 +39,7 @@ public interface OrderService {
   String getChosenBidderIdByOrderId(String orderId);
 
 
-  void updateOrderAndOrderItemByOrderId(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
+  void updateOrderAndOrderItemByOrderId(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto, boolean sendStatusUpdateEmail);
 
   void deleteOrderById(String orderId);
 

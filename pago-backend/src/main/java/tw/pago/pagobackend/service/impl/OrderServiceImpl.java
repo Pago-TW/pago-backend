@@ -315,7 +315,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public void updateOrderAndOrderItemByOrderId(Order oldOrder,
-      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
+      UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto, boolean sendStatusUpdateEmail) {
 
     // Get oldOrder
     if (oldOrder == null) {
@@ -366,8 +366,8 @@ public class OrderServiceImpl implements OrderService {
     // Check if the order status has been modified
     boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
 
-    // If the order status has been changed, send the email notification
-    if (orderStatusChanged) {
+    // If the order status has been changed AND status update email should be sent, send the email notification
+    if (orderStatusChanged && sendStatusUpdateEmail) {
       sendOrderUpdateEmail(oldOrder, updateOrderAndOrderItemRequestDto);
     }
   }
@@ -658,7 +658,8 @@ public class OrderServiceImpl implements OrderService {
         .orderStatus(TO_BE_CANCELED)
         .build();
 
-    updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+    // Pass false to prevent the order from being updated again
+    updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
 
     // Send email to notify the other party to reply
     sendCancelRequestEmail(order, cancellationRecord);
@@ -719,7 +720,8 @@ public class OrderServiceImpl implements OrderService {
         .orderStatus(TO_BE_POSTPONED)
         .build();
 
-    updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+    // Pass false to avoid sending email
+    updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
 
     // Send email to notify the other party to reply
     sendPostponeRequestEmail(order, postponeRecord);
@@ -755,15 +757,15 @@ public class OrderServiceImpl implements OrderService {
           .orderStatus(originalOrderStatus)
           .latestReceiveItemDate(updatedLatestReceiveItemDate)
           .build();
-
-      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      // Pass false to prevent the order from being updated again
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
     } else {
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
           .orderStatus(originalOrderStatus)
           .build();
-
-      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      // Pass false to prevent the order from being updated again
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
     }
 
@@ -792,14 +794,16 @@ public class OrderServiceImpl implements OrderService {
           .orderStatus(CANCELED)
           .build();
 
-      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      // Pass false to prevent the order from being updated again
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
     } else {
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
           .orderStatus(TO_BE_PURCHASED)
           .build();
 
-      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+      // Pass false to prevent the order from being updated again
+      updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
     }
 

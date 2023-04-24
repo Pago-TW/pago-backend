@@ -99,7 +99,7 @@ public class BidServiceImpl implements BidService {
 
     // Send the email notification
     sesEmailService.sendEmail(emailRequest);
-    System.out.println("......Email sent!");
+    System.out.println("......Email sent! (bid successfully created)");
 
     return bid;
   }
@@ -188,7 +188,7 @@ public class BidServiceImpl implements BidService {
         .build();
 
     // Update orderStatus & travelerFee
-    orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto);
+    orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
 
 
 
@@ -232,7 +232,7 @@ public class BidServiceImpl implements BidService {
 
     // Send the email notification
     sesEmailService.sendEmail(emailRequest);
-    System.out.println("......Email sent!");
+    System.out.println("......Email sent! (bid chosen)");
 
 
 
