@@ -17,8 +17,8 @@ public class CancellationRecordRowMapper implements RowMapper<CancellationRecord
     cancellationRecord.setCancelReason(
         CancelReasonCategoryEnum.valueOf(resultSet.getString("cancel_reason")));
     cancellationRecord.setNote(resultSet.getString("note"));
-    cancellationRecord.setCreateDate(resultSet.getDate("create_date").toLocalDate()); // TODO 要改LocalDateTime
-    cancellationRecord.setUpdateDate(resultSet.getDate("update_date").toLocalDate()); // TODO 要改LocalDateTime
+    cancellationRecord.setCreateDate(resultSet.getTimestamp("create_date").toLocalDateTime());
+    cancellationRecord.setUpdateDate(resultSet.getTimestamp("update_date").toLocalDateTime());
     cancellationRecord.setIsCancelled(resultSet.getBoolean("is_cancelled"));
 
     return cancellationRecord;

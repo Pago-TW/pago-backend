@@ -1,7 +1,7 @@
 package tw.pago.pagobackend.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
@@ -14,8 +14,8 @@ public class CancellationRecord {
   private String userId;
   private CancelReasonCategoryEnum cancelReason;
   private String note;
-  private LocalDate createDate;
-  private LocalDate updateDate;
+  private LocalDateTime createDate;
+  private LocalDateTime updateDate;
   @JsonProperty("isCancelled")
   private Boolean isCancelled;
 

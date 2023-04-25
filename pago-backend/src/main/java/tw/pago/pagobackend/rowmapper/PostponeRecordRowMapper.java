@@ -3,10 +3,8 @@ package tw.pago.pagobackend.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
-import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PostponeReasonCategoryEnum;
-import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.PostponeRecord;
 
 public class PostponeRecordRowMapper implements RowMapper<PostponeRecord> {
@@ -21,8 +19,8 @@ public class PostponeRecordRowMapper implements RowMapper<PostponeRecord> {
     postponeRecord.setPostponeReason(
         PostponeReasonCategoryEnum.valueOf(resultSet.getString("postpone_reason")));
     postponeRecord.setNote(resultSet.getString("note"));
-    postponeRecord.setCreateDate(resultSet.getDate("create_date").toLocalDate()); // TODO 要改LocalDateTime
-    postponeRecord.setUpdateDate(resultSet.getDate("update_date").toLocalDate()); // TODO 要改LocalDateTime
+    postponeRecord.setCreateDate(resultSet.getTimestamp("create_date").toLocalDateTime());
+    postponeRecord.setUpdateDate(resultSet.getTimestamp("update_date").toLocalDateTime());
     postponeRecord.setIsPostponed(resultSet.getBoolean("is_postponed"));
     postponeRecord.setOriginalOrderStatus(
         OrderStatusEnum.valueOf(resultSet.getString("original_order_status")));

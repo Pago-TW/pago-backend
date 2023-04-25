@@ -1,6 +1,6 @@
 package tw.pago.pagobackend.dao.impl;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
     map.put("cancellationRecordId", createCancellationRecordRequestDto.getCancellationRecordId());
     map.put("orderId", createCancellationRecordRequestDto.getOrderId());
     map.put("userId", createCancellationRecordRequestDto.getUserId());
@@ -103,7 +103,7 @@ public class CancellationRecordDaoImpl implements CancellationRecordDao {
         + "WHERE order_id = :orderId";
 
     Map<String, Object> map = new HashMap<>();
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
     map.put("isCancelled", updateCancellationRecordRequestDto.getIsCancelled());
     map.put("updateDate", now);
     map.put("orderId", updateCancellationRecordRequestDto.getOrderId());

@@ -1,6 +1,6 @@
 package tw.pago.pagobackend.dao.impl;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +11,7 @@ import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.PostponeRecordDao;
 import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
-import tw.pago.pagobackend.model.CancellationRecord;
 import tw.pago.pagobackend.model.PostponeRecord;
-import tw.pago.pagobackend.rowmapper.CancellationRecordRowMapper;
 import tw.pago.pagobackend.rowmapper.PostponeRecordRowMapper;
 
 @Repository
@@ -31,7 +29,7 @@ public class PostponeRecordDaoImpl implements PostponeRecordDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
     map.put("postponeRecordId", createPostponeRecordRequestDto.getPostponeRecordId());
     map.put("orderId", createPostponeRecordRequestDto.getOrderId());
     map.put("userId", createPostponeRecordRequestDto.getUserId());
@@ -95,7 +93,7 @@ public class PostponeRecordDaoImpl implements PostponeRecordDao {
         + "WHERE order_id = :orderId";
 
     Map<String, Object> map = new HashMap<>();
-    LocalDate now = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
     map.put("isPostponed", updatePostponeRecordRequestDto.getIsPostponed());
     map.put("updateDate", now);
     map.put("orderId", updatePostponeRecordRequestDto.getOrderId());

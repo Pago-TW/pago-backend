@@ -1,6 +1,6 @@
 package tw.pago.pagobackend.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,8 +16,8 @@ public class CreateCancellationRecordRequestDto {
   @NotNull
   private CancelReasonCategoryEnum cancelReason;
   private String note;
-  private LocalDate createDate;
-  private LocalDate updateDate;
+  private LocalDateTime createDate;
+  private LocalDateTime updateDate;
   private Boolean isCancelled;
 
 

@@ -281,13 +281,13 @@ public class OrderController {
 
     // Permission checking
     Order order = orderService.getOrderById(orderId);
-    String cosumerId = order.getConsumerId();
+    String consumerId = order.getConsumerId();
     String shopperId = order.getShopper() != null ? order.getShopper().getUserId() : null;
     if (shopperId == null) {
       return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("The order does not have a shopper assigned.");
     }
 
-    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shopperId))) {
+    if (!(currentLoginUserId.equals(consumerId) || currentLoginUserId.equals(shopperId))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
@@ -315,13 +315,13 @@ public class OrderController {
 
     // Permission checking
     Order order = orderService.getOrderById(orderId);
-    String cosumerId = order.getConsumerId();
+    String consumerId = order.getConsumerId();
     String shopperId = order.getShopper() != null ? order.getShopper().getUserId() : null;
     if (shopperId == null) {
       return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("The order does not have a shopper assigned.");
     }
 
-    if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shopperId))) {
+    if (!(currentLoginUserId.equals(consumerId) || currentLoginUserId.equals(shopperId))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 

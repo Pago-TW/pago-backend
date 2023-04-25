@@ -1,7 +1,7 @@
 package tw.pago.pagobackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ public class UpdatePostponeRecordRequestDto {
   private String postponeRecordId;
   private String orderId;
   private String userId;
-  private LocalDate updateDate;
+  private LocalDateTime updateDate;
 
   @NotNull
   @JsonProperty("isPostponed")
