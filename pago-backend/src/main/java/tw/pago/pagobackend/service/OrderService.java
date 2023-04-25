@@ -90,9 +90,9 @@ public interface OrderService {
 
   void sendOrderUpdateEmail(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto);
   
-  void sendReplyPostponeOrderEmail(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto, PostponeRecord postponeRecord);
+  void sendReplyPostponeOrderEmail(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto, PostponeRecord postponeRecord, String updatedOrderStatus);
 
-  void sendReplyCancelOrderEmail(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto, CancellationRecord cancellationRecord);
+  void sendReplyCancelOrderEmail(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto, CancellationRecord cancellationRecord, String updatedOrderStatus);
   
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

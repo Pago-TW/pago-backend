@@ -811,14 +811,14 @@ public class OrderServiceImpl implements OrderService {
           .orderStatus(originalOrderStatus)
           .latestReceiveItemDate(updatedLatestReceiveItemDate)
           .build();
-      // Pass false to prevent the order from being updated again
+
       updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
     } else {
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
           .orderStatus(originalOrderStatus)
           .build();
-      // Pass false to prevent the order from being updated again
+
       updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       postponeRecordDao.updatePostponeRecord(updatePostponeRecordRequestDto);
     }
@@ -826,7 +826,8 @@ public class OrderServiceImpl implements OrderService {
     PostponeRecord postponeRecord = getPostponeRecordByOrderId(order.getOrderId());
 
     // Send email to notify the other party about the reply
-    sendReplyPostponeOrderEmail(order, updatePostponeRecordRequestDto, postponeRecord);
+    String updatedOrderStatus = originalOrderStatus.getDescription();
+    sendReplyPostponeOrderEmail(order, updatePostponeRecordRequestDto, postponeRecord, updatedOrderStatus);
   }
 
   @Override
@@ -839,6 +840,7 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public void replyCancelOrder(
       Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
+    String updatedOrderStatus;
     // Check orderStatus is TO_BE_CANCELLED
     if (!(order.getOrderStatus().equals(TO_BE_CANCELLED))) {
       throw new AccessDeniedException("OrderStatus is not TO_BE_CANCELLED, so you have no permission to request a cancellation.");
@@ -846,26 +848,28 @@ public class OrderServiceImpl implements OrderService {
 
 
     if (updateCancellationRecordRequestDto.getIsCancelled() == true) {
+      OrderStatusEnum orderStatus = CANCELLED;
+      updatedOrderStatus = orderStatus.getDescription();
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-          .orderStatus(CANCELLED)
+          .orderStatus(orderStatus)
           .build();
 
-      // Pass false to prevent the order from being updated again
       updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
     } else {
+      OrderStatusEnum orderStatus = TO_BE_PURCHASED;
+      updatedOrderStatus = orderStatus.getDescription();
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
-          .orderStatus(TO_BE_PURCHASED)
+          .orderStatus(orderStatus)
           .build();
 
-      // Pass false to prevent the order from being updated again
       updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
       cancellationRecordDao.updateCancellationRecord(updateCancellationRecordRequestDto);
     }
 
     CancellationRecord cancellationRecord = getCancellationRecordByOrderId(order.getOrderId());
     // Send email to notify the other party about the reply
-    sendReplyCancelOrderEmail(order, updateCancellationRecordRequestDto, cancellationRecord);
+    sendReplyCancelOrderEmail(order, updateCancellationRecordRequestDto, cancellationRecord, updatedOrderStatus);
 
   }
 
@@ -1105,7 +1109,7 @@ public class OrderServiceImpl implements OrderService {
   }
 
   public void sendReplyPostponeOrderEmail(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto, 
-      PostponeRecord postponeRecord) {
+      PostponeRecord postponeRecord, String updatedOrderStatus) {
     String recipientId = postponeRecord.getUserId();
     User recipientUser = userDao.getUserById(recipientId);
     String recipientUserEmail = recipientUser.getEmail();
@@ -1116,7 +1120,6 @@ public class OrderServiceImpl implements OrderService {
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
   
     String result = updatePostponeRecordRequestDto.getIsPostponed() ? "通過" : "被拒絕";
-    String updatedOrderStatus = order.getOrderStatus().getDescription();
   
     String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
         "於%s，「%s」的訂單延期申請已%s。現在的訂單狀態為%s，請至Pago網站進行確認並查看詳情\n",
@@ -1134,7 +1137,7 @@ public class OrderServiceImpl implements OrderService {
   }
 
   public void sendReplyCancelOrderEmail(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto, 
-      CancellationRecord cancellationRecord) {
+      CancellationRecord cancellationRecord, String updatedOrderStatus) {
     String recipientId = cancellationRecord.getUserId();
     User recipientUser = userDao.getUserById(recipientId);
     String recipientUserEmail = recipientUser.getEmail();
@@ -1145,7 +1148,6 @@ public class OrderServiceImpl implements OrderService {
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
     String result = updateCancellationRecordRequestDto.getIsCancelled() ? "通過" : "被拒絕";
-    String updatedOrderStatus = order.getOrderStatus().getDescription();
 
     String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
             "於%s，「%s」的訂單取消申請已%s。現在的訂單狀態為%s，請至Pago網站進行確認並查看詳情\n",
