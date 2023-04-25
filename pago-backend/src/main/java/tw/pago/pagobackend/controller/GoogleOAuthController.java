@@ -48,7 +48,7 @@ public class GoogleOAuthController {
   }
 
 
-  @PostMapping("/oauth2/google-login")
+  @PostMapping("/oauth2/google-login") // TODO 登入後要更新 last_login
   public ResponseEntity<?> handleGoogleLogin(HttpServletRequest request, @RequestBody GoogleLoginRequestDto googleLoginRequestDto) {
     String idToken = googleLoginRequestDto.getIdToken();
 

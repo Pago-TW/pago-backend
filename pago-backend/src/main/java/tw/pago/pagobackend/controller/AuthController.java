@@ -23,7 +23,7 @@ public class AuthController {
   @Autowired
   private AuthService authService;
 
-  @PostMapping("/auth/login")
+  @PostMapping("/auth/login") // TODO 登入後要更新 last_login
   public ResponseEntity<JwtAuthenticationResponseDto> authenticateUser(@RequestBody @Valid UserLoginRequestDto userLoginRequestDto) {
 
     JwtAuthenticationResponseDto jwtAuthenticationResponseDto = authService.login(userLoginRequestDto);

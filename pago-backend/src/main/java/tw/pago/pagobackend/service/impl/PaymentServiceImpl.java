@@ -92,7 +92,7 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   public void updatePayment(UpdatePaymentRequestDto updatePaymentRequestDto) {
 
-    // TODO 如果是把isPaid從 0 -> 1 要寄付款通知信
+
     paymentDao.updatePayment(updatePaymentRequestDto);
   }
 
