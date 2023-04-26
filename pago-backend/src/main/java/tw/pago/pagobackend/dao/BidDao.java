@@ -16,6 +16,8 @@ public interface BidDao {
 
   Bid getChosenBidByOrderId(String orderId);
 
+  Bid getBidByShopperIdAndOrderId(String shopperId, String orderId);
+
   void deleteBidById(String bidId);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);

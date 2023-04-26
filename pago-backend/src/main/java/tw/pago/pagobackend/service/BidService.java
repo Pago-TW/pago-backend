@@ -9,7 +9,7 @@ import tw.pago.pagobackend.model.Bid;
 
 public interface BidService {
 
-  Bid createBid(CreateBidRequestDto createBidRequestDto);
+  Bid createOrUpdateBid(CreateBidRequestDto createBidRequestDto);
 
   Bid getBidById(String bidId);
 

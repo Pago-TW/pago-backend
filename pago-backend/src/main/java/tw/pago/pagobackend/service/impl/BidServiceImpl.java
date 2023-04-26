@@ -56,7 +56,28 @@ public class BidServiceImpl implements BidService {
   private final CurrentUserInfoProvider currentUserInfoProvider;
 
   @Override
-  public Bid createBid(CreateBidRequestDto createBidRequestDto) {
+  public Bid createOrUpdateBid(CreateBidRequestDto createBidRequestDto) {
+
+    Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
+    Bid existingBid = bidDao.getBidByShopperIdAndOrderId(trip.getShopperId(),
+        createBidRequestDto.getOrderId());
+
+    if (existingBid != null) {
+      UpdateBidRequestDto updateBidRequestDto = UpdateBidRequestDto.builder()
+          .bidId(existingBid.getBidId())
+          .orderId(createBidRequestDto.getOrderId())
+          .bidAmount(createBidRequestDto.getBidAmount())
+          .tripId(createBidRequestDto.getTripId())
+          .currency(createBidRequestDto.getCurrency())
+          .latestDeliveryDate(createBidRequestDto.getLatestDeliveryDate())
+          .build();
+
+      updateBid(updateBidRequestDto);
+
+      System.out.println("You have already made an offer, so we updated your bid!");
+      Bid updatedBid = bidDao.getBidById(existingBid.getBidId());
+      return updatedBid;
+    }
 
     String currency = createBidRequestDto.getCurrency().toString();
     String bidAmount = createBidRequestDto.getBidAmount().toString();

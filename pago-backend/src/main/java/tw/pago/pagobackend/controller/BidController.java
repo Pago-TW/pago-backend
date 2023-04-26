@@ -47,7 +47,7 @@ public class BidController {
       @RequestBody @Valid CreateBidRequestDto createBidRequestDto) {
 
     createBidRequestDto.setOrderId(orderId);
-    Bid bid = bidService.createBid(createBidRequestDto);
+    Bid bid = bidService.createOrUpdateBid(createBidRequestDto);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(bid);
   }
