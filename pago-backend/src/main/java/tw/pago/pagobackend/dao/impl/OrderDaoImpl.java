@@ -408,14 +408,14 @@ public class OrderDaoImpl implements OrderDao {
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
 
-    if (listQueryParametersDto.getFrom() != null) {
+    if (listQueryParametersDto.getFromCity() != null) {
       sql = sql + " AND oi.purchase_city = :purchaseCity ";
-      map.put("purchaseCity", listQueryParametersDto.getFrom().name());
+      map.put("purchaseCity", listQueryParametersDto.getFromCity().name());
     }
 
-    if (listQueryParametersDto.getTo() != null) {
+    if (listQueryParametersDto.getToCity() != null) {
       sql = sql + " AND om.destination_city = :destinationCity ";
-      map.put("destinationCity", listQueryParametersDto.getTo().name());
+      map.put("destinationCity", listQueryParametersDto.getToCity().name());
     }
 
     if (listQueryParametersDto.getIsPackagingRequired() != null) {

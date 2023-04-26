@@ -467,7 +467,7 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public List<MatchingShopperResponseDto> getMatchingShopperList(ListQueryParametersDto listQueryParametersDto) {
 
-    List<Trip> matchingTripList = tripDao.getMatchingTripForOrder(listQueryParametersDto);
+    List<Trip> matchingTripList = tripDao.getMatchingTripListForOrder(listQueryParametersDto);
 
     List<MatchingShopperResponseDto> matchingShopperResponseDtoList = matchingTripList.stream()
         .map(trip -> {

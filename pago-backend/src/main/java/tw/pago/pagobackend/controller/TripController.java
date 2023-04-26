@@ -3,7 +3,6 @@ package tw.pago.pagobackend.controller;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -104,8 +103,9 @@ public class TripController {
   }
 
   @GetMapping("/trips")
-  public ResponseEntity<ListResponseDto<TripResponseDto>> getTripList(
+  public ResponseEntity<Object> getTripList(
       @RequestParam(required = false) String userId,
+      @RequestParam(required = false) String orderId,
       @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
@@ -113,8 +113,20 @@ public class TripController {
       @RequestParam(defaultValue = "create_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
-    if (userId == null) {
-      userId = currentUserInfoProvider.getCurrentLoginUserId();
+    if (orderId != null) {
+
+      ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+          .startIndex(startIndex)
+          .size(size)
+          .orderBy(orderBy)
+          .sort(sort)
+          .build();
+
+      List<Trip> tripList = tripService.getMatchingTripListByOrderId(orderId, listQueryParametersDto);
+      List<TripResponseDto> tripResponseDtoList = tripService.getTripResponseDtoByTripList(tripList);
+
+      return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoList);
+
     }
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()

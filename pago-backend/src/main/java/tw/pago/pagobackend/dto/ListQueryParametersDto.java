@@ -5,8 +5,6 @@ import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
@@ -25,8 +23,8 @@ public class ListQueryParametersDto {
 
   // Order
   private OrderStatusEnum orderStatus;
-  private CityCode from;
-  private CityCode to;
+  private CityCode fromCity;
+  private CityCode toCity;
   private Boolean isPackagingRequired;
   private LocalDate orderCreateDate;
 

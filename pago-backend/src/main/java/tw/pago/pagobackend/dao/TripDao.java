@@ -21,7 +21,7 @@ public interface TripDao {
 
     List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto);
 
-    List<Trip> getMatchingTripForOrder(ListQueryParametersDto listQueryParametersDto);
+    List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
 

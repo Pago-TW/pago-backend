@@ -5,6 +5,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 @Component
+@Deprecated
 public class CityUtil {
 
   public static String getChineseCountryName(String countryCode) {

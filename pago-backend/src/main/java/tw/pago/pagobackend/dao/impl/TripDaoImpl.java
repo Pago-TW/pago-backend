@@ -164,7 +164,7 @@ public class TripDaoImpl implements TripDao {
   }
 
   @Override
-  public List<Trip> getMatchingTripForOrder(ListQueryParametersDto listQueryParametersDto) {
+  public List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
         + "FROM trip "
@@ -172,7 +172,7 @@ public class TripDaoImpl implements TripDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    // Filtering e.g. status, search
+    // Filtering e.g. From, to, create_date
     sql = addMatchingTripForOrderSql(sql, map, listQueryParametersDto);
 
 
@@ -230,6 +230,10 @@ public class TripDaoImpl implements TripDao {
       map.put("shopperId", listQueryParametersDto.getUserId());
     }
 
+    if (listQueryParametersDto.getOrderId() != null) {
+      sql = sql + "AND order_id = orderId ";
+    }
+
     if (listQueryParametersDto.getLatestReceiveItemDate() != null) {
       LocalDate latestReceiveItemDate = listQueryParametersDto.getLatestReceiveItemDate();
       sql = sql + " AND DATE(arrival_date) < :latestReceiveItemDate ";
@@ -251,14 +255,14 @@ public class TripDaoImpl implements TripDao {
 
   private String addMatchingTripForOrderSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
 
-    if (listQueryParametersDto.getFrom() != null) {
+    if (listQueryParametersDto.getFromCity() != null) {
       sql = sql + " AND from_city = :fromCity ";
-      map.put("fromCity", listQueryParametersDto.getFrom().name());
+      map.put("fromCity", listQueryParametersDto.getFromCity().name());
     }
 
-    if (listQueryParametersDto.getTo() != null) {
+    if (listQueryParametersDto.getToCity() != null) {
       sql = sql + " AND to_city = :toCity ";
-      map.put("toCity", listQueryParametersDto.getTo().name());
+      map.put("toCity", listQueryParametersDto.getToCity().name());
     }
 
     sql = sql + " AND DATE(arrival_date) BETWEEN :orderCreateDate AND :latestReceiveItemDate ";

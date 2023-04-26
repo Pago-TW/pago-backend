@@ -29,9 +29,13 @@ public interface TripService {
 
     List<Trip> getTripList(ListQueryParametersDto ListQueryParametersDto);
 
+    List<Trip> getMatchingTripListByOrderId(String orderId, ListQueryParametersDto listQueryParametersDto);
+
     List<OrderResponseDto> getMatchingOrderResponseDtoListForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 
     List<TripResponseDto> getTripResponseDtoList(ListQueryParametersDto listQueryParametersDto);
+
+    List<TripResponseDto> getTripResponseDtoByTripList(List<Trip> tripList);
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
 

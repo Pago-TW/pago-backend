@@ -9,7 +9,7 @@ public class CountryUtil {
 
   public static String getChineseCountryName(String countryCode) {
     Locale locale = new Locale("zh", countryCode);
-    return locale.getDisplayCountry(Locale.CHINESE);
+    return locale.getDisplayCountry(Locale.TRADITIONAL_CHINESE);
   }
   public static String getChineseCountryName(CountryCode countryCode) {
     Locale locale = new Locale("zh", countryCode.getAlpha2());
