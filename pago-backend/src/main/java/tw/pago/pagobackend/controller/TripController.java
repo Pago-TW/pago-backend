@@ -89,7 +89,7 @@ public class TripController {
     return ResponseEntity.status(HttpStatus.OK).body(updatedTrip);
   }
 
-  @DeleteMapping("/trips/{tripId}")
+  @DeleteMapping("/trips/{tripId}") // TODO 刪除旅途後，要把之前的出價順便刪掉
   public ResponseEntity<?> delete(@PathVariable String tripId)
       throws SQLException {
 

@@ -121,7 +121,7 @@ public class OrderController {
 
   }
 
-  @DeleteMapping("/orders/{orderId}")
+  @DeleteMapping("/orders/{orderId}") // TODO 刪除委託後，要順便把底下的出價順便刪掉
   public ResponseEntity<Object> deleteOrderById(@PathVariable String orderId) {
 
     Order order = orderService.getOrderById(orderId);
@@ -158,6 +158,7 @@ public class OrderController {
   @GetMapping("/orders")
   public ResponseEntity<ListResponseDto<OrderResponseDto>> getOrderList(
       @RequestParam(required = false) String userId,
+      @RequestParam(required = false) String tripId,
       @RequestParam(required = false) OrderStatusEnum status,
       @RequestParam(required = false) String search,
       @RequestParam(required = false) CityCode from,
@@ -168,8 +169,12 @@ public class OrderController {
       @RequestParam(defaultValue = "create_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
+
+
+
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .userId(userId)
+        .tripId(tripId)
         .orderStatus(status)
         .search(search)
         .from(from)

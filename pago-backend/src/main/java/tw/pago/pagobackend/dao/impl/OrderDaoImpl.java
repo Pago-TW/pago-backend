@@ -392,6 +392,12 @@ public class OrderDaoImpl implements OrderDao {
       map.put("consumerId", listQueryParametersDto.getUserId());
     }
 
+    if (listQueryParametersDto.getTripId() != null) {
+      sql = sql + " AND om.order_id IN (SELECT b.order_id FROM bid AS b WHERE b.trip_id = :tripId) ";
+      map.put("tripId", listQueryParametersDto.getTripId());
+    }
+
+
     if (listQueryParametersDto.getOrderStatus() != null) {
       sql = sql + " AND order_status = :orderStatus ";
       map.put("orderStatus", listQueryParametersDto.getOrderStatus().name());
