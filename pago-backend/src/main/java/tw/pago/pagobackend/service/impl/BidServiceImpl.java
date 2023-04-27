@@ -345,24 +345,27 @@ public class BidServiceImpl implements BidService {
     String orderItemName = order.getOrderItem().getName();
     // Get the user name
     String orderCreatorName = orderCreator.getFirstName();
+
+    String orderSerialNumber = order.getSerialNumber();
     // Get current date
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
     String currency = bid.getCurrency().toString();
     String bidAmount = bid.getBidAmount().toString();
-    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
-            "%s已於%s在您的訂單 %s 更新出價：%s%s",
-        orderCreatorName, bidderName, date, orderItemName, currency, bidAmount);
+    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 更新出價：%s %s<br>訂單編號：%s",
+        bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
 
     // Prepare the email content
-    EmailRequestDto emailRequest = new EmailRequestDto();
-    emailRequest.setTo(orderCreatorEmail);
-    emailRequest.setSubject("【Pago 訂單出價更新通知】" + orderItemName);
-    emailRequest.setBody(emailBody);
+    EmailRequestDto emailRequestDto = new EmailRequestDto();
+    emailRequestDto.setTo(orderCreatorEmail);
+    emailRequestDto.setSubject("【Pago 訂單出價更新通知】" + orderItemName);
+    emailRequestDto.setBody(emailBody);
+    emailRequestDto.setRecipientName(orderCreatorName);
+
 
     // Send the email
-    sesEmailService.sendEmail(emailRequest);
+    sesEmailService.sendEmail(emailRequestDto);
   }
 
 
@@ -379,24 +382,26 @@ public class BidServiceImpl implements BidService {
     String orderItemName = order.getOrderItem().getName();
     // Get the user name
     String orderCreatorName = orderCreator.getFirstName();
+    // Get orderSerialNumber
+    String orderSerialNumber = order.getSerialNumber();
     // Get current date
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
     String currency = bid.getCurrency().toString();
     String bidAmount = bid.getBidAmount().toString();
-    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
-            "%s已於%s在您的訂單 %s 出價：%s%s",
-        orderCreatorName, bidderName, date, orderItemName, currency, bidAmount);
+    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 出價：%s %s<br>訂單編號：$s",
+        orderCreatorName, bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
 
     // Prepare the email content
-    EmailRequestDto emailRequest = new EmailRequestDto();
-    emailRequest.setTo(orderCreatorEmail);
-    emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
-    emailRequest.setBody(emailBody);
+    EmailRequestDto emailRequestDto = new EmailRequestDto();
+    emailRequestDto.setTo(orderCreatorEmail);
+    emailRequestDto.setSubject("【Pago 訂單出價通知】" + orderItemName);
+    emailRequestDto.setRecipientName(orderCreatorName);
+    emailRequestDto.setBody(emailBody);
 
     // Send the email
-    sesEmailService.sendEmail(emailRequest);
+    sesEmailService.sendEmail(emailRequestDto);
   }
 
 
@@ -410,6 +415,7 @@ public class BidServiceImpl implements BidService {
     // Get the order item name
     Order order = orderService.getOrderById(orderId);
     String orderItemName = order.getOrderItem().getName();
+    String orderSerialNumber = order.getSerialNumber();
     // Get the user name
     String orderCreatorId = order.getConsumerId();
     User orderCreator = userService.getUserById(orderCreatorId);
@@ -418,18 +424,18 @@ public class BidServiceImpl implements BidService {
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
-    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
-            "您於 %s 訂單的出價已在%s被%s選中！請前往Pago查看詳情",
-        bidderName, orderItemName, date, orderCreatorName);
+    String emailBody = String.format("您於 %s 訂單的出價已在 %s 被 %s 選中！請前往 Pago 查看詳情<br>訂單編號：%s",
+        orderItemName, date, orderCreatorName, orderSerialNumber);
 
     // Prepare the email content
-    EmailRequestDto emailRequest = new EmailRequestDto();
-    emailRequest.setTo(bidderEmail);
-    emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
-    emailRequest.setBody(emailBody);
+    EmailRequestDto emailRequestDto = new EmailRequestDto();
+    emailRequestDto.setTo(bidderEmail);
+    emailRequestDto.setSubject("【Pago 訂單出價通知】" + orderItemName);
+    emailRequestDto.setRecipientName(bidderName);
+    emailRequestDto.setBody(emailBody);
 
     // Send the email notification
-    sesEmailService.sendEmail(emailRequest);
+    sesEmailService.sendEmail(emailRequestDto);
     System.out.println("......Email sent! (bid chosen)");
   }
 
