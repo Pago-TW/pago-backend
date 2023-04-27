@@ -42,7 +42,7 @@ public class BidController {
   private final OrderService orderService;
   private final PaymentService paymentService;
 
-  @PostMapping("/orders/{orderId}/bids") // TODO 若某使用者已經對該委託出價過，假設他在該委託中再次 call 此 API，不能讓他在對此訂單創建一筆新的 bid ，而是要更新 bid
+  @PostMapping("/orders/{orderId}/bids")
   public ResponseEntity<Bid> createBid(@PathVariable String orderId,
       @RequestBody @Valid CreateBidRequestDto createBidRequestDto) {
 

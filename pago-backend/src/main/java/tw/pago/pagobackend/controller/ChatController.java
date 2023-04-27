@@ -46,6 +46,7 @@ public class ChatController {
   private final UserService userService;
 
   @PostMapping("/send-message")
+  @Deprecated
   public ResponseEntity<Void> sendMessage(@RequestBody SendMessageRequestDto sendMessageRequestDto) {
     User sender = currentUserInfoProvider.getCurrentLoginUser();
     sendMessageRequestDto.setSenderId(sender.getUserId());
@@ -64,7 +65,7 @@ public class ChatController {
 
   }
 
-  @MessageMapping("/send-message") // TODO 若有發送訊息，更新 last_read_message_id 為他剛剛發送的message_id
+  @MessageMapping("/send-message")
   public void receiveMessage(@Payload SendMessageRequestDto sendMessageRequestDto) {
 
     System.out.println("Frontend send Message");

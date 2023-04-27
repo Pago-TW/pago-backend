@@ -5,6 +5,7 @@ import java.util.Optional;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.dto.CreateChatRoomUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.UpdateChatroomUserMappingRequestDto;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.ChatroomUserMapping;
 
@@ -21,6 +22,8 @@ public interface ChatroomDao {
   ChatroomUserMapping getChatroomUserMappingByChatroomIdAndUserId(String chatroomId, String userId);
 
   List<ChatroomUserMapping> getChatroomUserMappingListByChatroomId(String chatroomId);
+
+  void updateLastReadMessageIdByChatroomIdAndUserId(UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto);
 
   Optional<Chatroom> findChatroomByUserIds(String userIdA, String userIdB);
 

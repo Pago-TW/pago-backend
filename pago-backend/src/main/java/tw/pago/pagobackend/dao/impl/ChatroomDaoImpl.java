@@ -13,6 +13,7 @@ import tw.pago.pagobackend.dao.ChatroomDao;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
 import tw.pago.pagobackend.dto.CreateChatRoomUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.UpdateChatroomUserMappingRequestDto;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.ChatroomUserMapping;
 import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
@@ -131,6 +132,25 @@ public class ChatroomDaoImpl implements ChatroomDao {
     List<ChatroomUserMapping> chatroomUserMappingList = namedParameterJdbcTemplate.query(sql, map, new ChatroomUserMappingRowMapper());
 
     return chatroomUserMappingList;
+
+  }
+
+  @Override
+  public void updateLastReadMessageIdByChatroomIdAndUserId(
+      UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto) {
+    String sql = "UPDATE chatroom_user_mapping "
+        + "SET last_read_message_id = :lastReadMessageId, update_date = :updateDate "
+        + "WHERE chatroom_id = :chatroomId "
+        + "AND user_id = :userId ";
+
+    LocalDateTime now = LocalDateTime.now();
+    Map<String, Object> map = new HashMap<>();
+    map.put("lastReadMessageId", updateChatroomUserMappingRequestDto.getLastReadMessageId());
+    map.put("updateDate", now);
+    map.put("chatroomId", updateChatroomUserMappingRequestDto.getChatroomId());
+    map.put("userId", updateChatroomUserMappingRequestDto.getUserId());
+
+    namedParameterJdbcTemplate.update(sql, map);
 
   }
 

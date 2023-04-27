@@ -18,6 +18,7 @@ import tw.pago.pagobackend.dto.CreateChatRoomUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MessageResponseDto;
 import tw.pago.pagobackend.dto.SendMessageRequestDto;
+import tw.pago.pagobackend.dto.UpdateChatroomUserMappingRequestDto;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.ChatroomUserMapping;
@@ -38,6 +39,7 @@ public class ChatServiceImpl implements ChatService {
   private final ModelMapper modelMapper;
 
   @Override
+  @Transactional
   public Message createMessage(SendMessageRequestDto sendMessageRequestDto) {
     String messageId = uuidGenerator.getUuid();
     MessageTypeEnum messageType = sendMessageRequestDto.getMessageType();
@@ -47,6 +49,13 @@ public class ChatServiceImpl implements ChatService {
     sendMessageRequestDto.setMessageId(messageId);
 
     messageDao.createMessage(sendMessageRequestDto);
+
+    // After createMessage, update the last_read_message_id
+    UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto = new UpdateChatroomUserMappingRequestDto();
+    updateChatroomUserMappingRequestDto.setChatroomId(sendMessageRequestDto.getChatroomId());
+    updateChatroomUserMappingRequestDto.setUserId(sendMessageRequestDto.getSenderId());
+    updateChatroomUserMappingRequestDto.setLastReadMessageId(messageId);
+    updateLastReadMessageId(updateChatroomUserMappingRequestDto);
 
     Message message = messageDao.getMessageById(messageId);
 
@@ -102,6 +111,13 @@ public class ChatServiceImpl implements ChatService {
   @Override
   public ChatroomUserMapping getChatroomUserMappingByUserId(String userId) {
     return chatroomDao.getChatroomUserMappingByUserId(userId);
+  }
+
+  @Override
+  public void updateLastReadMessageId(
+      UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto) {
+
+    chatroomDao.updateLastReadMessageIdByChatroomIdAndUserId(updateChatroomUserMappingRequestDto);
   }
 
   @Override
