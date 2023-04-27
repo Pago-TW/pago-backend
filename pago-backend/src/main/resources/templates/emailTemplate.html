@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    @media only screen and (max-width: 600px) {
+      .container {
+        width: 100%;
+        margin: 0 auto;
+      }
+      .content {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+
     body {
       font-family: "Noto Sans TC", Arial, sans-serif;
       margin: 0;
@@ -43,13 +54,18 @@
       color: #000000;
       text-align: left;
     }
+    .content h3,
+    .content p {
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
     .notice {
       color: #000000;
       text-align: center;
     }
     .separator {
       width: 93%;
-      margin: 20px auto;
+      margin: 10px auto;
       border-top: 1px solid #eee;
     }
     .footer {
@@ -59,41 +75,80 @@
     }
     .footer img {
       width: 80px;
+      margin-bottom: 0.5em;
+    }
+    .footer p {
+      margin: 0.5em 0;
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <h1>Pago</h1>
-  </div>
-
-  <div>
-    <div class="content-title">
-      <h1>{{content_title}}</h1>
-    </div>
-    <div class="content">
-      <h3>親愛的 {{recipient_name}}，您好：</h3>
-      <p>感謝您使用 Pago 的服務</p>
-      <p>{{email_body}}</p>
-    </div>
-    <div class="notice">
-      <p><strong>本信件為系統發送的通知信，請勿回覆</strong></p>
-    </div>
-  </div>
-
-  <div class="separator"></div>
-
-  <div class="footer">
-    <a href="https://pago-app.me" target="_blank">
-      <img
-          src="https://pago-file-storage.s3.ap-northeast-1.amazonaws.com/5b65b2d2f7b14ca69cf153bcdbee5154_textWithLogo-removebg-preview.png"
-          alt="Pago Logo">
-    </a>
-    <p>Copyright © 2023 Pago</p>
-    <p>服務時間：週一至週五，上午 9:00 至 下午 6:00</p>
-    <p>聯絡信箱：<a href="mailto:service@pago-app.me">service@pago-app.me</a></p>
-  </div>
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tbody>
+    <tr>
+      <td class="header">
+        <h1>Pago</h1>
+      </td>
+    </tr>
+    <tr>
+      <td class="content-title">
+        <h1>{{content_title}}</h1>
+      </td>
+    </tr>
+    <tr>
+      <td class="content" style="color: #000000;">
+        <h3>親愛的 {{recipient_name}}，您好：</h3>
+        <p>感謝您使用 Pago 的服務</p>
+        <p>{{email_body}}</p>
+      </td>
+    </tr>
+    <tr>
+      <td class="notice">
+        <p><strong>本信件為系統發送的通知信，請勿回覆</strong></p>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tbody>
+    <tr>
+      <div class="separator"></div>
+    </tr>
+    <tr>
+      <td>
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+          <tbody>
+          <tr>
+            <td class="footer">
+              <a href="https://pago-app.me" target="_blank">
+                <img
+                    src="https://pago-file-storage.s3.ap-northeast-1.amazonaws.com/5b65b2d2f7b14ca69cf153bcdbee5154_textWithLogo-removebg-preview.png"
+                    alt="Pago Logo">
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td class="footer">
+              <p>Copyright © 2023 Pago</p>
+            </td>
+          </tr>
+          <tr>
+            <td class="footer">
+              <p>服務時間：週一至週五，上午 9:00 至 下午 6:00</p>
+            </td>
+          </tr>
+          <tr>
+            <td class="footer">
+              <p>聯絡信箱：<a href="mailto:service@pago-app.me">service@pago-app.me</a></p>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+    </tbody>
+  </table>
 </div>
 </body>
 </html>
