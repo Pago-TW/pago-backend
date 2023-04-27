@@ -58,11 +58,15 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid createOrUpdateBid(CreateBidRequestDto createBidRequestDto) {
 
+    // Get the trip by its ID
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
+
+    // Check if a bid already exists for the shopper and order
     Bid existingBid = bidDao.getBidByShopperIdAndOrderId(trip.getShopperId(),
         createBidRequestDto.getOrderId());
 
     if (existingBid != null) {
+      // If the bid already exists, create an update request for the existing bid
       UpdateBidRequestDto updateBidRequestDto = UpdateBidRequestDto.builder()
           .bidId(existingBid.getBidId())
           .orderId(createBidRequestDto.getOrderId())
@@ -72,58 +76,47 @@ public class BidServiceImpl implements BidService {
           .latestDeliveryDate(createBidRequestDto.getLatestDeliveryDate())
           .build();
 
-      updateBid(updateBidRequestDto);
+      // Get the order by its ID
+      String orderId = createBidRequestDto.getOrderId();
+      Order order = orderService.getOrderById(orderId);
+
+      // Update the existing bid
+      updateBid(updateBidRequestDto, existingBid, order);
 
       System.out.println("You have already made an offer, so we updated your bid!");
+      // Get the updated bid from the database
       Bid updatedBid = bidDao.getBidById(existingBid.getBidId());
+
       return updatedBid;
     }
 
+    // Convert the currency and bid amount to strings
     String currency = createBidRequestDto.getCurrency().toString();
     String bidAmount = createBidRequestDto.getBidAmount().toString();
 
-    // Init UUID & Set UUID
+    // Generate a UUID for the new bid
     String uuid = uuidGenerator.getUuid();
+
+    // Set the bid ID and initial status
     createBidRequestDto.setBidId(uuid);
     createBidRequestDto.setBidStatus(BidStatusEnum.NOT_CHOSEN);
-    // Create bid
+
+    // Create the new bid in the database
     bidDao.createBid(createBidRequestDto);
+
+    // Get the newly created bid from the database
     Bid bid = bidDao.getBidById(uuid);
 
-    // Get bidder's name
-    String bidderName = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
-
-    // Get the order creator's email
+    // Send the email notification
     String orderId = createBidRequestDto.getOrderId();
     Order order = orderService.getOrderById(orderId);
-    String orderCreatorId = order.getConsumerId();
-    User orderCreator = userService.getUserById(orderCreatorId);
-    String orderCreatorEmail = orderCreator.getEmail();
+    sendPlaceBidEmail(bid, order);
 
-    // Get the order item name
-    String orderItemName = order.getOrderItem().getName();
-    // Get the user name
-    String orderCreatorName = orderCreator.getFirstName();
-    // Get current date
-    Date now = new Date();
-    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
-
-    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
-    "%s已於%s在您的訂單 %s 出價：%s%s", 
-    orderCreatorName, bidderName, date, orderItemName, currency, bidAmount);
-
-    // Prepare the email content
-    EmailRequestDto emailRequest = new EmailRequestDto();
-    emailRequest.setTo(orderCreatorEmail);
-    emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
-    emailRequest.setBody(emailBody);
-
-    // Send the email notification
-    sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent! (bid successfully created)");
 
     return bid;
   }
+
 
   @Override
   public Bid getBidById(String bidId) {
@@ -173,6 +166,33 @@ public class BidServiceImpl implements BidService {
     BeanUtils.copyProperties(oldBid, updateBidRequestDto, presentPropertyNames);
 
     bidDao.updateBid(updateBidRequestDto);
+
+    Bid updatedBid = bidDao.getBidById(updateBidRequestDto.getBidId());
+    Order order = orderService.getOrderById(updatedBid.getOrderId());
+    sendUpdateBidEmail(updatedBid, order);
+    System.out.println("......Email sent! (bid successfully updated)");
+  }
+
+  @Override
+  public void updateBid(UpdateBidRequestDto updateBidRequestDto, Bid existingBid, Order order) {
+
+    Bid oldBid = getBidById(updateBidRequestDto.getBidId());
+
+    if (oldBid == null) {
+      throw new ResourceNotFoundException(updateBidRequestDto.getBidId(), " Not found", oldBid.getBidId());
+    }
+
+    // Get existing field names in updateDto
+    String[] presentPropertyNames = EntityPropertyUtil.getPresentPropertyNames(updateBidRequestDto);
+
+    // Copy properties from oldBid to updateDto, while ignoring the existing fields in updateDto.
+    BeanUtils.copyProperties(oldBid, updateBidRequestDto, presentPropertyNames);
+
+    bidDao.updateBid(updateBidRequestDto);
+
+    Bid updatedBid = bidDao.getBidById(updateBidRequestDto.getBidId());
+    sendUpdateBidEmail(updatedBid, order);
+    System.out.println("......Email sent! (bid successfully updated)");
   }
 
   @Override
@@ -223,39 +243,8 @@ public class BidServiceImpl implements BidService {
      * Body: 親愛的XXX您好，感謝您使用Pago的服務
      */
 
-    // Get bidder's name and email
-    String tripId = bid.getTripId();
-    Trip trip = tripService.getTripById(tripId);
-    String bidderId = trip.getShopperId();
-    User bidder = userService.getUserById(bidderId);
-    String bidderName = bidder.getFirstName();
-    String bidderEmail = bidder.getEmail();
-
-    // Get the order item name
-    String orderItemName = order.getOrderItem().getName();
-    // Get the user name
-    String orderCreatorId = order.getConsumerId();
-    User orderCreator = userService.getUserById(orderCreatorId);
-    String orderCreatorName = orderCreator.getFirstName();
-    // Get current date
-    Date now = new Date();
-    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
-
-    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
-    "您於 %s 訂單的出價已在%s被%s選中！請前往Pago查看詳情",
-    bidderName, orderItemName, date, orderCreatorName);
-
-    // Prepare the email content
-    EmailRequestDto emailRequest = new EmailRequestDto();
-    emailRequest.setTo(bidderEmail);
-    emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
-    emailRequest.setBody(emailBody);
-
-    // Send the email notification
-    sesEmailService.sendEmail(emailRequest);
-    System.out.println("......Email sent! (bid chosen)");
-
-
+    // Send email to the bidder
+    sendBidChosenEmail(bidId, orderId);
 
   }
 
@@ -342,5 +331,106 @@ public class BidServiceImpl implements BidService {
     return bidResponseDtoList;
   }
 
+
+  private void sendUpdateBidEmail(Bid bid, Order order) {
+    // Get bidder's name
+    String bidderName = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
+
+    // Get the order creator's email
+    String orderCreatorId = order.getConsumerId();
+    User orderCreator = userService.getUserById(orderCreatorId);
+    String orderCreatorEmail = orderCreator.getEmail();
+
+    // Get the order item name
+    String orderItemName = order.getOrderItem().getName();
+    // Get the user name
+    String orderCreatorName = orderCreator.getFirstName();
+    // Get current date
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String currency = bid.getCurrency().toString();
+    String bidAmount = bid.getBidAmount().toString();
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+            "%s已於%s在您的訂單 %s 更新出價：%s%s",
+        orderCreatorName, bidderName, date, orderItemName, currency, bidAmount);
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(orderCreatorEmail);
+    emailRequest.setSubject("【Pago 訂單出價更新通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email
+    sesEmailService.sendEmail(emailRequest);
+  }
+
+
+  private void sendPlaceBidEmail(Bid bid, Order order) {
+    // Get bidder's name
+    String bidderName = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
+
+    // Get the order creator's email
+    String orderCreatorId = order.getConsumerId();
+    User orderCreator = userService.getUserById(orderCreatorId);
+    String orderCreatorEmail = orderCreator.getEmail();
+
+    // Get the order item name
+    String orderItemName = order.getOrderItem().getName();
+    // Get the user name
+    String orderCreatorName = orderCreator.getFirstName();
+    // Get current date
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String currency = bid.getCurrency().toString();
+    String bidAmount = bid.getBidAmount().toString();
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+            "%s已於%s在您的訂單 %s 出價：%s%s",
+        orderCreatorName, bidderName, date, orderItemName, currency, bidAmount);
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(orderCreatorEmail);
+    emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email
+    sesEmailService.sendEmail(emailRequest);
+  }
+
+
+  private void sendBidChosenEmail(String bidId, String orderId) {
+    // Get bidder's name and email
+    BidResponseDto bidResponseDto = getBidResponseById(bidId);
+    User bidder = userService.getUserById(bidResponseDto.getCreator().getUserId());
+    String bidderName = bidder.getFirstName();
+    String bidderEmail = bidder.getEmail();
+
+    // Get the order item name
+    Order order = orderService.getOrderById(orderId);
+    String orderItemName = order.getOrderItem().getName();
+    // Get the user name
+    String orderCreatorId = order.getConsumerId();
+    User orderCreator = userService.getUserById(orderCreatorId);
+    String orderCreatorName = orderCreator.getFirstName();
+    // Get current date
+    Date now = new Date();
+    String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    String emailBody = String.format("親愛的%s您好，感謝您使用Pago的服務\n" +
+            "您於 %s 訂單的出價已在%s被%s選中！請前往Pago查看詳情",
+        bidderName, orderItemName, date, orderCreatorName);
+
+    // Prepare the email content
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(bidderEmail);
+    emailRequest.setSubject("【Pago 訂單出價通知】" + orderItemName);
+    emailRequest.setBody(emailBody);
+
+    // Send the email notification
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (bid chosen)");
+  }
 
 }

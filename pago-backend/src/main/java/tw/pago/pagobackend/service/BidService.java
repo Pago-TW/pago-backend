@@ -6,6 +6,7 @@ import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.model.Bid;
+import tw.pago.pagobackend.model.Order;
 
 public interface BidService {
 
@@ -20,6 +21,8 @@ public interface BidService {
   void deleteBidById(String bidId);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
+
+  void updateBid(UpdateBidRequestDto updateBidRequestDto, Bid existingBid, Order order);
 
   void chooseBid(String orderId, String bidId);
 
