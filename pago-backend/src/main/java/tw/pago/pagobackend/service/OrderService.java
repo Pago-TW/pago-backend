@@ -44,6 +44,8 @@ public interface OrderService {
 
   void deleteOrderById(String orderId);
 
+  void deleteOrderByOrder(Order order);
+
   void createFavoriteOrder(CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto);
 
   List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto);

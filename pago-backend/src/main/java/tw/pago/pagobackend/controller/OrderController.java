@@ -121,17 +121,22 @@ public class OrderController {
 
   }
 
-  @DeleteMapping("/orders/{orderId}") // TODO 刪除委託後，要順便把底下的出價順便刪掉
-  public ResponseEntity<Object> deleteOrderById(@PathVariable String orderId) {
+  @DeleteMapping("/orders/{orderId}")
+  public ResponseEntity<Object> deleteOrderById(@PathVariable String orderId) { // TODO 刪除委託後，要把 orderItem 和相關圖片一起刪除
 
     Order order = orderService.getOrderById(orderId);
 
+    // Permission checking
     if (!order.getConsumerId().equals(currentUserInfoProvider.getCurrentLoginUserId())) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
     }
 
-    orderService.deleteOrderById(orderId);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    try {
+      orderService.deleteOrderByOrder(order);
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    } catch (AccessDeniedException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
 
   }
 

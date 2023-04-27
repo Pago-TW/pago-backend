@@ -42,7 +42,7 @@ public class BidController {
   private final OrderService orderService;
   private final PaymentService paymentService;
 
-  @PostMapping("/orders/{orderId}/bids")
+  @PostMapping("/orders/{orderId}/bids") // TODO 不可以對自己創建的委託出價
   public ResponseEntity<Bid> createBid(@PathVariable String orderId,
       @RequestBody @Valid CreateBidRequestDto createBidRequestDto) {
 

@@ -29,6 +29,8 @@ public interface OrderDao {
 
   void deleteOrderById(String orderId);
 
+  void deleteOrderItemById(String orderItemId);
+
   List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto);
 
   List<Order> getMatchingOrderListForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);

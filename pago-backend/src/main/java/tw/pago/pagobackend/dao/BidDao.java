@@ -20,6 +20,8 @@ public interface BidDao {
 
   void deleteBidById(String bidId);
 
+  void deleteBidsByOrderId(String orderId);
+
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
 
   void chooseBid(Bid bid);

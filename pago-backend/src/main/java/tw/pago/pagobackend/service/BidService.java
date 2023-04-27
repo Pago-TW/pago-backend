@@ -20,6 +20,8 @@ public interface BidService {
 
   void deleteBidById(String bidId);
 
+  void deleteBidsByOrderId(String orderId);
+
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto, Bid existingBid, Order order);

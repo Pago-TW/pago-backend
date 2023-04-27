@@ -151,6 +151,11 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
+  public void deleteBidsByOrderId(String orderId) {
+    bidDao.deleteBidsByOrderId(orderId);
+  }
+
+  @Override
   public void updateBid(UpdateBidRequestDto updateBidRequestDto) {
 
     Bid oldBid = getBidById(updateBidRequestDto.getBidId());

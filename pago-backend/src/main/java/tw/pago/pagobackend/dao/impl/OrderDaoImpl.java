@@ -252,6 +252,16 @@ public class OrderDaoImpl implements OrderDao {
   }
 
   @Override
+  public void deleteOrderItemById(String orderItemId) {
+    String sql = "DELETE FROM order_item WHERE order_item_id = :orderItemId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderItemId", orderItemId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
   public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT om.order_id, om.order_item_id, om.serial_number,om.consumer_id, om.create_date, om.update_date, om.packaging, "
         + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "

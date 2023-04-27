@@ -493,11 +493,43 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   @Override
   public void deleteOrderById(String orderId) {
+
+    Order order = orderDao.getOrderById(orderId);
+    String orderItemId = order.getOrderItemId();
+
+    // Check whether the orderStatus is REQUESTED
+    if (!order.getOrderStatus().equals(REQUESTED)) {
+      throw new AccessDeniedException("Order: "+ orderId +", OrderStatus is not REQUESTED, you have no permission to delete this order");
+    }
+
+    // Delete order and orderItem
+    orderDao.deleteOrderItemById(orderItemId);
     orderDao.deleteOrderById(orderId);
 
     // delete file
     String objectType = "order";
     fileService.deleteFilesByObjectIdnType(orderId, objectType);
+  }
+
+  @Override
+  @Transactional
+  public void deleteOrderByOrder(Order order) {
+    String orderId = order.getOrderId();
+    String orderItemId = order.getOrderItemId();
+
+    // Check whether the orderStatus is REQUESTED
+    if (!order.getOrderStatus().equals(REQUESTED)) {
+      throw new AccessDeniedException("Order: "+ orderId +", OrderStatus is not REQUESTED, you have no permission to delete this order");
+    }
+
+    // Delete order and orderItem
+    orderDao.deleteOrderItemById(orderItemId);
+    orderDao.deleteOrderById(orderId);
+
+    // delete file
+    String objectType = "order";
+    fileService.deleteFilesByObjectIdnType(orderId, objectType);
+
   }
 
   @Override
