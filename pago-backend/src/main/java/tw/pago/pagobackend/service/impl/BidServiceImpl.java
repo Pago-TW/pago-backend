@@ -333,6 +333,8 @@ public class BidServiceImpl implements BidService {
 
 
   private void sendUpdateBidEmail(Bid bid, Order order) {
+    String contentTitle = "訂單出價更新通知";
+
     // Get bidder's name
     String bidderName = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
 
@@ -359,7 +361,8 @@ public class BidServiceImpl implements BidService {
     // Prepare the email content
     EmailRequestDto emailRequestDto = new EmailRequestDto();
     emailRequestDto.setTo(orderCreatorEmail);
-    emailRequestDto.setSubject("【Pago 訂單出價更新通知】" + orderItemName);
+    emailRequestDto.setSubject("【Pago " + contentTitle + "】" + orderItemName);
+    emailRequestDto.setContentTitle(contentTitle);
     emailRequestDto.setBody(emailBody);
     emailRequestDto.setRecipientName(orderCreatorName);
 
@@ -370,6 +373,8 @@ public class BidServiceImpl implements BidService {
 
 
   private void sendPlaceBidEmail(Bid bid, Order order) {
+    String contentTitle = "訂單出價通知";
+
     // Get bidder's name
     String bidderName = currentUserInfoProvider.getCurrentLoginUser().getFirstName();
 
@@ -396,7 +401,8 @@ public class BidServiceImpl implements BidService {
     // Prepare the email content
     EmailRequestDto emailRequestDto = new EmailRequestDto();
     emailRequestDto.setTo(orderCreatorEmail);
-    emailRequestDto.setSubject("【Pago 訂單出價通知】" + orderItemName);
+    emailRequestDto.setSubject("【Pago "+ contentTitle +"】" + orderItemName);
+    emailRequestDto.setContentTitle(contentTitle);
     emailRequestDto.setRecipientName(orderCreatorName);
     emailRequestDto.setBody(emailBody);
 
@@ -406,6 +412,8 @@ public class BidServiceImpl implements BidService {
 
 
   private void sendBidChosenEmail(String bidId, String orderId) {
+    String contentTitle = "訂單出價通知";
+
     // Get bidder's name and email
     BidResponseDto bidResponseDto = getBidResponseById(bidId);
     User bidder = userService.getUserById(bidResponseDto.getCreator().getUserId());
@@ -430,7 +438,8 @@ public class BidServiceImpl implements BidService {
     // Prepare the email content
     EmailRequestDto emailRequestDto = new EmailRequestDto();
     emailRequestDto.setTo(bidderEmail);
-    emailRequestDto.setSubject("【Pago 訂單出價通知】" + orderItemName);
+    emailRequestDto.setSubject("【Pago " + contentTitle + "】" + orderItemName);
+    emailRequestDto.setContentTitle(contentTitle);
     emailRequestDto.setRecipientName(bidderName);
     emailRequestDto.setBody(emailBody);
 

@@ -32,9 +32,12 @@ public class SesEmailServiceImpl implements SesEmailService {
             Resource resource = resourceLoader.getResource("classpath:templates/emailTemplate.html");
             String emailTemplate = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
+            String contentTitle = emailRequestDto.getContentTitle();
+            String recipientName = emailRequestDto.getRecipientName();
             String emailBody = emailRequestDto.getBody();
             String htmlBody = emailTemplate
-                .replace("{{recipient_name}}", emailRequestDto.getRecipientName())
+                .replace("{{content_title}}", contentTitle)
+                .replace("{{recipient_name}}", recipientName)
                 .replace("{{email_body}}", emailBody);
 
 
