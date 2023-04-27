@@ -27,6 +27,8 @@ public interface TripService {
 
     void deleteTripById(String tripId) throws SQLException;
 
+    void deleteTripByTrip(Trip trip) throws SQLException;
+
     List<Trip> getTripList(ListQueryParametersDto ListQueryParametersDto);
 
     List<Trip> getMatchingTripListByOrderId(String orderId, ListQueryParametersDto listQueryParametersDto);

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.TripAssembler;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
@@ -27,6 +28,7 @@ import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.TripDashboardDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
+import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
@@ -121,9 +123,38 @@ public class TripServiceImpl implements TripService {
   }
 
   @Override
+  @Transactional
   public void deleteTripById(String tripId) throws SQLException {
+    List<Bid> bidList = bidDao.getBidListByTripId(tripId);
+
+    boolean hasChosenBid = bidList.stream()
+        .anyMatch(bid -> bid.getBidStatus().equals(BidStatusEnum.IS_CHOSEN));
+
+    if (hasChosenBid) {
+      throw new AccessDeniedException("TripId: " + tripId + ",\nYou have matched at least one order, so you have no permission to delete this trip ");
+    }
+
     tripDao.delete(tripId);
   }
+
+  @Override
+  @Transactional
+  public void deleteTripByTrip(Trip trip) throws SQLException {
+    String tripId = trip.getTripId();
+
+    List<Bid> bidList = bidDao.getBidListByTripId(tripId);
+
+    boolean hasChosenBid = bidList.stream()
+        .anyMatch(bid -> bid.getBidStatus().equals(BidStatusEnum.IS_CHOSEN));
+
+    if (hasChosenBid) {
+      throw new AccessDeniedException("TripId: " + tripId + ",\nYou have matched at least one order, so you have no permission to delete this trip ");
+    }
+
+    tripDao.delete(tripId);
+
+  }
+
 
   @Override
   public List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto) {

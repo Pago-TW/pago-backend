@@ -122,7 +122,7 @@ public class OrderController {
   }
 
   @DeleteMapping("/orders/{orderId}")
-  public ResponseEntity<Object> deleteOrderById(@PathVariable String orderId) { // TODO 刪除委託後，要把 orderItem 和相關圖片一起刪除
+  public ResponseEntity<Object> deleteOrderById(@PathVariable String orderId) {
 
     Order order = orderService.getOrderById(orderId);
 

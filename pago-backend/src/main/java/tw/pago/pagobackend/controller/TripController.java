@@ -27,6 +27,7 @@ import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
+import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
@@ -88,18 +89,25 @@ public class TripController {
     return ResponseEntity.status(HttpStatus.OK).body(updatedTrip);
   }
 
-  @DeleteMapping("/trips/{tripId}") // TODO 刪除旅途後，要把之前的出價順便刪掉
-  public ResponseEntity<?> delete(@PathVariable String tripId)
+  @DeleteMapping("/trips/{tripId}")
+  public ResponseEntity<String> delete(@PathVariable String tripId)
       throws SQLException {
 
     Trip trip = tripService.getTripById(tripId);
     String tripCreatorId = trip.getShopperId();
+
+    // Permission Checking
     if (!currentUserInfoProvider.getCurrentLoginUserId().equals(tripCreatorId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
     }
 
-    tripService.deleteTripById(tripId);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    try {
+      tripService.deleteTripByTrip(trip);
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    } catch (AccessDeniedException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
+
   }
 
   @GetMapping("/trips")
