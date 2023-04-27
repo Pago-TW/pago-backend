@@ -15,7 +15,8 @@ public class SesEmailServiceImpl implements SesEmailService {
     @Autowired
     private AmazonSimpleEmailService amazonSimpleEmailService;
 
-    private final String fromEmail = "pagonotifications@gmail.com";
+    private static final String FROM_EMAIL = "pagonotifications@gmail.com";
+    private static final String FROM_NAME = "Pago";
 
     @Override
     public void sendEmail(EmailRequestDto emailRequestDto) {
@@ -24,7 +25,7 @@ public class SesEmailServiceImpl implements SesEmailService {
                 .withMessage(new Message().withBody(new Body().withText(new Content().withCharset("UTF-8")
                         .withData(emailRequestDto.getBody())))
                         .withSubject(new Content().withCharset("UTF-8").withData(emailRequestDto.getSubject())))
-                .withSource(fromEmail);
+                .withSource("\"" + FROM_NAME + "\" <" + FROM_EMAIL + ">");
 
         amazonSimpleEmailService.sendEmail(request);
     }
