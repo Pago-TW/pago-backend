@@ -16,6 +16,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -152,6 +153,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
           .firstName(userInfoMap.get("firstName").toString())
           .lastName(userInfoMap.get("firstName").toString())
           .avatarUrl(userInfoMap.get("avatarUrl").toString())
+          .lastLogin(new Date())
           .build();
 
       // Compare with data you set, if null -> set oldUser data;

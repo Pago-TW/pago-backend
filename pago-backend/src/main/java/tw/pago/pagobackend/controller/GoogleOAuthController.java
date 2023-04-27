@@ -48,7 +48,7 @@ public class GoogleOAuthController {
   }
 
 
-  @PostMapping("/oauth2/google-login") // TODO 登入後要更新 last_login
+  @PostMapping("/oauth2/google-login")
   public ResponseEntity<?> handleGoogleLogin(HttpServletRequest request, @RequestBody GoogleLoginRequestDto googleLoginRequestDto) {
     String idToken = googleLoginRequestDto.getIdToken();
 
@@ -56,6 +56,7 @@ public class GoogleOAuthController {
 
     try {
       String loginResponseData = oAuth2AuthenticationSuccessHandler.handleGoogleLogin(request, authentication);
+
       return ResponseEntity.status(HttpStatus.OK).body(loginResponseData);
     } catch (IOException | ServletException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during authentication");
