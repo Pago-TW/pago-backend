@@ -177,7 +177,7 @@ public class ChatController {
     return ResponseEntity.status(HttpStatus.OK).body(chatroomListResponseDto);
   }
 
-  @GetMapping("/chatrooms/{chatroomId}/messages") // TODO 一樣，該 call 這支 API 要更新 last_read_message_id
+  @GetMapping("/chatrooms/{chatroomId}/messages")
   public ResponseEntity<?> getChatHistory(
       @PathVariable String chatroomId,
       @RequestParam(required = false) String search,

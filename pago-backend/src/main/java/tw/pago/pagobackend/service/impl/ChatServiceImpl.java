@@ -26,6 +26,7 @@ import tw.pago.pagobackend.model.Message;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.ChatService;
 import tw.pago.pagobackend.service.UserService;
+import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Service
@@ -37,6 +38,7 @@ public class ChatServiceImpl implements ChatService {
   private final ChatroomDao chatroomDao;
   private final UserService userService;
   private final ModelMapper modelMapper;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
 
   @Override
   @Transactional
@@ -55,7 +57,7 @@ public class ChatServiceImpl implements ChatService {
     updateChatroomUserMappingRequestDto.setChatroomId(sendMessageRequestDto.getChatroomId());
     updateChatroomUserMappingRequestDto.setUserId(sendMessageRequestDto.getSenderId());
     updateChatroomUserMappingRequestDto.setLastReadMessageId(messageId);
-    updateLastReadMessageId(updateChatroomUserMappingRequestDto);
+    chatroomDao.updateLastReadMessageIdByChatroomIdAndUserId(updateChatroomUserMappingRequestDto);
 
     Message message = messageDao.getMessageById(messageId);
 
@@ -216,11 +218,24 @@ public class ChatServiceImpl implements ChatService {
 
     List<Message> messageList = messageDao.getMessageList(listQueryParametersDto);
 
+    Message lastReadMessage =  messageList.get(0);
+    String lastRaedMessageId = lastReadMessage.getMessageId();
+    String chatroomId = lastReadMessage.getChatRoomId();
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    // After getChatHistory success, update the currentLoginUser's last_read_message_id
+    UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto = new UpdateChatroomUserMappingRequestDto();
+    updateChatroomUserMappingRequestDto.setLastReadMessageId(lastRaedMessageId);
+    updateChatroomUserMappingRequestDto.setChatroomId(chatroomId);
+    updateChatroomUserMappingRequestDto.setUserId(currentLoginUserId);
+    chatroomDao.updateLastReadMessageIdByChatroomIdAndUserId(updateChatroomUserMappingRequestDto);
+
+
     // The latest messages in the frontend UI will be displayed at the bottom
     Collections.reverse(messageList);
 
-
     return messageList;
+
   }
 
   @Override
