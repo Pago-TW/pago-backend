@@ -25,6 +25,7 @@ import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
+import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
@@ -59,6 +60,14 @@ public class BidServiceImpl implements BidService {
   @Override
   @Transactional
   public BidOperationResultDto createOrUpdateBid(CreateBidRequestDto createBidRequestDto) {
+    String orderId = createBidRequestDto.getOrderId();
+    Order order = orderService.getOrderById(orderId);
+
+    // Check whether the order status is REQUESTED
+    if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
+      throw new AccessDeniedException("OrderId: " + orderId + ", the orderStatus is not REQUESTED, you have no permission to place bid." );
+    }
+
 
     // Get the trip by its ID
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
@@ -78,10 +87,6 @@ public class BidServiceImpl implements BidService {
           .latestDeliveryDate(createBidRequestDto.getLatestDeliveryDate())
           .build();
 
-      // Get the order by its ID
-      String orderId = createBidRequestDto.getOrderId();
-      Order order = orderService.getOrderById(orderId);
-
       // Update the existing bid
       updateBid(updateBidRequestDto, existingBid, order);
 
@@ -94,7 +99,6 @@ public class BidServiceImpl implements BidService {
       bidOperationResultDto.setCreated(false);
 
       return bidOperationResultDto;
-
     }
 
     // Convert the currency and bid amount to strings
@@ -119,8 +123,6 @@ public class BidServiceImpl implements BidService {
     bidOperationResultDto.setCreated(true);
 
     // Send the email notification
-    String orderId = createBidRequestDto.getOrderId();
-    Order order = orderService.getOrderById(orderId);
     sendPlaceBidEmail(bid, order);
 
     System.out.println("......Email sent! (bid successfully created)");
@@ -412,7 +414,7 @@ public class BidServiceImpl implements BidService {
 
     String currency = bid.getCurrency().toString();
     String bidAmount = bid.getBidAmount().toString();
-    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 出價：%s %s<br><br>訂單編號：$s",
+    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 出價：%s %s<br><br>訂單編號：%s",
         bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
 
     // Prepare the email content
