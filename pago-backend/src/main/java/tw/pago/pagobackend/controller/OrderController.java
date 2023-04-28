@@ -271,14 +271,25 @@ public class OrderController {
   }
 
   @PostMapping("/calculate-order-amount")
-  public ResponseEntity<Object> calculateOrderAmount(@RequestBody CalculateOrderAmountRequestDto calculateOrderAmountRequestDto) {
+  public ResponseEntity<Object> calculateOrderAmount(
+      @RequestBody CalculateOrderAmountRequestDto calculateOrderAmountRequestDto) {
 
     CalculateOrderAmountResponseDto calculateOrderAmountResponseDto;
     if (calculateOrderAmountRequestDto.getBidId() != null) {
-      calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringChooseBid(calculateOrderAmountRequestDto.getBidId());
+      try {
+        calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringChooseBid(
+            calculateOrderAmountRequestDto.getBidId());
+      } catch (IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
+      }
     } else {
-      calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringCreation(
-          calculateOrderAmountRequestDto);
+      try {
+        calculateOrderAmountResponseDto = orderService.calculateOrderEachAmountDuringCreation(
+            calculateOrderAmountRequestDto);
+      } catch (IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
+      }
+
     }
     return ResponseEntity.status(HttpStatus.OK).body(calculateOrderAmountResponseDto);
 

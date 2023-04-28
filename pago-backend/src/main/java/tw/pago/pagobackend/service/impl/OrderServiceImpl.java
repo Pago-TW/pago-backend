@@ -88,6 +88,7 @@ public class OrderServiceImpl implements OrderService {
   private static final String OBJECT_TYPE = "order";
   private static final Double PLATFORM_FEE_PERCENT = 4.5;
   private static final Double TARIFF_FEE_PERCENT = 2.5;
+  private static final BigDecimal PERCENT_TO_DECIMAL = BigDecimal.valueOf(0.01);
 
   private OrderDao orderDao;
   private UuidGenerator uuidGenerator;
@@ -559,25 +560,41 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public Map<String, BigDecimal> calculateOrderEachAmount(Order order) {
-    // Init Variable
+    // Check for null values
+    if (order == null) {
+      throw new IllegalArgumentException("Order cannot be null");
+    }
+
+    if (order.getOrderItem() == null) {
+      throw new IllegalArgumentException("Order item cannot be null");
+    }
+
+    // Initialize variables
     Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
     BigDecimal orderItemUnitPrice = order.getOrderItem().getUnitPrice();
     BigDecimal orderItemQuantity = BigDecimal.valueOf(order.getOrderItem().getQuantity());
     BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(order.getPlatformFeePercent())
-        .multiply(BigDecimal.valueOf(0.01));
+        .multiply(PERCENT_TO_DECIMAL);
     BigDecimal orderTariffFeePercent = BigDecimal.valueOf(order.getTariffFeePercent())
-        .multiply(BigDecimal.valueOf(0.01));
+        .multiply(PERCENT_TO_DECIMAL);
 
-    // Calculation
-    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity); // 1
-    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent); // 2
-    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent); // 3
-    BigDecimal travelerFee = order.getTravelerFee(); // 4
+    // Check for invalid values
+    if (orderItemUnitPrice == null || orderItemUnitPrice.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderItemQuantity.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderPlatformFeePercent.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderTariffFeePercent.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new IllegalArgumentException("Values must be non-null and greater than 0");
+    }
 
-    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3
-                                                                                                    // + 4
+    // Calculate fees and total amount
+    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity);
+    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent);
+    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent);
+    BigDecimal travelerFee = order.getTravelerFee();
 
-    // Set only the second digit after the decimal point (Banker 's rounding)
+    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
+
+    // Apply rounding to the second digit after the decimal point (Banker's rounding)
     CurrencyEnum currency = order.getCurrency();
     int decimalScale = CurrencyUtil.getDecimalScale(currency);
 
@@ -585,7 +602,7 @@ public class OrderServiceImpl implements OrderService {
     platformFee = platformFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
     orderTotalAmount = orderTotalAmount.setScale(decimalScale, RoundingMode.HALF_EVEN);
 
-    // Set return value
+    // Set return values
     orderEachAmountMap.put("tariffFee", tariffFee);
     orderEachAmountMap.put("platformFee", platformFee);
     orderEachAmountMap.put("orderTotalAmount", orderTotalAmount);
@@ -593,35 +610,43 @@ public class OrderServiceImpl implements OrderService {
     return orderEachAmountMap;
   }
 
+
+
   @Override
   public CalculateOrderAmountResponseDto calculateOrderEachAmountDuringCreation(
       CalculateOrderAmountRequestDto calculateOrderAmountRequestDto) {
+
+    // Set platform and tariff fee percentages
     calculateOrderAmountRequestDto.setPlatformFeePercent(PLATFORM_FEE_PERCENT);
     calculateOrderAmountRequestDto.setTariffFeePercent(TARIFF_FEE_PERCENT);
 
-
-
-    // Init Variable
-    Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
+    // Initialize variables
     BigDecimal orderItemUnitPrice = calculateOrderAmountRequestDto.getCreateOrderItemDto().getUnitPrice();
-    BigDecimal orderItemQuantity = BigDecimal.valueOf(
-        calculateOrderAmountRequestDto.getCreateOrderItemDto().getQuantity());
+    BigDecimal orderItemQuantity = BigDecimal.valueOf(calculateOrderAmountRequestDto.getCreateOrderItemDto().getQuantity());
     BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(calculateOrderAmountRequestDto.getPlatformFeePercent())
-        .multiply(BigDecimal.valueOf(0.01));
+        .multiply(PERCENT_TO_DECIMAL);
     BigDecimal orderTariffFeePercent = BigDecimal.valueOf(calculateOrderAmountRequestDto.getTariffFeePercent())
-        .multiply(BigDecimal.valueOf(0.01));
+        .multiply(PERCENT_TO_DECIMAL);
 
-    // TODO 碰到錢的一定要做好防呆，不能有值是NULL，不能有缺值，一定要確保程式正確執行，若不正確，程式要跳出
+    // Check for invalid values
+    if (orderItemUnitPrice == null || orderItemUnitPrice.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderItemQuantity.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderPlatformFeePercent.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderTariffFeePercent.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new IllegalArgumentException("Values must be non-null and greater than 0");
+    }
+
+
+
     // Calculation
-    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity); // 1
-    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent); // 2
-    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent); // 3
-    BigDecimal travelerFee = calculateOrderAmountRequestDto.getTravelerFee(); // 4
+    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity);
+    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent);
+    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent);
+    BigDecimal travelerFee = calculateOrderAmountRequestDto.getTravelerFee();
 
-    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3
-    // + 4
+    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
 
-    // Set only the second digit after the decimal point (Banker 's rounding)
+    // Apply rounding to the second digit after the decimal point (Banker's rounding)
     CurrencyEnum currency = calculateOrderAmountRequestDto.getCurrency();
     int decimalScale = CurrencyUtil.getDecimalScale(currency);
 
@@ -629,48 +654,53 @@ public class OrderServiceImpl implements OrderService {
     platformFee = platformFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
     orderTotalAmount = orderTotalAmount.setScale(decimalScale, RoundingMode.HALF_EVEN);
 
-    // Set return value
-    orderEachAmountMap.put("tariffFee", tariffFee);
-    orderEachAmountMap.put("platformFee", platformFee);
-    orderEachAmountMap.put("orderTotalAmount", orderTotalAmount);
 
-    // Set value to DTO
+    // Set values to the response DTO
     CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = new CalculateOrderAmountResponseDto();
-    calculateOrderAmountResponseDto.setTariffFee(orderEachAmountMap.get("tariffFee"));
-    calculateOrderAmountResponseDto.setPlatformFee(orderEachAmountMap.get("platformFee"));
-    calculateOrderAmountResponseDto.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
-    calculateOrderAmountResponseDto.setTravelerFee(calculateOrderAmountRequestDto.getTravelerFee());
-    calculateOrderAmountResponseDto.setCurrency(calculateOrderAmountRequestDto.getCurrency());
+    calculateOrderAmountResponseDto.setTariffFee(tariffFee);
+    calculateOrderAmountResponseDto.setPlatformFee(platformFee);
+    calculateOrderAmountResponseDto.setTotalAmount(orderTotalAmount);
+    calculateOrderAmountResponseDto.setTravelerFee(travelerFee);
+    calculateOrderAmountResponseDto.setCurrency(currency);
 
     return calculateOrderAmountResponseDto;
   }
 
+
   @Override
   public CalculateOrderAmountResponseDto calculateOrderEachAmountDuringChooseBid(String bidId) {
+    // Retrieve necessary data
     BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
     Order order = getOrderById(bidResponseDto.getOrderId());
     OrderItem orderItem = order.getOrderItem();
 
 
-    // Init Variable
+    // Initialize variables
     Map<String, BigDecimal> orderEachAmountMap = new HashMap<>();
     BigDecimal orderItemUnitPrice = orderItem.getUnitPrice();
     BigDecimal orderItemQuantity = BigDecimal.valueOf(orderItem.getQuantity());
     BigDecimal orderPlatformFeePercent = BigDecimal.valueOf(order.getPlatformFeePercent())
-        .multiply(BigDecimal.valueOf(0.01));
+        .multiply(PERCENT_TO_DECIMAL);
     BigDecimal orderTariffFeePercent = BigDecimal.valueOf(order.getTariffFeePercent())
-        .multiply(BigDecimal.valueOf(0.01));
+        .multiply(PERCENT_TO_DECIMAL);
+
+    // Check for invalid values
+    if (orderItemUnitPrice == null || orderItemUnitPrice.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderItemQuantity.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderPlatformFeePercent.compareTo(BigDecimal.ZERO) <= 0 ||
+        orderTariffFeePercent.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new IllegalArgumentException("Values must be non-null and greater than 0");
+    }
 
     // Calculation
-    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity); // 1
-    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent); // 2
-    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent); // 3
-    BigDecimal travelerFee = bidResponseDto.getBidAmount(); // 4
+    BigDecimal itemTotalAmount = orderItemUnitPrice.multiply(orderItemQuantity);
+    BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent);
+    BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent);
+    BigDecimal travelerFee = bidResponseDto.getBidAmount();
 
-    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee); // total = 1 + 2 + 3
-    // + 4
+    BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
 
-    // Set only the second digit after the decimal point (Banker 's rounding)
+    // Apply rounding
     CurrencyEnum currency = order.getCurrency();
     int decimalScale = CurrencyUtil.getDecimalScale(currency);
 
@@ -678,22 +708,18 @@ public class OrderServiceImpl implements OrderService {
     platformFee = platformFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
     orderTotalAmount = orderTotalAmount.setScale(decimalScale, RoundingMode.HALF_EVEN);
 
-    // Set return value
-    orderEachAmountMap.put("tariffFee", tariffFee);
-    orderEachAmountMap.put("platformFee", platformFee);
-    orderEachAmountMap.put("orderTotalAmount", orderTotalAmount);
-
-    // Set value to DTO
+    // Prepare response
     CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = new CalculateOrderAmountResponseDto();
-    calculateOrderAmountResponseDto.setTariffFee(orderEachAmountMap.get("tariffFee"));
-    calculateOrderAmountResponseDto.setPlatformFee(orderEachAmountMap.get("platformFee"));
-    calculateOrderAmountResponseDto.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
+    calculateOrderAmountResponseDto.setTariffFee(tariffFee);
+    calculateOrderAmountResponseDto.setPlatformFee(platformFee);
+    calculateOrderAmountResponseDto.setTotalAmount(orderTotalAmount);
     calculateOrderAmountResponseDto.setTravelerFee(travelerFee);
     calculateOrderAmountResponseDto.setCurrency(order.getCurrency());
     calculateOrderAmountResponseDto.setBidder(bidResponseDto.getCreator());
 
     return calculateOrderAmountResponseDto;
   }
+
 
   @Override
   public String generateOrderSerialNumber(CreateOrderRequestDto createOrderRequestDto) {
