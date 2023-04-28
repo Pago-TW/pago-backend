@@ -26,6 +26,8 @@ import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
+import tw.pago.pagobackend.exception.AccessDeniedException;
+import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.service.BidService;
@@ -43,7 +45,7 @@ public class BidController {
   private final OrderService orderService;
   private final PaymentService paymentService;
 
-  @PostMapping("/orders/{orderId}/bids")
+  @PostMapping("/orders/{orderId}/bids") // TODO 檢查出價的抵達城市是否和送達地點的城市一樣，否則不給出價
   public ResponseEntity<Object> createBid(@PathVariable String orderId,
       @RequestBody @Valid CreateBidRequestDto createBidRequestDto) {
     Order order = orderService.getOrderById(orderId);
@@ -58,16 +60,23 @@ public class BidController {
 
     createBidRequestDto.setOrderId(orderId);
     // Call the createOrUpdateBid service method to either create a new bid or update an existing one.
-    BidOperationResultDto bidOperationResultDto = bidService.createOrUpdateBid(createBidRequestDto);
-
-    // Check if the bid was created or updated, and return the appropriate HTTP status code.
-    if (bidOperationResultDto.isCreated()) {
-      // The bid was created, return HTTP status 201 Created.
-      return ResponseEntity.status(HttpStatus.CREATED).body(bidOperationResultDto.getBid());
-    } else {
-      // The bid was updated, return HTTP status 200 OK.
-      return ResponseEntity.status(HttpStatus.OK).body(bidOperationResultDto.getBid());
+    try {
+      BidOperationResultDto bidOperationResultDto = bidService.createOrUpdateBid(createBidRequestDto);
+      // Check if the bid was created or updated, and return the appropriate HTTP status code.
+      if (bidOperationResultDto.isCreated()) {
+        // The bid was created, return HTTP status 201 Created.
+        return ResponseEntity.status(HttpStatus.CREATED).body(bidOperationResultDto.getBid());
+      } else {
+        // The bid was updated, return HTTP status 200 OK.
+        return ResponseEntity.status(HttpStatus.OK).body(bidOperationResultDto.getBid());
+      }
+    } catch (AccessDeniedException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    } catch (InvalidDeliveryDateException e) {
+      return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
     }
+
+
   }
 
 

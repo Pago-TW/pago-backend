@@ -27,6 +27,7 @@ import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
+import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
@@ -69,13 +70,21 @@ public class BidServiceImpl implements BidService {
     }
 
 
-    // Get the trip by its ID
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
+    Date arrivalDate = trip.getArrivalDate();
+    Date lastReceiveItemDate = order.getLatestReceiveItemDate();
+    Date latedDeliveryDate = createBidRequestDto.getLatestDeliveryDate();
 
-    // Check if a bid already exists for the shopper and order
+    // Throws an InvalidDeliveryDateException if the latest delivery date is not within the arrival date and the latest receive item date.
+    if (!(latedDeliveryDate.after(arrivalDate) && latedDeliveryDate.before(lastReceiveItemDate))) {
+      throw new InvalidDeliveryDateException("DeliveryDate should be after the arrivalDate and before the lastReceiveItemDate.");
+    }
+
+
     Bid existingBid = bidDao.getBidByShopperIdAndOrderId(trip.getShopperId(),
         createBidRequestDto.getOrderId());
 
+    // Check if a bid already exists for the shopper and order
     if (existingBid != null) {
       // If the bid already exists, create an update request for the existing bid
       UpdateBidRequestDto updateBidRequestDto = UpdateBidRequestDto.builder()
