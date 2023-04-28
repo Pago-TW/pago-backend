@@ -261,7 +261,7 @@ public class BidServiceImpl implements BidService {
      */
 
     // Send email to the bidder
-    sendBidChosenEmail(bidId, orderId);
+    sendBidChosenEmail(bid, order);
 
   }
 
@@ -428,8 +428,10 @@ public class BidServiceImpl implements BidService {
   }
 
 
-  private void sendBidChosenEmail(String bidId, String orderId) {
+  private void sendBidChosenEmail(Bid bid, Order order) {
     String contentTitle = "訂單出價通知";
+    String bidId = bid.getBidId();
+    String orderId = order.getOrderId();
 
     // Get bidder's name and email
     BidResponseDto bidResponseDto = getBidResponseById(bidId);
@@ -438,7 +440,6 @@ public class BidServiceImpl implements BidService {
     String bidderEmail = bidder.getEmail();
 
     // Get the order item name
-    Order order = orderService.getOrderById(orderId);
     String orderItemName = order.getOrderItem().getName();
     String orderSerialNumber = order.getSerialNumber();
     // Get the user name
