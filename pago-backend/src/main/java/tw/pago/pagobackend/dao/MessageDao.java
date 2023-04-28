@@ -13,6 +13,8 @@ public interface MessageDao {
 
   List<Message> getMessageList(ListQueryParametersDto listQueryParametersDto);
 
+  List<Message> getMessageListByChatroomId(String chatroomId);
+
   Integer countMessage(ListQueryParametersDto listQueryParametersDto);
 
   Integer countMessagesAfterMessageId(String chatroomId, String lastReadMessageId);

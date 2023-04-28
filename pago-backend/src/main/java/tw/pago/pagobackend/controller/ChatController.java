@@ -116,7 +116,7 @@ public class ChatController {
 
 
   @GetMapping("/chatrooms")
-  public ResponseEntity<Object> enterChatroom(
+  public ResponseEntity<Object> getCharoomList(
       @RequestParam(required = false) String chatWith,
       @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,

@@ -85,6 +85,21 @@ public class MessageDaoImpl implements MessageDao {
   }
 
   @Override
+  public List<Message> getMessageListByChatroomId(String chatroomId) {
+    String sql = "SELECT message_id, chatroom_id, sender_id, content, message_type, send_date "
+        + "FROM message "
+        + "WHERE chatroom_id = :chatroomId "
+        + "ORDER BY send_date DESC ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("chatroomId", chatroomId);
+
+    List<Message> messageList = namedParameterJdbcTemplate.query(sql, map, new MessageRowMapper());
+
+    return messageList;
+  }
+
+  @Override
   public Integer countMessage(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT COUNT(message_id) "
         + "FROM message "

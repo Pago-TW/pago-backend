@@ -129,6 +129,8 @@ public class ChatServiceImpl implements ChatService {
 
   @Override
   public ChatroomResponseDto getChatroomResponseDtoByChatroomAndUser(Chatroom chatroom, User user) {
+    String chatroomId = chatroom.getChatroomId();
+
 
     // Retrieve the list of ChatroomUserMapping based on the chatroomId
     List<ChatroomUserMapping> chatroomUserMappingList = chatroomDao.getChatroomUserMappingListByChatroomId(chatroom.getChatroomId());
@@ -155,7 +157,10 @@ public class ChatServiceImpl implements ChatService {
       throw new ResourceNotFoundException("Other user not found");
     }
 
-    Integer totalUnreadMessage = countUnreadMessage(chatroom.getChatroomId(), currentLoginUserChatroomUserMapping);
+    Integer totalUnreadMessage = countUnreadMessage(chatroomId, currentLoginUserChatroomUserMapping);
+    List<Message> messageList = messageDao.getMessageListByChatroomId(chatroomId);
+    String latestMessageContent = messageList.get(0).getContent();
+    MessageTypeEnum latestMessageType = messageList.get(0).getMessageType();
 
     // Create a ChatroomOtherUserDto to store the other user's information
     ChatroomOtherUserDto chatroomOtherUserDto = new ChatroomOtherUserDto();
@@ -165,11 +170,12 @@ public class ChatServiceImpl implements ChatService {
 
     // Create a ChatroomResponseDto to store the chatroom and user information
     ChatroomResponseDto chatroomResponseDto = new ChatroomResponseDto();
-    chatroomResponseDto.setChatroomId(chatroom.getChatroomId());
+    chatroomResponseDto.setChatroomId(chatroomId);
     chatroomResponseDto.setCurrentLoginUserId(user.getUserId());
     chatroomResponseDto.setTotalUnreadMessage(totalUnreadMessage);
     chatroomResponseDto.setUpdateDate(chatroom.getUpdateDate());
-    chatroomResponseDto.setLatestMessageContent("// TODO LatestMessageContent"); // TODO: Retrieve the latest message content for the chatroom
+    chatroomResponseDto.setLatestMessageContent(latestMessageContent);
+    chatroomResponseDto.setLatestMessageType(latestMessageType);
     chatroomResponseDto.setOtherUser(chatroomOtherUserDto);
 
     return chatroomResponseDto;
