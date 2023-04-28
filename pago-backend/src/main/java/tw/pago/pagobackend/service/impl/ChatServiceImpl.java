@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -161,6 +162,7 @@ public class ChatServiceImpl implements ChatService {
     List<Message> messageList = messageDao.getMessageListByChatroomId(chatroomId);
     String latestMessageContent = messageList.get(0).getContent();
     MessageTypeEnum latestMessageType = messageList.get(0).getMessageType();
+    LocalDateTime latestMessageSendDate = messageList.get(0).getSendDate();
 
     // Create a ChatroomOtherUserDto to store the other user's information
     ChatroomOtherUserDto chatroomOtherUserDto = new ChatroomOtherUserDto();
@@ -171,9 +173,9 @@ public class ChatServiceImpl implements ChatService {
     // Create a ChatroomResponseDto to store the chatroom and user information
     ChatroomResponseDto chatroomResponseDto = new ChatroomResponseDto();
     chatroomResponseDto.setChatroomId(chatroomId);
-    chatroomResponseDto.setCurrentLoginUserId(user.getUserId());
+    chatroomResponseDto.setCurrentLoginUserId(loginUserId);
     chatroomResponseDto.setTotalUnreadMessage(totalUnreadMessage);
-    chatroomResponseDto.setUpdateDate(chatroom.getUpdateDate());
+    chatroomResponseDto.setLatestMessageSendDate(latestMessageSendDate);
     chatroomResponseDto.setLatestMessageContent(latestMessageContent);
     chatroomResponseDto.setLatestMessageType(latestMessageType);
     chatroomResponseDto.setOtherUser(chatroomOtherUserDto);
