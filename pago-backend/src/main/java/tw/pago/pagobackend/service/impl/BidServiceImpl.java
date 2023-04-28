@@ -16,6 +16,7 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dto.BidCreatorReviewDto;
+import tw.pago.pagobackend.dto.BidOperationResultDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
@@ -56,7 +57,8 @@ public class BidServiceImpl implements BidService {
   private final CurrentUserInfoProvider currentUserInfoProvider;
 
   @Override
-  public Bid createOrUpdateBid(CreateBidRequestDto createBidRequestDto) {
+  @Transactional
+  public BidOperationResultDto createOrUpdateBid(CreateBidRequestDto createBidRequestDto) {
 
     // Get the trip by its ID
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
@@ -87,7 +89,12 @@ public class BidServiceImpl implements BidService {
       // Get the updated bid from the database
       Bid updatedBid = bidDao.getBidById(existingBid.getBidId());
 
-      return updatedBid;
+      BidOperationResultDto bidOperationResultDto = new BidOperationResultDto();
+      bidOperationResultDto.setBid(updatedBid);
+      bidOperationResultDto.setCreated(false);
+
+      return bidOperationResultDto;
+
     }
 
     // Convert the currency and bid amount to strings
@@ -107,6 +114,10 @@ public class BidServiceImpl implements BidService {
     // Get the newly created bid from the database
     Bid bid = bidDao.getBidById(uuid);
 
+    BidOperationResultDto bidOperationResultDto = new BidOperationResultDto();
+    bidOperationResultDto.setBid(bid);
+    bidOperationResultDto.setCreated(true);
+
     // Send the email notification
     String orderId = createBidRequestDto.getOrderId();
     Order order = orderService.getOrderById(orderId);
@@ -114,8 +125,9 @@ public class BidServiceImpl implements BidService {
 
     System.out.println("......Email sent! (bid successfully created)");
 
-    return bid;
+    return bidOperationResultDto;
   }
+
 
 
   @Override
@@ -360,7 +372,7 @@ public class BidServiceImpl implements BidService {
 
     String currency = bid.getCurrency().toString();
     String bidAmount = bid.getBidAmount().toString();
-    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 更新出價：%s %s<br>訂單編號：%s",
+    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 更新出價：%s %s<br><br>訂單編號：%s",
         bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
 
     // Prepare the email content
@@ -400,8 +412,8 @@ public class BidServiceImpl implements BidService {
 
     String currency = bid.getCurrency().toString();
     String bidAmount = bid.getBidAmount().toString();
-    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 出價：%s %s<br>訂單編號：$s",
-        orderCreatorName, bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
+    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 出價：%s %s<br><br>訂單編號：$s",
+        bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
 
     // Prepare the email content
     EmailRequestDto emailRequestDto = new EmailRequestDto();
@@ -437,7 +449,7 @@ public class BidServiceImpl implements BidService {
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
-    String emailBody = String.format("您於 %s 訂單的出價已在 %s 被 %s 選中！請前往 Pago 查看詳情<br>訂單編號：%s",
+    String emailBody = String.format("您於 %s 訂單的出價已在 %s 被 %s 選中！請前往 Pago 查看詳情<br><br>訂單編號：%s",
         orderItemName, date, orderCreatorName, orderSerialNumber);
 
     // Prepare the email content

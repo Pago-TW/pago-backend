@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.dto.BidOperationResultDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -49,15 +50,24 @@ public class BidController {
     String orderCreatorId = order.getConsumerId();
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
-    //Permission checking
+    // Check if the current logged-in user is the creator of the order.
+    // If so, do not allow them to place a bid on their own order.
     if (currentLoginUserId.equals(orderCreatorId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to place bid in your own order");
     }
 
     createBidRequestDto.setOrderId(orderId);
-    Bid bid = bidService.createOrUpdateBid(createBidRequestDto);
+    // Call the createOrUpdateBid service method to either create a new bid or update an existing one.
+    BidOperationResultDto bidOperationResultDto = bidService.createOrUpdateBid(createBidRequestDto);
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(bid);
+    // Check if the bid was created or updated, and return the appropriate HTTP status code.
+    if (bidOperationResultDto.isCreated()) {
+      // The bid was created, return HTTP status 201 Created.
+      return ResponseEntity.status(HttpStatus.CREATED).body(bidOperationResultDto.getBid());
+    } else {
+      // The bid was updated, return HTTP status 200 OK.
+      return ResponseEntity.status(HttpStatus.OK).body(bidOperationResultDto.getBid());
+    }
   }
 
 

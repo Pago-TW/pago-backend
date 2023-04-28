@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service;
 
 import java.util.List;
+import tw.pago.pagobackend.dto.BidOperationResultDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -10,7 +11,7 @@ import tw.pago.pagobackend.model.Order;
 
 public interface BidService {
 
-  Bid createOrUpdateBid(CreateBidRequestDto createBidRequestDto);
+  BidOperationResultDto createOrUpdateBid(CreateBidRequestDto createBidRequestDto);
 
   Bid getBidById(String bidId);
 
