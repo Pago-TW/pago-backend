@@ -42,9 +42,17 @@ public class BidController {
   private final OrderService orderService;
   private final PaymentService paymentService;
 
-  @PostMapping("/orders/{orderId}/bids") // TODO 不可以對自己創建的委託出價
-  public ResponseEntity<Bid> createBid(@PathVariable String orderId,
+  @PostMapping("/orders/{orderId}/bids")
+  public ResponseEntity<Object> createBid(@PathVariable String orderId,
       @RequestBody @Valid CreateBidRequestDto createBidRequestDto) {
+    Order order = orderService.getOrderById(orderId);
+    String orderCreatorId = order.getConsumerId();
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    //Permission checking
+    if (currentLoginUserId.equals(orderCreatorId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to place bid in your own order");
+    }
 
     createBidRequestDto.setOrderId(orderId);
     Bid bid = bidService.createOrUpdateBid(createBidRequestDto);
