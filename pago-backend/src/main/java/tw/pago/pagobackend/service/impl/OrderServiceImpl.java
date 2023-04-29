@@ -592,6 +592,15 @@ public class OrderServiceImpl implements OrderService {
     BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent);
     BigDecimal travelerFee = order.getTravelerFee();
 
+    // Set minimum fee amounts
+    if (tariffFee.compareTo(BigDecimal.TEN) < 0) {
+      tariffFee = BigDecimal.TEN;
+    }
+
+    if (platformFee.compareTo(BigDecimal.TEN) < 0) {
+      platformFee = BigDecimal.TEN;
+    }
+
     BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
 
     // Apply rounding to the second digit after the decimal point (Banker's rounding)
@@ -643,6 +652,15 @@ public class OrderServiceImpl implements OrderService {
     BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent);
     BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent);
     BigDecimal travelerFee = calculateOrderAmountRequestDto.getTravelerFee();
+
+    // Set minimum fee amounts
+    if (tariffFee.compareTo(BigDecimal.TEN) < 0) {
+      tariffFee = BigDecimal.TEN;
+    }
+
+    if (platformFee.compareTo(BigDecimal.TEN) < 0) {
+      platformFee = BigDecimal.TEN;
+    }
 
     BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
 
@@ -697,6 +715,15 @@ public class OrderServiceImpl implements OrderService {
     BigDecimal tariffFee = itemTotalAmount.multiply(orderTariffFeePercent);
     BigDecimal platformFee = itemTotalAmount.multiply(orderPlatformFeePercent);
     BigDecimal travelerFee = bidResponseDto.getBidAmount();
+
+    // Set minimum fee amounts
+    if (tariffFee.compareTo(BigDecimal.TEN) < 0) {
+      tariffFee = BigDecimal.TEN;
+    }
+
+    if (platformFee.compareTo(BigDecimal.TEN) < 0) {
+      platformFee = BigDecimal.TEN;
+    }
 
     BigDecimal orderTotalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
 
