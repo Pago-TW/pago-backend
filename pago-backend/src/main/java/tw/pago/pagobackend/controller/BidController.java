@@ -30,9 +30,11 @@ import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.PaymentService;
+import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @RestController
@@ -44,8 +46,10 @@ public class BidController {
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final OrderService orderService;
   private final PaymentService paymentService;
+  private final TripService tripService;
+  
 
-  @PostMapping("/orders/{orderId}/bids") // TODO 檢查出價的抵達城市是否和送達地點的城市一樣，否則不給出價
+  @PostMapping("/orders/{orderId}/bids")
   public ResponseEntity<Object> createBid(@PathVariable String orderId,
       @RequestBody @Valid CreateBidRequestDto createBidRequestDto) {
     Order order = orderService.getOrderById(orderId);
@@ -58,6 +62,16 @@ public class BidController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to place bid in your own order");
     }
 
+    // Check if the arrival city in the trip matches the destination city in the order
+    Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
+    System.out.println("trip.getToCity(): " + trip.getToCity());
+    System.out.println("order.getDestinationCity(): " + order.getDestinationCity());
+    if (!trip.getToCity().equals(order.getDestinationCity())) {
+      System.out.println("Does not match");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The arrival city of the trip must match the destination city of the order");
+    }
+    System.out.println("Matches");
+    
     createBidRequestDto.setOrderId(orderId);
     // Call the createOrUpdateBid service method to either create a new bid or update an existing one.
     try {
