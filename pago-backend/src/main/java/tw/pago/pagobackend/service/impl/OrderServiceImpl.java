@@ -976,7 +976,7 @@ public class OrderServiceImpl implements OrderService {
   private OrderChosenShopperDto getOrderChosenShopper(Order order) {
     Bid chosenBid = bidService.getChosenBidByOrderId(order.getOrderId());
     if (chosenBid == null) {
-      return null; // TODO 需要防呆，避免非REQUESTED order找不到對應的chosenBid;
+      return null; // TODO 需要防呆，想辦法讓這裡直接中斷執行，拋出Exception，避免非REQUESTED order找不到對應的chosenBid，因為上次這裡Null讓我上次找得好累==，只要 orderStatus 是 REQUESTED 以外的狀態，代表這個 order 一定有選出代購者了;
     }
     BidResponseDto chosenBidResponseDto = bidService.getBidResponseById(chosenBid.getBidId());
     BidCreatorDto shopper = chosenBidResponseDto.getCreator();
@@ -1114,7 +1114,7 @@ public class OrderServiceImpl implements OrderService {
     System.out.println("......Email sent! (postponeRequest)");
   }
 
-  public void sendCancelRequestEmail(Order order, CancellationRecord cancellationRecord) {
+  public void sendCancelRequestEmail(Order order, CancellationRecord cancellationRecord) { // TODO 因應現在 mail 都有套 html 模板，需要修改一下，建議你可以參考BidService的Email相關程式碼，那邊是我有改過的，html模板的檔名:emailTemplate.html
     String cancellingUserId = cancellationRecord.getUserId();
     String orderCreatorId = order.getConsumerId();
     String recipientId;

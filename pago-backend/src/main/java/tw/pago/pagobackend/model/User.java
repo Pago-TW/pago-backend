@@ -22,9 +22,9 @@ public class User {
   private String lastName;
   private String phone;
   private String email;
-  private String gender;
+  private String gender; // TODO 改用 ENUM 可能就 男、女、不公開
   private String googleId;
-  private String accountStatus;
+  private String accountStatus; // TODO 改用 ENUM，這邊原本是想說可能會有檢舉的功能，還有官方後台的功能，可以去看 Dropbox 產品規格的UserStory 5.官方服務，可能就會有印象這是我們很早期討論到的功能，但目前我們專題狀況應該是用不到，正常的帳號都會是"啟用狀態"，所以剛創好的帳號預設就會是"啟用狀態"，然後可能它被檢舉過就改成"警告狀態"上線可能就提醒他注意行為舉止之類的，再被瘋狂檢舉就送它"停權狀態"之類的....
   private Date updateDate;
   private Date createDate;
   private String aboutMe;
