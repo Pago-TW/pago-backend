@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.dto.CountryAndCityResponseDto;
@@ -86,12 +87,20 @@ public class CountryAndCityController {
 //  }
 
   @GetMapping("/countries-and-cities")
-  public List<CountryAndCityResponseDto> getLocations() {
+  public List<CountryAndCityResponseDto> getLocations(
+      @RequestParam(required = false) String country,
+      @RequestParam(required = false) String city) {
+
     List<CountryAndCityResponseDto> locations = new ArrayList<>();
 
     for (CityCode cityCode : CityCode.values()) {
-      Country country = new Country();
-      City city = new City();
+      if ((country != null && !cityCode.getCountryCode().getAlpha2().equalsIgnoreCase(country)) ||
+          (city != null && !cityCode.name().equalsIgnoreCase(city))) {
+        continue;
+      }
+
+      Country countryObject = new Country();
+      City cityObject = new City();
 
       CountryCode countryCode = cityCode.getCountryCode();
       String countryEnglishName = CountryUtil.getEnglishCountryName(countryCode);
@@ -100,14 +109,14 @@ public class CountryAndCityController {
       String cityEnglishName = cityCode.getEnglishName();
       String cityChineseName = cityCode.getChineseName();
 
-      country.setCountryCode(countryCode);
-      country.setEnglishName(countryEnglishName);
-      country.setChineseName(countryChineseName);
-      city.setCityCode(cityCode.name());
-      city.setEnglishName(cityEnglishName);
-      city.setChineseName(cityChineseName);
+      countryObject.setCountryCode(countryCode);
+      countryObject.setEnglishName(countryEnglishName);
+      countryObject.setChineseName(countryChineseName);
+      cityObject.setCityCode(cityCode.name());
+      cityObject.setEnglishName(cityEnglishName);
+      cityObject.setChineseName(cityChineseName);
 
-      CountryAndCityResponseDto countryAndCityResponseDto = new CountryAndCityResponseDto(country, city);
+      CountryAndCityResponseDto countryAndCityResponseDto = new CountryAndCityResponseDto(countryObject, cityObject);
       locations.add(countryAndCityResponseDto);
     }
 
