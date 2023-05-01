@@ -40,9 +40,9 @@ public class UserDaoImpl implements UserDao {
     map.put("lastName", userRegisterRequestDto.getLastName());
     map.put("phone", userRegisterRequestDto.getPhone());
     map.put("email", userRegisterRequestDto.getEmail());
-    map.put("gender", userRegisterRequestDto.getGender());
+    map.put("gender", userRegisterRequestDto.getGender().toString());
     map.put("googleId", userRegisterRequestDto.getGoogleId());
-    map.put("accountStatus", userRegisterRequestDto.getAccountStatus());
+    map.put("accountStatus", userRegisterRequestDto.getAccountStatus().toString());
 
     Date now = new Date();
     map.put("updateDate", now);
@@ -125,9 +125,9 @@ public class UserDaoImpl implements UserDao {
     map.put("lastName", updateUserRequestDto.getLastName());
     map.put("phone", updateUserRequestDto.getPhone());
     map.put("email", updateUserRequestDto.getEmail());
-    map.put("gender", updateUserRequestDto.getGender().getDescription());
+    map.put("gender", updateUserRequestDto.getGender().toString());
     map.put("googleId", updateUserRequestDto.getGoogleId());
-    map.put("accountStatus", updateUserRequestDto.getAccountStatus().getDescription());
+    map.put("accountStatus", updateUserRequestDto.getAccountStatus().toString());
     map.put("updateDate", new Date());
     map.put("aboutMe", updateUserRequestDto.getAboutMe());
     map.put("country", updateUserRequestDto.getCountry());
