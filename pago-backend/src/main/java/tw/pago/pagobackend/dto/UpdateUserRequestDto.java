@@ -7,6 +7,7 @@ import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.model.User;
 
 @Getter
@@ -21,7 +22,7 @@ public class UpdateUserRequestDto {
   private String lastName;
   private String phone;
   private String email;
-  private String gender;
+  private GenderEnum gender;
   private String googleId;
   private String accountStatus;
   private Date updateDate;

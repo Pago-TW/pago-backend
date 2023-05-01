@@ -5,6 +5,7 @@ import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.CompletionRatingEnum;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 
@@ -17,7 +18,7 @@ public class UserResponseDto {
   private String lastName;
   private String phone;
   private String email;
-  private String gender;
+  private GenderEnum gender;
   private String accountStatus;
   private Date updateDate;
   private Date createDate;

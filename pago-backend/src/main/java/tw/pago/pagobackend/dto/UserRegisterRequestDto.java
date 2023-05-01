@@ -5,6 +5,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 
@@ -25,7 +26,7 @@ public class UserRegisterRequestDto {
   @NotBlank
   private String email;
 
-  private String gender;
+  private GenderEnum gender;
   private String googleId;
   private String accountStatus;
   private Date updateDate;

@@ -6,6 +6,7 @@ import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 @Getter
@@ -22,7 +23,7 @@ public class User {
   private String lastName;
   private String phone;
   private String email;
-  private String gender;
+  private GenderEnum gender;
   private String googleId;
   private String accountStatus;
   private Date updateDate;

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 
 @Data
@@ -39,7 +40,7 @@ public class UserDto {
   private String lastName;
   private String phone;
   private String email;
-  private String gender;
+  private GenderEnum gender;
   private String googleId;
   private String accountStatus;
   private String aboutMe;
