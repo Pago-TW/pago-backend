@@ -28,9 +28,8 @@ public class UserController {
   @Autowired
   private UserService userService;
 
-
-
-  @PatchMapping("/users/{userId}")
+  @PatchMapping("/users/{userId}") // TODO 更新時，用正規表達式檢查手機格式，或是使用Annotation,套件
+                                   // 等等...檢查格式是否正確，例如：手機09開頭且10碼，若多處會用到這種格式檢查，建議可以考慮寫成 Util 拿來共用!
   public ResponseEntity<User> updateUser(@PathVariable String userId,
       @RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
 
