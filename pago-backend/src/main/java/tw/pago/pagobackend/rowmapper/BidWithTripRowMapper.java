@@ -9,6 +9,7 @@ import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Trip;
 
 public class BidWithTripRowMapper implements RowMapper<Bid> { // TODO 我忘了為什麼我會命名成 BidWithTrip == 但這看起來就是普通的BidRowMapper
+                                                              // TODO by dayc: 我測試過了，這兩個一模一樣
 
   @Override
   public Bid mapRow(ResultSet resultSet, int rowNum) throws SQLException {
