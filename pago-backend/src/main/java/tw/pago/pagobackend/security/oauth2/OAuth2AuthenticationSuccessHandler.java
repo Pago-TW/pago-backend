@@ -34,6 +34,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import tw.pago.pagobackend.constant.AccountStatusEnum;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.JwtDto;
@@ -98,6 +100,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
           .firstName(userInfoMap.get("firstName").toString())
           .lastName(userInfoMap.get("firstName").toString())
           .avatarUrl(userInfoMap.get("avatarUrl").toString())
+          .lastLogin(new Date())
           .build();
 
       // Compare with data you set, if null -> set oldUser data;
@@ -112,6 +115,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
           .userId(userId)
           .account(userInfoMap.get("email").toString())
           .provider(UserAuthProviderEnum.valueOf(userInfoMap.get("provider").toString()))
+          .gender(GenderEnum.PREFER_NOT_TO_SAY)
+          .accountStatus(AccountStatusEnum.ACTIVE)
           .googleId(userInfoMap.get("googleId").toString())
           .firstName(userInfoMap.get("firstName").toString())
           .lastName(userInfoMap.get("lastName").toString())
@@ -167,8 +172,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
       UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
           .userId(userId)
           .account(userInfoMap.get("email").toString())
+          .gender(GenderEnum.PREFER_NOT_TO_SAY)
           .provider(UserAuthProviderEnum.valueOf(userInfoMap.get("provider").toString()))
           .googleId(userInfoMap.get("googleId").toString())
+          .accountStatus(AccountStatusEnum.ACTIVE)
           .firstName(userInfoMap.get("firstName").toString())
           .lastName(userInfoMap.get("lastName").toString())
           .email(userInfoMap.get("email").toString())

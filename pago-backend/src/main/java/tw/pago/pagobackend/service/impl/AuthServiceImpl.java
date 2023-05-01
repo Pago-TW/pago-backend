@@ -16,6 +16,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tw.pago.pagobackend.constant.AccountStatusEnum;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.JwtAuthenticationResponseDto;
@@ -106,7 +108,10 @@ public class AuthServiceImpl implements AuthService {
 
     String userId = uuidGenerator.getUuid();
     userRegisterRequestDto.setUserId(userId);
+    userRegisterRequestDto.setAccountStatus(AccountStatusEnum.ACTIVE);
     userRegisterRequestDto.setProvider(UserAuthProviderEnum.LOCAL);
+    userRegisterRequestDto.setGender(userRegisterRequestDto.getGender() == null ?
+        GenderEnum.PREFER_NOT_TO_SAY : userRegisterRequestDto.getGender());
 
     // Hash user's register password
     String hashedPassword = passwordEncoder.encode(userRegisterRequestDto.getPassword());
