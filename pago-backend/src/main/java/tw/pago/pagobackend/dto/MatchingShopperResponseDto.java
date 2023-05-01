@@ -13,7 +13,7 @@ import tw.pago.pagobackend.model.Trip;
 @Data
 @NoArgsConstructor
 @JsonPropertyOrder({
-    "shopperId",
+    "userId",
     "fullName",
     "email",
     "avatarUrl",
@@ -22,7 +22,6 @@ public class MatchingShopperResponseDto {
 
   private OrderResponseDto order;
 
-  @JsonProperty("shopperId")
   private String userId;
   @JsonIgnore
   private String firstName;
