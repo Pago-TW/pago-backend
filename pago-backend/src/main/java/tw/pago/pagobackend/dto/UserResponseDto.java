@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.CompletionRatingEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
@@ -19,7 +20,7 @@ public class UserResponseDto {
   private String phone;
   private String email;
   private GenderEnum gender;
-  private String accountStatus;
+  private AccountStatusEnum accountStatus;
   private Date updateDate;
   private Date createDate;
   private String aboutMe;

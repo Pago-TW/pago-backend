@@ -3,6 +3,9 @@ package tw.pago.pagobackend.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
+
+import tw.pago.pagobackend.constant.AccountStatusEnum;
+import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.model.User;
 
@@ -18,9 +21,9 @@ public class UserRowMapper implements RowMapper<User> {
         .lastName(resultSet.getString("last_name"))
         .phone(resultSet.getString("phone"))
         .email(resultSet.getString("email"))
-        .gender(resultSet.getString("gender"))
+        .gender(GenderEnum.valueOf(resultSet.getString("gender")))
         .googleId(resultSet.getString("google_id"))
-        .accountStatus(resultSet.getString("account_status"))
+        .accountStatus(AccountStatusEnum.valueOf(resultSet.getString("account_status")))
         .updateDate(resultSet.getTimestamp("update_date"))
         .createDate(resultSet.getTimestamp("create_date"))
         .avatarUrl(resultSet.getString("avatar_url"))
