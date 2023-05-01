@@ -73,13 +73,6 @@ public class ChatController {
     String senderId =  sendMessageRequestDto.getSenderId();
     User sender = userService.getUserById(senderId);
 
-//    User sender = User.builder().build();
-//    sender.setUserId("cc0fc75a5a854b1e9980d4acbe82086d");
-//    sender.setFirstName("LILY ");
-//    sender.setLastName("LILY");
-//    sender.setEmail("a0923183408@gmail.com");
-//    sender.setAvatarUrl("https://lh3.googleusercontent.com/a/AGNmyxYCn5ZTzVOK_r0TIN829tKCiI1zxd7e84okgIpI_TA=s96-c");
-
 
     sendMessageRequestDto.setSenderId(sender.getUserId());
     String destinationChatroomId =  sendMessageRequestDto.getChatroomId();
