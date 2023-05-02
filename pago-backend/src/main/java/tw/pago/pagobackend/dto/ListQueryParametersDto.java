@@ -9,6 +9,7 @@ import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
+import tw.pago.pagobackend.constant.TripStatusEnum;
 
 @Getter
 @Setter
@@ -31,9 +32,6 @@ public class ListQueryParametersDto {
   // Order, Trip
   private String userId;
 
-  // Trip
-  private LocalDate latestReceiveItemDate;
-
   // Review
   private String targetId;
   private ReviewTypeEnum reviewType;
@@ -45,6 +43,8 @@ public class ListQueryParametersDto {
 
   // Trip
   private String tripId;
+  private LocalDate latestReceiveItemDate;
+  private TripStatusEnum tripStatus;
 
   // Chatroom
   private String chatroomId;

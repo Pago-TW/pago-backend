@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
@@ -116,10 +117,13 @@ public class TripController {
       @RequestParam(required = false) String orderId,
       @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
+      @RequestParam(required = false) TripStatusEnum status,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
-      @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
+
+   String currentLoginUserId =  currentUserInfoProvider.getCurrentLoginUserId();
 
     if (orderId != null) {
 
@@ -144,12 +148,24 @@ public class TripController {
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)
+        .tripStatus(status)
         .sort(sort)
         .build();
 
-    List<TripResponseDto> tripList = tripService.getTripResponseDtoList(listQueryParametersDto);
+    Integer total = 0;
+    if (listQueryParametersDto.getTripStatus() != null) {
+      listQueryParametersDto.setSize(999);
+      total = tripService.countTrip(listQueryParametersDto.getTripStatus());
+      size = Integer.MAX_VALUE;
+    } else {
+      total = tripService.countTrip(listQueryParametersDto);
+    }
 
-    Integer total = tripService.countTrip(listQueryParametersDto);
+    if (listQueryParametersDto.getUserId() == null) {
+      listQueryParametersDto.setUserId(currentLoginUserId);
+    }
+
+    List<TripResponseDto> tripList = tripService.getTripResponseDtoList(listQueryParametersDto);
 
     ListResponseDto<TripResponseDto> tripResponseDtoList = ListResponseDto.<TripResponseDto>builder()
         .total(total)

@@ -3,6 +3,7 @@ package tw.pago.pagobackend.service;
 import java.sql.SQLException;
 
 import java.util.List;
+import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
@@ -40,6 +41,8 @@ public interface TripService {
     List<TripResponseDto> getTripResponseDtoByTripList(List<Trip> tripList);
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
+
+    Integer countTrip(TripStatusEnum tripStatus);
 
     Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
 

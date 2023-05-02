@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -205,9 +206,15 @@ public class TripServiceImpl implements TripService {
 
     List<Trip> tripList = getTripList(listQueryParametersDto);
 
-    List<TripResponseDto> tripResponseDtoList = tripList.stream()
-        .map(this::getTripResponseDtoByTrip)
-        .collect(Collectors.toList());
+    Stream<TripResponseDto> tripResponseDtoStream = tripList.stream()
+        .map(this::getTripResponseDtoByTrip);
+
+    if (listQueryParametersDto.getTripStatus() != null) {
+      tripResponseDtoStream  = tripResponseDtoStream
+          .filter(tripResponseDto -> tripResponseDto.getTripStatus().equals(listQueryParametersDto.getTripStatus()));
+    }
+
+    List<TripResponseDto> tripResponseDtoList = tripResponseDtoStream.collect(Collectors.toList());
 
     return tripResponseDtoList;
   }
@@ -226,6 +233,13 @@ public class TripServiceImpl implements TripService {
   public Integer countTrip(ListQueryParametersDto listQueryParametersDto) {
     Integer total = tripDao.countTrip(listQueryParametersDto);
 
+    return total;
+  }
+
+  @Override
+  public Integer countTrip(TripStatusEnum tripStatus) {
+
+    Integer total = tripDao.countTrip(tripStatus);
     return total;
   }
 

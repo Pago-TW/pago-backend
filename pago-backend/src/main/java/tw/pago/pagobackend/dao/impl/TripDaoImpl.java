@@ -17,6 +17,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
+import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
@@ -201,6 +202,39 @@ public class TripDaoImpl implements TripDao {
 
     // Filtering e.g. status, search
     sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
+  @Override
+  public Integer countTrip(TripStatusEnum tripStatus) {
+    String sql = "SELECT COUNT(trip_id) "
+        + "FROM trip "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    LocalDate currentDate = LocalDate.now();
+
+    switch (tripStatus) {
+      case UPCOMING:
+        sql = sql + " AND DATE(arrival_date) > :currentDate  ";
+        map.put("currentDate", currentDate);
+        break;
+      case ONGOING:
+        sql = sql + " AND :currentDate BETWEEN DATE(arrival_date)  AND DATE_ADD(arrival_date, INTERVAL 7 DAY) ";
+        map.put("currentDate", currentDate);
+        break;
+      case PAST:
+        sql = sql + " AND DATE_ADD(arrival_date, INTERVAL 7 DAY) < :currentDate ";
+        map.put("currentDate", currentDate);
+        break;
+      default:
+        sql = sql;
+        break;
+    }
 
     Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
 

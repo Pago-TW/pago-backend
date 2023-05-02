@@ -3,6 +3,7 @@ package tw.pago.pagobackend.dao;
 import java.sql.SQLException;
 
 import java.util.List;
+import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
@@ -24,6 +25,8 @@ public interface TripDao {
     List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
+
+    Integer countTrip(TripStatusEnum tripStatus);
 
     Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
 }

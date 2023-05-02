@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
 
 
     // Get user completionRating
-    CompletionRatingEnum completionRating = getUserCompletionRating(user);
+    CompletionRatingEnum completionRating = getUserCompletionRating(user); // TODO 調整一下邏輯，預設先給VERY_GOOD，不然剛創建的用戶因為沒有資料，他會是不良
     userResponseDto.setCompletionRating(completionRating);
 
 
