@@ -53,8 +53,11 @@ public class UserController {
 
   @GetMapping("/users/me")
   @PreAuthorize("hasRole('ROLE_USER')")
-  public User getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
-    return userService.getUserById(userPrincipal.getId());
+  public UserResponseDto getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
+
+    User user = userService.getUserById(userPrincipal.getId());
+    UserResponseDto userResponseDto = userService.getUserResponseDtoByUser(user);
+    return userResponseDto;
   }
 
 }
