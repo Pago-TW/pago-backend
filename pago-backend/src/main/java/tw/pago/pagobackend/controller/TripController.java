@@ -156,7 +156,7 @@ public class TripController {
     if (listQueryParametersDto.getTripStatus() != null) {
       listQueryParametersDto.setSize(999);
       total = tripService.countTrip(listQueryParametersDto.getTripStatus());
-      size = Integer.MAX_VALUE;
+      size = Integer.MAX_VALUE; // TODO 因為size 10太小，會變成先撈所有資料的前10筆，再從前10筆撈出指定status，用Integer.MAX_VALUE是確保全部資料都撈出來後經過DTO會得到Status再慢慢篩選，需要優化撈出指定 status 的邏輯，可以在DAO寫SQL下判斷式撈出符合的資料，建議參考countTrip(TripStatusEnum tripStatus)，而不是用這種方式去處理
     } else {
       total = tripService.countTrip(listQueryParametersDto);
     }

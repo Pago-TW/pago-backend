@@ -160,6 +160,7 @@ public class ChatServiceImpl implements ChatService {
 
     Integer totalUnreadMessage = countUnreadMessage(chatroomId, currentLoginUserChatroomUserMapping);
     List<Message> messageList = messageDao.getMessageListByChatroomId(chatroomId);
+    String latestMessageSenderId = messageList.get(0).getSenderId();
     String latestMessageContent = messageList.get(0).getContent();
     MessageTypeEnum latestMessageType = messageList.get(0).getMessageType();
     LocalDateTime latestMessageSendDate = messageList.get(0).getSendDate();
@@ -175,6 +176,7 @@ public class ChatServiceImpl implements ChatService {
     chatroomResponseDto.setChatroomId(chatroomId);
     chatroomResponseDto.setCurrentLoginUserId(loginUserId);
     chatroomResponseDto.setTotalUnreadMessage(totalUnreadMessage);
+    chatroomResponseDto.setLatestMessageSenderId(latestMessageSenderId);
     chatroomResponseDto.setLatestMessageSendDate(latestMessageSendDate);
     chatroomResponseDto.setLatestMessageContent(latestMessageContent);
     chatroomResponseDto.setLatestMessageType(latestMessageType);
