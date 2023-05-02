@@ -51,7 +51,7 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
   }
 
-  @GetMapping("/user/me")
+  @GetMapping("/users/me")
   @PreAuthorize("hasRole('ROLE_USER')")
   public User getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
     return userService.getUserById(userPrincipal.getId());
