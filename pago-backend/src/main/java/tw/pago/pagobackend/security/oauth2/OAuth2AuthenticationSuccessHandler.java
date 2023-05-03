@@ -368,6 +368,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     userObject.addProperty("fullName", user.getFullName());
     userObject.addProperty("phone", user.getPhone());
     userObject.addProperty("provider", user.getProvider().toString());
+    userObject.addProperty("avatarUrl", user.getAvatarUrl().toString());
     userObject.addProperty("createDate", user.getCreateDate().toString());
     userObject.addProperty("updateDate", user.getUpdateDate().toString());
     userObject.addProperty("lastLogin", user.getLastLogin().toString());
