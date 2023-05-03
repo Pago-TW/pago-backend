@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.validation.Valid;
@@ -64,9 +65,13 @@ public class OrderController {
   private final BidService bidService;
 
   @PostMapping("/orders")
-  public ResponseEntity<OrderResponseDto> createOrder(@RequestParam("file") List<MultipartFile> files,
+  public ResponseEntity<OrderResponseDto> createOrder(@RequestParam(value = "file", required = false) List<MultipartFile> files,
       @RequestParam("data") String createOrderRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
+    // If no files are provided or all files are empty, initialize an empty list
+    if (files == null || files.stream().allMatch(file -> file.isEmpty())) {
+      files = new ArrayList<>();
+    }
     // Convert data to DTO
     ObjectMapper objectMapper = new ObjectMapper();
     CreateOrderRequestDto createOrderRequestDto = objectMapper.readValue(createOrderRequestDtoString, CreateOrderRequestDto.class);
