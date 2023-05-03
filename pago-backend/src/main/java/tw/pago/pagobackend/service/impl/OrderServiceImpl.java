@@ -149,19 +149,23 @@ public class OrderServiceImpl implements OrderService {
     orderDao.createOrderItem(createOrderRequestDto);
     orderDao.createOrder(userId, createOrderRequestDto);
 
-    // upload file
-    CreateFileRequestDto createFileRequestDto = new CreateFileRequestDto();
-    createFileRequestDto.setFileCreator(userId);
-    createFileRequestDto.setObjectId(orderUuid);
-    createFileRequestDto.setObjectType("order");
+    // Check if files are not null and not empty
+    if (files != null && !files.isEmpty()) {
+      System.out.println("file not null");
+      // upload file
+      CreateFileRequestDto createFileRequestDto = new CreateFileRequestDto();
+      createFileRequestDto.setFileCreator(userId);
+      createFileRequestDto.setObjectId(orderUuid);
+      createFileRequestDto.setObjectType("order");
 
-    List<URL> uploadedUrls = fileService.uploadFile(files, createFileRequestDto);
-    // print out all uploadedurls
-    for (URL url : uploadedUrls) {
-      System.out.println(url);
-      System.out.println("Successfully uploaded!");
+      List<URL> uploadedUrls = fileService.uploadFile(files, createFileRequestDto);
+      // print out all uploadedurls
+      for (URL url : uploadedUrls) {
+        System.out.println(url);
+        System.out.println("Successfully uploaded!");
+      }
+      // System.out.println("file uploaded");
     }
-    // System.out.println("file uploaded");
 
     Order order = getOrderById(orderUuid);
 
