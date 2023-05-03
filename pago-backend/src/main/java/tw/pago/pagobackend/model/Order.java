@@ -29,10 +29,8 @@ public class Order {
   private String consumerId;
   private Date createDate;
   private Date updateDate;
-  @JsonProperty("isPackagingRequired")
-  private boolean isPackagingRequired;
-  @JsonProperty("isVerificationRequired")
-  private boolean isVerificationRequired;
+  private Boolean isPackagingRequired;
+  private Boolean isVerificationRequired;
   private CountryCode destinationCountry;
   private CityCode destinationCity;
   private CurrencyEnum currency;

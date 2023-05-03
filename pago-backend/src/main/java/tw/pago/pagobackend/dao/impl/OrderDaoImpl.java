@@ -45,8 +45,8 @@ public class OrderDaoImpl implements OrderDao {
     Date now = new Date();
     map.put("createDate", now);
     map.put("updateDate", now);
-    map.put("packaging", createOrderRequestDto.isPackaging());
-    map.put("verification", createOrderRequestDto.isVerification());
+    map.put("packaging", createOrderRequestDto.getIsPackagingRequired());
+    map.put("verification", createOrderRequestDto.getIsVerificationRequired());
     map.put("destinationCountry", createOrderRequestDto.getDestinationCountry().name());
     map.put("destinationCity", createOrderRequestDto.getDestinationCity().name());
     map.put("travelerFee", createOrderRequestDto.getTravelerFee());
@@ -224,8 +224,8 @@ public class OrderDaoImpl implements OrderDao {
     map.put("purchaseCountry", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseCountry().name());
     map.put("purchaseCity", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseCity().name());
     map.put("purchaseRoad", updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getPurchaseRoad());
-    map.put("packaging", updateOrderAndOrderItemRequestDto.isPackagingRequired());
-    map.put("verification", updateOrderAndOrderItemRequestDto.isVerificationRequired());
+    map.put("packaging", updateOrderAndOrderItemRequestDto.getIsPackagingRequired());
+    map.put("verification", updateOrderAndOrderItemRequestDto.getIsVerificationRequired());
     map.put("destinationCountry", updateOrderAndOrderItemRequestDto.getDestinationCountry().name());
     map.put("destinationCity", updateOrderAndOrderItemRequestDto.getDestinationCity().name());
     map.put("travelerFee", updateOrderAndOrderItemRequestDto.getTravelerFee());

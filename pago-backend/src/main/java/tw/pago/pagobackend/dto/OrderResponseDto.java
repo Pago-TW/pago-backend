@@ -49,9 +49,9 @@ public class OrderResponseDto {
   private Date createDate;
   private Date updateDate;
   @JsonProperty("isPackagingRequired")
-  private boolean isPackagingRequired;
+  private Boolean isPackagingRequired;
   @JsonProperty("isVerificationRequired")
-  private boolean isVerificationRequired;
+  private Boolean isVerificationRequired;
   private String destinationCountryName;
   @JsonProperty("destinationCountryCode")
   private CountryCode destinationCountry;

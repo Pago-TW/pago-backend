@@ -22,8 +22,8 @@ public class CalculateOrderAmountRequestDto {
   private CreateOrderItemDto createOrderItemDto;
   private String orderId;
   private String serialNumber;
-  private boolean packaging;
-  private boolean verification;
+  private Boolean isPackagingRequired;
+  private Boolean isVerificationRequired;
   private CountryCode destinationCountry;
   private CityCode destinationCity;
   private BigDecimal travelerFee;

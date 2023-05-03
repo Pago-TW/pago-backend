@@ -23,10 +23,14 @@ public class CreateOrderRequestDto {
   private String orderId;
   private String serialNumber;
 
+
   @NotNull
-  private boolean packaging;
+  @JsonProperty(value = "isPackagingRequired")
+  private Boolean isPackagingRequired;
+
   @NotNull
-  private boolean verification;
+  @JsonProperty(value = "isVerificationRequired")
+  private Boolean isVerificationRequired;
   @NotNull
   private CountryCode destinationCountry;
   @NotNull

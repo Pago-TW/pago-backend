@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Optional;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -14,24 +13,21 @@ import org.springframework.beans.factory.annotation.Value;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
-// import tw.pago.pagobackend.constant.PackagingEnum;
 
 @Getter
 @Setter
 @Builder
 public class UpdateOrderAndOrderItemRequestDto {
 
-
   private String orderId;
-
   private String consumerId;
 
   @JsonProperty(value = "orderItem")
   private UpdateOrderItemDto updateOrderItemDto;
   @JsonProperty(value = "isPackagingRequired")
-  private boolean isPackagingRequired;
+  private Boolean isPackagingRequired;
   @JsonProperty(value = "isVerificationRequired")
-  private boolean isVerificationRequired;
+  private Boolean isVerificationRequired;
   private CountryCode destinationCountry;
   private CityCode destinationCity;
   private BigDecimal travelerFee;
@@ -44,6 +40,5 @@ public class UpdateOrderAndOrderItemRequestDto {
   private Date latestReceiveItemDate;
   private String note;
   private OrderStatusEnum orderStatus;
-
 
 }

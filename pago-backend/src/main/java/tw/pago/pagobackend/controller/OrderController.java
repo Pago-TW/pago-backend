@@ -3,14 +3,20 @@ package tw.pago.pagobackend.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.Validator;
+
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +69,7 @@ public class OrderController {
   private final TripService tripService;
   private final PaymentService paymentService;
   private final BidService bidService;
+  private final Validator validator;
 
   @PostMapping("/orders")
   public ResponseEntity<OrderResponseDto> createOrder(@RequestParam(value = "file", required = false) List<MultipartFile> files,
@@ -72,9 +79,16 @@ public class OrderController {
     if (files == null || files.stream().allMatch(file -> file.isEmpty())) {
       files = new ArrayList<>();
     }
+
     // Convert data to DTO
     ObjectMapper objectMapper = new ObjectMapper();
     CreateOrderRequestDto createOrderRequestDto = objectMapper.readValue(createOrderRequestDtoString, CreateOrderRequestDto.class);
+
+    // Perform validation
+    Set<ConstraintViolation<CreateOrderRequestDto>> violations = validator.validate(createOrderRequestDto);
+    if (!violations.isEmpty()) {
+      throw new BadRequestException(violations.toString());
+    }
 
     // Get currentLogin User
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
