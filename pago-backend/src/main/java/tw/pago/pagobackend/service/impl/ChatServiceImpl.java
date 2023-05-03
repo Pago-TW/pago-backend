@@ -160,10 +160,18 @@ public class ChatServiceImpl implements ChatService {
 
     Integer totalUnreadMessage = countUnreadMessage(chatroomId, currentLoginUserChatroomUserMapping);
     List<Message> messageList = messageDao.getMessageListByChatroomId(chatroomId);
-    String latestMessageSenderId = messageList.get(0).getSenderId();
-    String latestMessageContent = messageList.get(0).getContent();
-    MessageTypeEnum latestMessageType = messageList.get(0).getMessageType();
-    LocalDateTime latestMessageSendDate = messageList.get(0).getSendDate();
+    String latestMessageSenderId = "";
+    String latestMessageContent = "";
+    MessageTypeEnum latestMessageType = null;
+    LocalDateTime latestMessageSendDate = null;
+
+    // Check if messageList is not empty before accessing its elements
+    if (!messageList.isEmpty()) {
+      latestMessageSenderId = messageList.get(0).getSenderId();
+      latestMessageContent = messageList.get(0).getContent();
+      latestMessageType = messageList.get(0).getMessageType();
+      latestMessageSendDate = messageList.get(0).getSendDate();
+    }
 
     // Create a ChatroomOtherUserDto to store the other user's information
     ChatroomOtherUserDto chatroomOtherUserDto = new ChatroomOtherUserDto();
