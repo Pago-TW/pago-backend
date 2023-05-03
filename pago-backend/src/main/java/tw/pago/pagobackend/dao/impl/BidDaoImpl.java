@@ -16,7 +16,7 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.rowmapper.BidRowMapper;
-import tw.pago.pagobackend.rowmapper.BidWithTripRowMapper;
+// import tw.pago.pagobackend.rowmapper.BidWithTripRowMapper;
 
 @Component
 public class BidDaoImpl implements BidDao {
@@ -217,7 +217,7 @@ public class BidDaoImpl implements BidDao {
 
 
 
-    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidWithTripRowMapper());
+    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidRowMapper());
 
     return bidList;
   }
@@ -232,7 +232,7 @@ public class BidDaoImpl implements BidDao {
     Map<String, Object> map = new HashMap<>();
     map.put("tripId", tripId);
 
-    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidWithTripRowMapper());
+    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidRowMapper());
 
     return bidList;
   }
