@@ -236,25 +236,26 @@ public class ChatServiceImpl implements ChatService {
 
     List<Message> messageList = messageDao.getMessageList(listQueryParametersDto);
 
-    Message lastReadMessage =  messageList.get(0);
-    String lastRaedMessageId = lastReadMessage.getMessageId();
-    String chatroomId = lastReadMessage.getChatRoomId();
-    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    if (!messageList.isEmpty()) { // Check if the messageList is not empty
+      Message lastReadMessage =  messageList.get(0);
+      String lastRaedMessageId = lastReadMessage.getMessageId();
+      String chatroomId = lastReadMessage.getChatRoomId();
+      String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
-    // After getChatHistory success, update the currentLoginUser's last_read_message_id
-    UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto = new UpdateChatroomUserMappingRequestDto();
-    updateChatroomUserMappingRequestDto.setLastReadMessageId(lastRaedMessageId);
-    updateChatroomUserMappingRequestDto.setChatroomId(chatroomId);
-    updateChatroomUserMappingRequestDto.setUserId(currentLoginUserId);
-    chatroomDao.updateLastReadMessageIdByChatroomIdAndUserId(updateChatroomUserMappingRequestDto);
-
+      // After getChatHistory success, update the currentLoginUser's last_read_message_id
+      UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto = new UpdateChatroomUserMappingRequestDto();
+      updateChatroomUserMappingRequestDto.setLastReadMessageId(lastRaedMessageId);
+      updateChatroomUserMappingRequestDto.setChatroomId(chatroomId);
+      updateChatroomUserMappingRequestDto.setUserId(currentLoginUserId);
+      chatroomDao.updateLastReadMessageIdByChatroomIdAndUserId(updateChatroomUserMappingRequestDto);
+    }
 
     // The latest messages in the frontend UI will be displayed at the bottom
     Collections.reverse(messageList);
 
     return messageList;
-
   }
+
 
   @Override
   public List<MessageResponseDto> getMessageResponseDtoListByMessageList(
