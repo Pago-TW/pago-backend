@@ -128,6 +128,7 @@ public class TripController {
     if (orderId != null) {
 
       ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+          .userId(currentLoginUserId)
           .startIndex(startIndex)
           .size(size)
           .orderBy(orderBy)
