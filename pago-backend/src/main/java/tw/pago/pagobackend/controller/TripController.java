@@ -190,7 +190,7 @@ public class TripController {
       @RequestParam(defaultValue = "DESC") String sort) {
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
-        .tripId(tripId)
+
         .search(search)
         .orderStatus(orderStatus)
         .startIndex(startIndex)
