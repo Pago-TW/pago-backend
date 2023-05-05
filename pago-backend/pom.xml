@@ -238,21 +238,5 @@
                 </configuration>
             </plugin>
         </plugins>
-<!--        TODO 以下的 resources 是不知道為什麼 Maven 編譯出來的class裡面沒有第三方金流要的 EcpayPayment.xml 所以我加的-->
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>src/main/resources</directory>-->
-<!--                <filtering>true</filtering>-->
-<!--                <includes>-->
-<!--                    <include>**/*.properties</include>-->
-<!--                </includes>-->
-<!--            </resource>-->
-<!--            <resource>-->
-<!--                <directory>src/main/java</directory>-->
-<!--                <includes>-->
-<!--                    <include>**/*.xml</include>-->
-<!--                </includes>-->
-<!--            </resource>-->
-<!--        </resources>-->
     </build>
 </project>
