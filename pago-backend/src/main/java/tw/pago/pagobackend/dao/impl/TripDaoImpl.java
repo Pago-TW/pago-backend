@@ -165,6 +165,55 @@ public class TripDaoImpl implements TripDao {
   }
 
   @Override
+  public List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus,
+      ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+        + "arrival_date, profit, create_date, update_date "
+        + "FROM trip "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    LocalDate currentDate = LocalDate.now();
+
+
+    switch (tripStatus) {
+      case UPCOMING:
+        sql = sql + " AND DATE(arrival_date) > :currentDate  ";
+        map.put("currentDate", currentDate);
+        break;
+      case ONGOING:
+        sql = sql + " AND :currentDate BETWEEN DATE(arrival_date)  AND DATE_ADD(arrival_date, INTERVAL 7 DAY) ";
+        map.put("currentDate", currentDate);
+        break;
+      case PAST:
+        sql = sql + " AND DATE_ADD(arrival_date, INTERVAL 7 DAY) < :currentDate ";
+        map.put("currentDate", currentDate);
+        break;
+      default:
+        sql = sql;
+        break;
+    }
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+
+
+
+    List<Trip> tripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return tripList;
+  }
+
+  @Override
   public List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
@@ -209,7 +258,7 @@ public class TripDaoImpl implements TripDao {
   }
 
   @Override
-  public Integer countTrip(TripStatusEnum tripStatus) {
+  public Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT COUNT(trip_id) "
         + "FROM trip "
         + "WHERE 1=1 ";
@@ -217,6 +266,8 @@ public class TripDaoImpl implements TripDao {
     Map<String, Object> map = new HashMap<>();
 
     LocalDate currentDate = LocalDate.now();
+
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
 
     switch (tripStatus) {
       case UPCOMING:

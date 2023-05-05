@@ -34,6 +34,8 @@ public interface TripService {
 
     List<Trip> getMatchingTripListByOrderId(String orderId, ListQueryParametersDto listQueryParametersDto);
 
+    List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
+
     List<OrderResponseDto> getMatchingOrderResponseDtoListForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 
     List<TripResponseDto> getTripResponseDtoList(ListQueryParametersDto listQueryParametersDto);
@@ -42,7 +44,7 @@ public interface TripService {
 
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
 
-    Integer countTrip(TripStatusEnum tripStatus);
+    Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
 
     Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
 

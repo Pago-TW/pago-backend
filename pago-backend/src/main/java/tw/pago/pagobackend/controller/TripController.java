@@ -115,6 +115,7 @@ public class TripController {
   public ResponseEntity<Object> getTripList(
       @RequestParam(required = false) String userId,
       @RequestParam(required = false) String orderId,
+      // Filter trips by the latest date to receive items (optional); only include trips with an arrival_date before this date
       @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
       @RequestParam(required = false) TripStatusEnum status,
@@ -123,10 +124,10 @@ public class TripController {
       @RequestParam(defaultValue = "create_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
-   String currentLoginUserId =  currentUserInfoProvider.getCurrentLoginUserId();
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
+    // If an order ID is provided, fetch matching trips for that order
     if (orderId != null) {
-
       ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
           .userId(currentLoginUserId)
           .startIndex(startIndex)
@@ -139,11 +140,11 @@ public class TripController {
       List<TripResponseDto> tripResponseDtoList = tripService.getTripResponseDtoByTripList(tripList);
 
       return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoList);
-
     }
 
+    // If orderId is null
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
-        .userId(userId)
+        .userId(userId == null ? currentLoginUserId : null)
         .latestReceiveItemDate(latestReceiveItemDate)
         .search(search)
         .startIndex(startIndex)
@@ -153,30 +154,35 @@ public class TripController {
         .sort(sort)
         .build();
 
+    // Initialize variables for total count and trip response DTO list
     Integer total = 0;
+    List<TripResponseDto> tripResponseDtoList;
+
+    // If a trip status is provided, filter trips by the given status
     if (listQueryParametersDto.getTripStatus() != null) {
-      listQueryParametersDto.setSize(999);
-      total = tripService.countTrip(listQueryParametersDto.getTripStatus());
-      size = Integer.MAX_VALUE; // TODO 因為size 10太小，會變成先撈所有資料的前10筆，再從前10筆撈出指定status，用Integer.MAX_VALUE是確保全部資料都撈出來後經過DTO會得到Status再慢慢篩選，需要優化撈出指定 status 的邏輯，可以在DAO寫SQL下判斷式撈出符合的資料，建議參考countTrip(TripStatusEnum tripStatus)，而不是用這種方式去處理
+      TripStatusEnum tripStatus = listQueryParametersDto.getTripStatus();
+
+      List<Trip> tripList = tripService.getTripListByTripStatus(tripStatus, listQueryParametersDto);
+      tripResponseDtoList = tripService.getTripResponseDtoByTripList(tripList);
+
+      total = tripService.countTrip(tripStatus, listQueryParametersDto);
     } else {
+      // If no trip status is provided, fetch all trips based on the query parameters
+      tripResponseDtoList = tripService.getTripResponseDtoList(listQueryParametersDto);
       total = tripService.countTrip(listQueryParametersDto);
     }
 
-    if (listQueryParametersDto.getUserId() == null) {
-      listQueryParametersDto.setUserId(currentLoginUserId);
-    }
-
-    List<TripResponseDto> tripList = tripService.getTripResponseDtoList(listQueryParametersDto);
-
-    ListResponseDto<TripResponseDto> tripResponseDtoList = ListResponseDto.<TripResponseDto>builder()
+    // Build the pagination response DTO
+    ListResponseDto<TripResponseDto> tripResponseDtoListResponseDto = ListResponseDto.<TripResponseDto>builder()
         .total(total)
         .startIndex(startIndex)
         .size(size)
-        .data(tripList)
+        .data(tripResponseDtoList)
         .build();
 
-    return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoList);
+    return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoListResponseDto);
   }
+
 
 
   @GetMapping("/trips/{tripId}/matching-orders")

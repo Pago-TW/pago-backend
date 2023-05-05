@@ -186,6 +186,14 @@ public class TripServiceImpl implements TripService {
     return tripList;
   }
 
+  @Override
+  public List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus,
+      ListQueryParametersDto listQueryParametersDto) {
+
+    List<Trip> tripList = tripDao.getTripListByTripStatus(tripStatus, listQueryParametersDto);
+    return tripList;
+  }
+
 
   @Override
   public List<OrderResponseDto> getMatchingOrderResponseDtoListForTrip(
@@ -237,9 +245,9 @@ public class TripServiceImpl implements TripService {
   }
 
   @Override
-  public Integer countTrip(TripStatusEnum tripStatus) {
+  public Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto) {
 
-    Integer total = tripDao.countTrip(tripStatus);
+    Integer total = tripDao.countTrip(tripStatus, listQueryParametersDto);
     return total;
   }
 
