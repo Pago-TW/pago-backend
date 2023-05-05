@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
 
 
     // Get user completionRating
-    CompletionRatingEnum completionRating = getUserCompletionRating(user); // TODO 調整一下邏輯，預設先給VERY_GOOD，不然剛創建的用戶因為沒有資料，他會是不良
+    CompletionRatingEnum completionRating = getUserCompletionRating(user);
     userResponseDto.setCompletionRating(completionRating);
 
 
@@ -257,6 +257,12 @@ public class UserServiceImpl implements UserService {
 
     int totalOrdersInProcurementProcess = getUserTotalOrdersInProcurementProcess(user.getUserId());
     int totalCancellationRecords = cancellationRecordDao.countCancellationRecord(user.getUserId());
+
+    // Check if the user is new
+    if (totalOrdersInProcurementProcess == 0 && totalCancellationRecords == 0) {
+      return CompletionRatingEnum.EXCELLENT;
+    }
+
     double cancellationRating = calculateUserCancellationRating(totalCancellationRecords, totalOrdersInProcurementProcess);
     System.out.println("Cancellation: " + cancellationRating);
 

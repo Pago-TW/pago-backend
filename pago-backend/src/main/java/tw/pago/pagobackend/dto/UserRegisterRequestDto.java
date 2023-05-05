@@ -8,6 +8,7 @@ import lombok.Setter;
 import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
+import tw.pago.pagobackend.validation.ValidPhone;
 
 
 @Getter
@@ -22,6 +23,8 @@ public class UserRegisterRequestDto {
 
   private String firstName;
   private String lastName;
+
+  @ValidPhone
   private String phone;
 
   @NotBlank

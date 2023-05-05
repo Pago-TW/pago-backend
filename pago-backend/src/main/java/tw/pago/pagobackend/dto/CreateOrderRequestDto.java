@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.validation.NotBeforeToday;
 
 @Data
 @NoArgsConstructor
@@ -47,6 +48,7 @@ public class CreateOrderRequestDto {
   private Double tariffFeePercent;
 
   @NotNull
+  @NotBeforeToday
   @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   private Date latestReceiveItemDate;
 

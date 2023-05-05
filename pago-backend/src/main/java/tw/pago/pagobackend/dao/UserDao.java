@@ -11,5 +11,7 @@ public interface UserDao {
 
   User getUserByEmail(String email);
 
+  User getUserByPhone(String phone);
+
   void updateUser(UpdateUserRequestDto updateUserRequestDto);
 }

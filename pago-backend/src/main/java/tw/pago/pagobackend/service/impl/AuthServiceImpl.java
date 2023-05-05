@@ -26,6 +26,7 @@ import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
+import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.AuthService;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
@@ -97,13 +98,20 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public User register(UserRegisterRequestDto userRegisterRequestDto) {
 
-    // Get User By Email, will be used to check isExist?
-    User user = userDao.getUserByEmail(userRegisterRequestDto.getEmail());
+    // Get User By Email and Phone, will be used to check isExist?
+    User userByEmail = userDao.getUserByEmail(userRegisterRequestDto.getEmail());
+    User userByPhone = userDao.getUserByPhone(userRegisterRequestDto.getPhone());
 
-    // Check email isExist? return BAD_REQUEST : Register
-    if (user != null) {
-      log.warn("該email: {} 已被註冊", userRegisterRequestDto.getEmail());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    // Check email or phone isExist? return BAD_REQUEST : Register
+    if (userByEmail != null || userByPhone != null) {
+      StringBuilder message = new StringBuilder("Registration failed: ");
+      if (userByEmail != null) {
+          message.append("The email '").append(userRegisterRequestDto.getEmail()).append("' is already registered. ");
+      }
+      if (userByPhone != null) {
+          message.append("The phone '").append(userRegisterRequestDto.getPhone()).append("' is already registered.");
+      }
+      throw new BadRequestException(message.toString());
     }
 
     String userId = uuidGenerator.getUuid();
@@ -120,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
     // register
     userDao.createUser(userRegisterRequestDto);
 
-    user = userDao.getUserById(userId);
+    User user = userDao.getUserById(userId);
 
     if (user == null) {
       throw new UsernameNotFoundException(userId);
