@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 600px) {
+      .container {
+        width: 100%;
+        margin: 0 auto;
+      }
+      .content {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+
+    body {
+      font-family: "Noto Sans TC", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border-left: 1px solid #eeeeee;
+      border-right: 1px solid #eeeeee;
+      border-bottom: 1px solid #eeeeee;
+      overflow: hidden;
+    }
+    .header {
+      background-color: #335891;
+      padding: 10px 0;
+      text-align: center;
+    }
+    .header h1 {
+      color: #fff;
+      font-size: 24px;
+      margin: 0;
+    }
+    .content-title{
+      padding-top: 10px;
+      color: #000000;
+      text-align: center;
+    }
+    .content {
+      padding-top: 5px;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 20px;
+      color: #000000;
+      text-align: left;
+    }
+    .notice {
+      color: #000000;
+      text-align: center;
+    }
+    .separator {
+      width: 93%;
+      margin: 20px auto;
+      border-top: 1px solid #eee;
+    }
+    .footer {
+      padding: 2px;
+      color: #b9b9b9;
+      text-align: center;
+    }
+    .footer img {
+      width: 80px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Pago</h1>
+  </div>
+
+  <div>
+    <div class="content-title">
+      <h1>{{content_title}}</h1>
+    </div>
+    <div class="content">
+      <h3>親愛的 {{recipient_name}}，您好：</h3>
+      <p>感謝您使用 Pago 的服務</p>
+      <p>{{email_body}}</p>
+    </div>
+    <div class="notice">
+      <p><strong>本信件為系統發送的通知信，請勿回覆</strong></p>
+    </div>
+  </div>
+
+  <div class="separator"></div>
+
+  <div class="footer">
+    <a href="https://pago-app.me" target="_blank">
+      <img
+          src="https://pago-file-storage.s3.ap-northeast-1.amazonaws.com/5b65b2d2f7b14ca69cf153bcdbee5154_textWithLogo-removebg-preview.png"
+          alt="Pago Logo">
+    </a>
+    <p>Copyright © 2023 Pago</p>
+    <p>服務時間：週一至週五，上午 9:00 至 下午 6:00</p>
+    <p>聯絡信箱：<a href="mailto:service@pago-app.me">service@pago-app.me</a></p>
+  </div>
+</div>
+</body>
+</html>

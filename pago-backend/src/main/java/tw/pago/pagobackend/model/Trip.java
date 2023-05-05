@@ -1,67 +1,27 @@
 package tw.pago.pagobackend.model;
 
+import com.neovisionaries.i18n.CountryCode;
+import java.math.BigDecimal;
+import java.util.Date;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.TripStatusEnum;
+
+@Getter
+@Setter
+@Builder
 public class Trip {
-    private Integer tripId;
-    private Integer travelerId;
-    private String fromLocation;
-    private String toLocation;
-    private String arrivalDate;
-    private double profit;
+    private String tripId;
+    private String shopperId;
+    private CountryCode fromCountry;
+    private CityCode fromCity;
+    private CountryCode toCountry;
+    private CityCode toCity;
+    private Date arrivalDate;
+    private BigDecimal profit;
+    private Date createDate;
+    private Date updateDate;
 
-    public Trip(Integer tripId, Integer travelerId, String fromLocation, String toLocation, String arrivalDate, double profit) {
-        this.tripId = tripId;
-        this.travelerId = travelerId;
-        this.fromLocation = fromLocation;
-        this.toLocation = toLocation;
-        this.arrivalDate = arrivalDate;
-        this.profit = profit;
-    }
-
-    public Integer getTripId() {
-        return tripId;
-    }
-
-    public void setTripId(Integer tripId) {
-        this.tripId = tripId;
-    }
-
-    public Integer getTravelerId() {
-        return travelerId;
-    }
-
-    public void setTravelerId(Integer travelerId) {
-        this.travelerId = travelerId;
-    }
-
-    public String getFromLocation() {
-        return fromLocation;
-    }
-
-    public void setFromLocation(String fromLocation) {
-        this.fromLocation = fromLocation;
-    }
-
-    public String getToLocation() {
-        return toLocation;
-    }
-
-    public void setToLocation(String toLocation) {
-        this.toLocation = toLocation;
-    }
-
-    public String getArrivalDate() {
-        return arrivalDate;
-    }
-
-    public void setArrivalDate(String arrivalDate) {
-        this.arrivalDate = arrivalDate;
-    }
-
-    public double getProfit() {
-        return profit;
-    }
-
-    public void setProfit(double profit) {
-        this.profit = profit;
-    }
 }

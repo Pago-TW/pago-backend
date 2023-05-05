@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>簡單的網站</title>
+</head>
+<body>
+<button id="callApiBtn">呼叫API</button>
+
+<script>
+  const callApiBtn = document.getElementById("callApiBtn");
+
+  callApiBtn.addEventListener("click", async () => {
+    const response = await fetch("http://localhost:8080/api/v1/bids/2371b8665a134b61a73280fb0f9e5bfc/ecpay-checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}) // 如果API需要傳遞資料，可以在這裡填寫
+    });
+
+    if (response.ok) {
+      const responseData = await response.text(); // 使用text()而不是json()來解析返回的HTML
+      const formContainer = document.createElement('div'); // 創建一個新的div元素來容納表單
+      formContainer.innerHTML = responseData; // 將回傳的HTML插入到新建的div中
+      document.body.appendChild(formContainer); // 將包含表單的div添加到頁面上
+      const form = formContainer.querySelector('form'); // 選擇剛剛插入的表單
+      form.submit(); // 自動提交表單
+    } else {
+      console.error("API呼叫失敗，狀態碼: " + response.status);
+    }
+  });
+</script>
+</body>
+</html>

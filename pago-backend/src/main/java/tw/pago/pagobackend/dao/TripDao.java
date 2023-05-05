@@ -1,18 +1,34 @@
 package tw.pago.pagobackend.dao;
 
 import java.sql.SQLException;
-import java.util.List;
 
+import java.util.List;
+import tw.pago.pagobackend.constant.TripStatusEnum;
+import tw.pago.pagobackend.dto.CreateTripRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.model.Trip;
 
 public interface TripDao {
-    public Trip getById(Integer tripId) throws SQLException;
+    Trip getTripById(String tripId);
 
-    public List<Trip> findAll() throws SQLException;
+//    public List<Trip> findAll() throws SQLException;
 
-    public Integer insert(Trip tripRequest) throws SQLException;
+    String createTrip(String userId, CreateTripRequestDto createTripRequestDto);
 
-    public void update(Integer tripId, Trip tripRequest) throws SQLException;
+    void updateTrip(Trip trip, UpdateTripRequestDto updateTripRequestDto);
 
-    public void delete(Integer tripId) throws SQLException;
+    void delete(String tripId) throws SQLException;
+
+    List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto);
+
+    List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
+
+    List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto);
+
+    Integer countTrip(ListQueryParametersDto listQueryParametersDto);
+
+    Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
+
+    Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
 }
