@@ -10,6 +10,7 @@ import lombok.Setter;
 import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.model.User;
+import tw.pago.pagobackend.validation.ValidPhone;
 
 @Getter
 @Setter
@@ -21,6 +22,7 @@ public class UpdateUserRequestDto {
   private String password;
   private String firstName;
   private String lastName;
+  @ValidPhone
   private String phone;
   private String email;
   private GenderEnum gender;
