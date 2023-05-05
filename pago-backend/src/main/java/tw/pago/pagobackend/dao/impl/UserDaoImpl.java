@@ -98,6 +98,26 @@ public class UserDaoImpl implements UserDao {
     }
   }
 
+  @Override
+  public User getUserByPhone(String phone) {
+    String sql = "SELECT user_id, account, password, first_name, last_name,"
+        + "phone, email, gender, google_id, account_status, update_date,"
+        + "create_date, avatar_url, about_me, country, last_login, provider "
+        + "FROM user "
+        + "WHERE phone = :phone ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("phone", phone);
+
+    List<User> userList = namedParameterJdbcTemplate.query(sql, map, new UserRowMapper());
+
+    if (userList.size() > 0) {
+      return userList.get(0);
+    } else {
+      return null;
+    }
+  }
+
 
   @Override
   public void updateUser(UpdateUserRequestDto updateUserRequestDto) {
