@@ -31,6 +31,7 @@ public class ListQueryParametersDto {
 
   // Order, Trip
   private String userId;
+  private String consumerId;
 
   // Review
   private String targetId;

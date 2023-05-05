@@ -232,15 +232,7 @@ public class OrderController {
       @RequestParam(defaultValue = "arrival_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
-    // Get permission checking needing value
     Order order = orderService.getOrderById(orderId);
-    // String orderCreatorId = order.getConsumerId();
-    // String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
-
-    // // Check permission
-    // if (!currentLoginUserId.equals(orderCreatorId)) {
-    //   return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
-    // }
 
     Date latestReceiveItemDate = order.getLatestReceiveItemDate();
     LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -250,6 +242,7 @@ public class OrderController {
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .orderId(orderId)
+        .consumerId(order.getConsumerId())
         .toCity(order.getDestinationCity())
         .fromCity(order.getOrderItem().getPurchaseCity())
         .latestReceiveItemDate(latestReceiveItemLocalDate)
@@ -260,7 +253,8 @@ public class OrderController {
         .sort(sort)
         .build();
 
-    List<MatchingShopperResponseDto> matchingShopperList = orderService.getMatchingShopperList(listQueryParametersDto);
+    List<MatchingShopperResponseDto> matchingShopperList = orderService.getMatchingShopperList(order,
+        listQueryParametersDto);
 
     Integer total = tripService.countMatchingShopper(listQueryParametersDto);
 

@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -470,30 +471,38 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public List<MatchingShopperResponseDto> getMatchingShopperList(ListQueryParametersDto listQueryParametersDto) {
+  public List<MatchingShopperResponseDto> getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto) {
 
     List<Trip> matchingTripList = tripDao.getMatchingTripListForOrder(listQueryParametersDto);
 
-    List<MatchingShopperResponseDto> matchingShopperResponseDtoList = matchingTripList.stream()
-        .map(trip -> {
-          User user = userDao.getUserById(trip.getShopperId());
-          MatchingShopperResponseDto matchingShopperResponseDto = modelMapper.map(user, MatchingShopperResponseDto.class);
+    // Use a Map to collect all matching trips for each user
+    Map<String, List<Trip>> userIdToTripsMap = matchingTripList.stream()
+        .collect(Collectors.groupingBy(Trip::getShopperId));
 
-          // Set tripDto properties based on the trip object
-          MatchingTripForOrderDto matchingTripForOrderDto = modelMapper.map(trip, MatchingTripForOrderDto.class);
-          matchingShopperResponseDto.setTrip(matchingTripForOrderDto);
+    List<MatchingShopperResponseDto> matchingShopperResponseDtoList = new ArrayList<>();
+    for (Map.Entry<String, List<Trip>> entry : userIdToTripsMap.entrySet()) {
+      String userId = entry.getKey();
+      User user = userDao.getUserById(userId);
+      MatchingShopperResponseDto matchingShopperResponseDto = modelMapper.map(user, MatchingShopperResponseDto.class);
+
+      // Convert the Trip list in the entry to a MatchingTripForOrderDto list
+      List<MatchingTripForOrderDto> matchingTripListForOrder = entry.getValue().stream()
+          .map(trip -> modelMapper.map(trip, MatchingTripForOrderDto.class))
+          .collect(Collectors.toList());
+
+      // Set the matchingTripListForOrder as the trips attribute of the matchingShopperResponseDto
+      matchingShopperResponseDto.setTrips(matchingTripListForOrder);
 
 
+        // Add the matchingShopperResponseDto to the matchingShopperResponseDtoList
+        matchingShopperResponseDtoList.add(matchingShopperResponseDto);
 
-
-          return matchingShopperResponseDto;
-        })
-        .collect(Collectors.toList());
-
-
+    }
 
     return matchingShopperResponseDtoList;
   }
+
+
 
   @Transactional
   @Override

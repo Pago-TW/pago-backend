@@ -56,7 +56,7 @@ public interface OrderService {
 
   List<OrderResponseDto> getOrderResponseDtoListByOrderList(List<Order> orderList);
 
-  List<MatchingShopperResponseDto> getMatchingShopperList(ListQueryParametersDto listQueryParametersDto);
+  List<MatchingShopperResponseDto> getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto);
 
   Integer countOrder(ListQueryParametersDto listQueryParametersDto);
 

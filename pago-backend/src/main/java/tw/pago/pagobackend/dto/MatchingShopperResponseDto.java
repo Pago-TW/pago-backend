@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Date;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
@@ -20,8 +21,6 @@ import tw.pago.pagobackend.model.Trip;
 })
 public class MatchingShopperResponseDto {
 
-  private OrderResponseDto order;
-
   private String userId;
   @JsonIgnore
   private String firstName;
@@ -33,7 +32,7 @@ public class MatchingShopperResponseDto {
   // For programing use;
   private String fullName;
 
-  private MatchingTripForOrderDto trip;
+  private List<MatchingTripForOrderDto> trips;
 
   public String getFullName() {
     return firstName + " " + lastName;

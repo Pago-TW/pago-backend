@@ -304,6 +304,12 @@ public class TripDaoImpl implements TripDao {
       map.put("shopperId", listQueryParametersDto.getUserId());
     }
 
+    if (listQueryParametersDto.getConsumerId() != null) {
+      sql = sql + " AND shopper_id != :consumerId ";
+      map.put("consumerId", listQueryParametersDto.getConsumerId());
+    }
+
+
     sql = sql + " AND DATE(arrival_date) BETWEEN :orderCreateDate AND :latestReceiveItemDate ";
     map.put("latestReceiveItemDate", listQueryParametersDto.getLatestReceiveItemDate());
     map.put("orderCreateDate", listQueryParametersDto.getOrderCreateDate());
