@@ -56,7 +56,7 @@ public class PaymentServiceImpl implements PaymentService {
     obj.setTotalAmount(orderTotalAmount);
     obj.setTradeDesc("test Description");
     obj.setItemName("Pago Service, " + "No. " + serialNumber);
-    obj.setReturnURL("https://api.pago-app.me/api/v1/ecpay-checkout/callback"); // TODO 一定要https，測試可以用ngrok，正式要部署beanstalk並且用https
+    obj.setReturnURL("https://api.pago-app.me/api/v1/ecpay-checkout/callback");
     obj.setNeedExtraPaidInfo("N");
     obj.setClientBackURL("https://pago-dev.vercel.app/");
     String form = all.aioCheckOut(obj, null);

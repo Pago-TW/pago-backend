@@ -8,10 +8,8 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import tw.pago.pagobackend.dto.ChatroomResponseDto;
 import tw.pago.pagobackend.dto.CreateChatRoomRequestDto;
-import tw.pago.pagobackend.dto.JoinRoomRequest;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.MessageResponseDto;
@@ -87,28 +84,8 @@ public class ChatController {
 
   }
 
-  @SendTo("/chatroom/message")
-  public MessageResponseDto broadcastMessage(@Payload MessageResponseDto messageResponseDto) {
 
-//    System.out.println("Broadcast Message!");
-
-    return messageResponseDto;
-  }
-
-//  @MessageMapping("/join")
-//  @SendTo("/topic/{roomName}/join")
-//  public String joinRoom(@Payload JoinRoomRequest JoinRoomRequest, @DestinationVariable String roomName) {
-//    // ... 處理加入聊天室的邏輯，如保存用戶信息等
-////    User currentLoginUser = currentUserInfoProvider.getCurrentLoginUser();
-////    String currentLoginUserName = currentLoginUser.getFullName();
-//    System.out.println("Join");
-//
-//
-//    return JoinRoomRequest.getUserName() + " 加入了 " + roomName + " 聊天室";
-//  }
-
-
-  @GetMapping("/chatrooms") // TODO 如果發送訊息就更新chatroom update_date，這樣才能排最上面，不然有些未讀訊息都要滑到很下面才看得到
+  @GetMapping("/chatrooms")
   public ResponseEntity<Object> getCharoomList(
       @RequestParam(required = false) String chatWith,
       @RequestParam(required = false) String search,
