@@ -349,6 +349,16 @@ public class OrderController {
 
   }
 
+  @GetMapping("/orders/{orderId}/cancellation-record")
+  public ResponseEntity<?> getCancellationRecord(@PathVariable String orderId) {
+
+    CancellationRecord cancellationRecord = orderService.getCancellationRecordByOrderId(orderId);
+
+
+    return ResponseEntity.status(HttpStatus.OK).body(cancellationRecord);
+  }
+
+
   @PatchMapping("/orders/{orderId}/cancellation-record")
   public ResponseEntity<?> replyCancelOrder(@PathVariable String orderId, @RequestBody @Valid UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
@@ -379,6 +389,13 @@ public class OrderController {
 
 
 
+  }
+
+  @GetMapping("/orders/{orderId}/postpone-record")
+  public ResponseEntity<?> getPostponeRecord(@PathVariable String orderId) {
+    PostponeRecord postponeRecord = orderService.getPostponeRecordByOrderId(orderId);
+
+    return ResponseEntity.status(HttpStatus.OK).body(postponeRecord);
   }
 
 
