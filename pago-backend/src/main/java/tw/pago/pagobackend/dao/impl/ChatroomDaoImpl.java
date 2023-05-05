@@ -42,6 +42,20 @@ public class ChatroomDaoImpl implements ChatroomDao {
   }
 
   @Override
+  public void updateChatroom(String chatroomId) {
+    String sql = "UPDATE chatroom "
+        + "SET update_date = :updateDate "
+        + "WHERE chatroom_id = :chatroomId ";
+
+    Map<String, Object> map = new HashMap<>();
+    LocalDateTime now = LocalDateTime.now();
+    map.put("updateDate", now);
+    map.put("chatroomId", chatroomId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
   public Chatroom getChatroomById(String chatroomId) {
     String sql = "SELECT chatroom_id, create_date, update_date "
         + "FROM chatroom "

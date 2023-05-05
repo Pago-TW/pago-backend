@@ -13,6 +13,8 @@ public interface ChatroomDao {
 
   void createChatroom(CreateChatRoomRequestDto createChatRoomRequestDto);
 
+  void updateChatroom(String chatroomId);
+
   Chatroom getChatroomById(String chatroomId);
 
   void createChatroomUserMapping(CreateChatRoomUserMappingRequestDto createChatRoomUserMappingRequestDto);

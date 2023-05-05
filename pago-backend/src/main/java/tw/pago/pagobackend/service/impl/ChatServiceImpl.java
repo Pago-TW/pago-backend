@@ -45,6 +45,8 @@ public class ChatServiceImpl implements ChatService {
   @Transactional
   public Message createMessage(SendMessageRequestDto sendMessageRequestDto) {
     String messageId = uuidGenerator.getUuid();
+    String chatroomId = sendMessageRequestDto.getChatroomId();
+    String senderId = sendMessageRequestDto.getSenderId();
     MessageTypeEnum messageType = sendMessageRequestDto.getMessageType();
 
 
@@ -53,12 +55,13 @@ public class ChatServiceImpl implements ChatService {
 
     messageDao.createMessage(sendMessageRequestDto);
 
-    // After createMessage, update the last_read_message_id
+    // After createMessage, update the last_read_message_id and chatroom.update_date
     UpdateChatroomUserMappingRequestDto updateChatroomUserMappingRequestDto = new UpdateChatroomUserMappingRequestDto();
-    updateChatroomUserMappingRequestDto.setChatroomId(sendMessageRequestDto.getChatroomId());
-    updateChatroomUserMappingRequestDto.setUserId(sendMessageRequestDto.getSenderId());
+    updateChatroomUserMappingRequestDto.setChatroomId(chatroomId);
+    updateChatroomUserMappingRequestDto.setUserId(senderId);
     updateChatroomUserMappingRequestDto.setLastReadMessageId(messageId);
     chatroomDao.updateLastReadMessageIdByChatroomIdAndUserId(updateChatroomUserMappingRequestDto);
+    chatroomDao.updateChatroom(chatroomId);
 
     Message message = messageDao.getMessageById(messageId);
 
