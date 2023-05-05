@@ -2,6 +2,7 @@ package ecpay.payment.integration.ecpayOperator;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -246,7 +247,8 @@ public class EcpayFunction {
 		Integer timeStamp = (int)(date.getTime() / 1000);
 		return timeStamp.toString();
 	}
-	
+
+	// When using test code
 	public final static Document xmlParser(String uri){
 		try{
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -259,7 +261,21 @@ public class EcpayFunction {
 		}
 		
 	}
-	
+
+	// When useing web project
+	public final static Document xmlParser(InputStream inputStream) {
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setValidating(false);
+			factory.setIgnoringElementContentWhitespace(true);
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			return builder.parse(inputStream);
+		} catch (Exception e) {
+			throw new Error(e);
+		}
+	}
+
+
 	/**
 	 * 信任所有憑證.
 	 * @param connection
