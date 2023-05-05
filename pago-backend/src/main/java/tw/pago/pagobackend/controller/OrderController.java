@@ -71,7 +71,7 @@ public class OrderController {
   private final BidService bidService;
   private final Validator validator;
 
-  @PostMapping("/orders") // TODO lastReceiveItemDate 不可以在 "今天日期" 之前，會不合邏輯
+  @PostMapping("/orders")
   public ResponseEntity<OrderResponseDto> createOrder(@RequestParam(value = "file", required = false) List<MultipartFile> files,
       @RequestParam("data") String createOrderRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
