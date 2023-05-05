@@ -234,13 +234,13 @@ public class OrderController {
 
     // Get permission checking needing value
     Order order = orderService.getOrderById(orderId);
-    String orderCreatorId = order.getConsumerId();
-    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    // String orderCreatorId = order.getConsumerId();
+    // String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
-    // Check permission
-    if (!currentLoginUserId.equals(orderCreatorId)) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
-    }
+    // // Check permission
+    // if (!currentLoginUserId.equals(orderCreatorId)) {
+    //   return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    // }
 
     Date latestReceiveItemDate = order.getLatestReceiveItemDate();
     LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
