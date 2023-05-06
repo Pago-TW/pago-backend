@@ -1,7 +1,6 @@
 package tw.pago.pagobackend.controller;
 
 
-import com.neovisionaries.i18n.CountryCode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.dto.CountryAndCityResponseDto;
 import tw.pago.pagobackend.model.City;
 import tw.pago.pagobackend.model.Country;
@@ -128,17 +128,19 @@ public class CountryAndCityController {
         locations.add(new CountryAndCityResponseDto(countryObject, anyCity));
       }
 
-      Country countryObject = new Country();
-      countryObject.setCountryCode(countryCode.name());
-      countryObject.setChineseName(CountryUtil.getChineseCountryName(countryCode));
-      countryObject.setEnglishName(CountryUtil.getEnglishCountryName(countryCode));
-      City cityObject = new City();
-      cityObject.setCityCode(cityCode.name());
-      cityObject.setChineseName(cityCode.getChineseName());
-      cityObject.setEnglishName(cityCode.getEnglishName());
+      if (countryCode != null) {
+        Country countryObject = new Country();
+        countryObject.setCountryCode(countryCode.name());
+        countryObject.setChineseName(CountryUtil.getChineseCountryName(countryCode));
+        countryObject.setEnglishName(CountryUtil.getEnglishCountryName(countryCode));
+        City cityObject = new City();
+        cityObject.setCityCode(cityCode.name());
+        cityObject.setChineseName(cityCode.getChineseName());
+        cityObject.setEnglishName(cityCode.getEnglishName());
 
-      CountryAndCityResponseDto countryAndCityResponseDto = new CountryAndCityResponseDto(countryObject, cityObject);
-      locations.add(countryAndCityResponseDto);
+        CountryAndCityResponseDto countryAndCityResponseDto = new CountryAndCityResponseDto(countryObject, cityObject);
+        locations.add(countryAndCityResponseDto);
+      }
     }
 
     return locations;
