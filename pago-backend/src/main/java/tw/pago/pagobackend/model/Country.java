@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Country {
-    private CountryCode countryCode;
+    private String countryCode;
     private String englishName;
     private String chineseName;
 

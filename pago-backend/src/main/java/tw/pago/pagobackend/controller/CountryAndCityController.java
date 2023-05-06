@@ -96,7 +96,7 @@ public class CountryAndCityController {
     if (includeAny) {
 
       Country anyCountry = new Country();
-      anyCountry.setCountryCode(CountryCode.UNDEFINED);
+      anyCountry.setCountryCode("ANY");
       anyCountry.setChineseName("任何國家");
       anyCountry.setEnglishName("Any Country");
       City anyCity = new City();
@@ -118,7 +118,7 @@ public class CountryAndCityController {
       if (includeAny && cityCode.getCountryCode() != null && addedCountries.add(cityCode.getCountryCode())) {
         // Add the "Country", "Any City" combination for each country
         Country countryObject = new Country();
-        countryObject.setCountryCode(countryCode);
+        countryObject.setCountryCode(countryCode.name());
         countryObject.setChineseName(CountryUtil.getChineseCountryName(countryCode));
         countryObject.setEnglishName(CountryUtil.getEnglishCountryName(countryCode));
         City anyCity = new City();
@@ -129,7 +129,7 @@ public class CountryAndCityController {
       }
 
       Country countryObject = new Country();
-      countryObject.setCountryCode(countryCode);
+      countryObject.setCountryCode(countryCode.name());
       countryObject.setChineseName(CountryUtil.getChineseCountryName(countryCode));
       countryObject.setEnglishName(CountryUtil.getEnglishCountryName(countryCode));
       City cityObject = new City();
@@ -143,10 +143,5 @@ public class CountryAndCityController {
 
     return locations;
   }
-
-
-
-
-
 
 }
