@@ -1,0 +1,38 @@
+name: Deploy to AWS Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: 'adopt'
+
+    - name: Build with Maven
+      run: mvn clean package --file pom.xml
+
+    - name: Set version label
+      run: echo "VERSION_LABEL=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Deploy to AWS Beanstalk
+      uses: einaregilsson/beanstalk-deploy@v14
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+        application_name: 'pago'
+        environment_name: 'Pago-env-2'
+        version_label: ${{ env.VERSION_LABEL }}
+        region: 'ap-northeast-1'
+        deployment_package: target/pago-backend-0.0.1-SNAPSHOT.jar
