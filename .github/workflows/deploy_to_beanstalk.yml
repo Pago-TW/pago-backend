@@ -20,7 +20,7 @@ jobs:
         distribution: 'adopt'
 
     - name: Build with Maven
-      run: mvn clean package --file pom.xml
+      run: mvn clean package --file pago-backend/pom.xml
 
     - name: Set version label
       run: echo "VERSION_LABEL=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_ENV
@@ -35,4 +35,4 @@ jobs:
         environment_name: 'Pago-env-2'
         version_label: ${{ env.VERSION_LABEL }}
         region: 'ap-northeast-1'
-        deployment_package: target/pago-backend-0.0.1-SNAPSHOT.jar
+        deployment_package: pago-backend/target/pago-backend-0.0.1-SNAPSHOT.jar
