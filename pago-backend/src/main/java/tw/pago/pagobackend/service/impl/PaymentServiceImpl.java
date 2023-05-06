@@ -35,11 +35,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     Bid bid = bidService.getBidById(bidId);
     Order order = orderService.getOrderById(bid.getOrderId());
-
+    
     if (order == null) {
       throw new ResourceNotFoundException("ECPay can not retrieve orderInfo, due to Order is null");
     }
-
+    String orderId = order.getOrderId();
 
     String merchantTradeNo =  uuidGenerator.getUuid().substring(0, 20);
     LocalDateTime now = LocalDateTime.now();
@@ -58,7 +58,7 @@ public class PaymentServiceImpl implements PaymentService {
     obj.setItemName("Pago Service, " + "No. " + serialNumber);
     obj.setReturnURL("https://api.pago-app.me/api/v1/ecpay-checkout/callback");
     obj.setNeedExtraPaidInfo("N");
-    obj.setClientBackURL("https://pago-dev.vercel.app/");
+    obj.setClientBackURL("https://pago-app.me/orders/" + orderId);
     String form = all.aioCheckOut(obj, null);
 
 
