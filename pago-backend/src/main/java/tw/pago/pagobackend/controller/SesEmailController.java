@@ -1,5 +1,7 @@
 // package tw.pago.pagobackend.controller;
 
+// import java.text.SimpleDateFormat;
+
 // import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.http.ResponseEntity;
 // import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +25,8 @@
 //         emailRequestDto.setTo("youremail@gmail.com"); //your email
 //         emailRequestDto.setSubject("Test email");
 //         emailRequestDto.setBody("Hello, this is a test email.");
+//         emailRequestDto.setContentTitle("TEST");
+//         emailRequestDto.setRecipientName("Dear tester");
         
 //         sesEmailService.sendEmail(emailRequestDto);
 //         return ResponseEntity.ok("Test email sent.");
