@@ -71,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Override
-  protected void configure(HttpSecurity http) throws Exception { // TODO 檢查哪些 API 是任何人(不用登入)就可以存取，哪些是要有登入才可以
+  protected void configure(HttpSecurity http) throws Exception {
     http
         .cors()
         .and()
@@ -107,9 +107,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/cities/**",
             "/health",
             "/ecpay-checkout/callback",
-            "/ws/**",
-            "/files/**"// TODO 暫時為了測試聊天室用，之後要改回來
-            ) // TODO 暫時為了測試聊天室用，之後要改回來
+            "/ws/**"
+            )
         .permitAll()
         .antMatchers(
             HttpMethod.GET,

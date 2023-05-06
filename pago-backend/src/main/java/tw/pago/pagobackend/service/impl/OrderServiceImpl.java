@@ -989,7 +989,7 @@ public class OrderServiceImpl implements OrderService {
   private OrderChosenShopperDto getOrderChosenShopper(Order order) {
     Bid chosenBid = bidService.getChosenBidByOrderId(order.getOrderId());
     if (chosenBid == null) {
-      return null; // TODO 需要防呆，想辦法讓這裡直接中斷執行，拋出Exception，避免非REQUESTED order找不到對應的chosenBid，因為上次這裡Null讓我上次找得好累==，只要 orderStatus 是 REQUESTED 以外的狀態，代表這個 order 一定有選出代購者了;
+      return null;
     }
     BidResponseDto chosenBidResponseDto = bidService.getBidResponseById(chosenBid.getBidId());
     BidCreatorDto shopper = chosenBidResponseDto.getCreator();
