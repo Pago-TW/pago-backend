@@ -1,18 +1,16 @@
 package tw.pago.pagobackend.controller;
 
 
-import com.neovisionaries.i18n.CountryCode;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.dto.CountryAndCityResponseDto;
 import tw.pago.pagobackend.model.City;
 import tw.pago.pagobackend.model.Country;
@@ -88,10 +86,27 @@ public class CountryAndCityController {
 
   @GetMapping("/countries-and-cities")
   public List<CountryAndCityResponseDto> getLocations(
+      @RequestParam(defaultValue = "false") boolean includeAny,
       @RequestParam(required = false) String country,
       @RequestParam(required = false) String city) {
 
     List<CountryAndCityResponseDto> locations = new ArrayList<>();
+
+    // Add the "Any Country", "Any City" combination at the beginning
+    if (includeAny) {
+
+      Country anyCountry = new Country();
+      anyCountry.setCountryCode("ANY");
+      anyCountry.setChineseName("任何國家");
+      anyCountry.setEnglishName("Any Country");
+      City anyCity = new City();
+      anyCity.setCityCode("ANY");
+      anyCity.setChineseName("任何城市");
+      anyCity.setEnglishName("Any City");
+      locations.add(new CountryAndCityResponseDto(anyCountry, anyCity));
+    }
+
+    Set<CountryCode> addedCountries = new HashSet<>();
 
     for (CityCode cityCode : CityCode.values()) {
       if ((country != null && !cityCode.getCountryCode().getAlpha2().equalsIgnoreCase(country)) ||
@@ -99,31 +114,36 @@ public class CountryAndCityController {
         continue;
       }
 
-      Country countryObject = new Country();
-      City cityObject = new City();
-
       CountryCode countryCode = cityCode.getCountryCode();
-      String countryEnglishName = CountryUtil.getEnglishCountryName(countryCode);
-      String countryChineseName = CountryUtil.getChineseCountryName(countryCode);
+      if (includeAny && cityCode.getCountryCode() != null && addedCountries.add(cityCode.getCountryCode())) {
+        // Add the "Country", "Any City" combination for each country
+        Country countryObject = new Country();
+        countryObject.setCountryCode(countryCode.name());
+        countryObject.setChineseName(CountryUtil.getChineseCountryName(countryCode));
+        countryObject.setEnglishName(CountryUtil.getEnglishCountryName(countryCode));
+        City anyCity = new City();
+        anyCity.setCityCode("ANY");
+        anyCity.setChineseName("任何城市");
+        anyCity.setEnglishName("Any City");
+        locations.add(new CountryAndCityResponseDto(countryObject, anyCity));
+      }
 
-      String cityEnglishName = cityCode.getEnglishName();
-      String cityChineseName = cityCode.getChineseName();
+      if (countryCode != null) {
+        Country countryObject = new Country();
+        countryObject.setCountryCode(countryCode.name());
+        countryObject.setChineseName(CountryUtil.getChineseCountryName(countryCode));
+        countryObject.setEnglishName(CountryUtil.getEnglishCountryName(countryCode));
+        City cityObject = new City();
+        cityObject.setCityCode(cityCode.name());
+        cityObject.setChineseName(cityCode.getChineseName());
+        cityObject.setEnglishName(cityCode.getEnglishName());
 
-      countryObject.setCountryCode(countryCode);
-      countryObject.setEnglishName(countryEnglishName);
-      countryObject.setChineseName(countryChineseName);
-      cityObject.setCityCode(cityCode.name());
-      cityObject.setEnglishName(cityEnglishName);
-      cityObject.setChineseName(cityChineseName);
-
-      CountryAndCityResponseDto countryAndCityResponseDto = new CountryAndCityResponseDto(countryObject, cityObject);
-      locations.add(countryAndCityResponseDto);
+        CountryAndCityResponseDto countryAndCityResponseDto = new CountryAndCityResponseDto(countryObject, cityObject);
+        locations.add(countryAndCityResponseDto);
+      }
     }
 
     return locations;
   }
-
-
-
 
 }

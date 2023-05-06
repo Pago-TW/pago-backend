@@ -1,12 +1,14 @@
 package tw.pago.pagobackend.constant;
 
-import static com.neovisionaries.i18n.CountryCode.*;
+import static tw.pago.pagobackend.constant.CountryCode.*;
 
-import com.neovisionaries.i18n.CountryCode;
 import lombok.Getter;
 
 @Getter
 public enum CityCode {
+  // ANY
+  ANY("任何城市", "Any City", null),
+
   // TW
   TPE("台北市", "Taipei", TW),
   TPH("新北市", "New Taipei", TW),

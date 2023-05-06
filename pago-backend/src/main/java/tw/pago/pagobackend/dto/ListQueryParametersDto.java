@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;
@@ -28,6 +29,10 @@ public class ListQueryParametersDto {
   private CityCode toCity;
   private Boolean isPackagingRequired;
   private LocalDate orderCreateDate;
+  private CountryCode purchaseCountry;
+  private CityCode purchaseCity;
+  private CountryCode destinationCountry;
+  private CityCode destinationCity;
 
   // Order, Trip
   private String userId;

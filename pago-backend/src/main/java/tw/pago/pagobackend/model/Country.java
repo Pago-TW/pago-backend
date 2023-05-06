@@ -1,7 +1,5 @@
 package tw.pago.pagobackend.model;
 
-import com.neovisionaries.i18n.CountryCode;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Country {
-    private CountryCode countryCode;
+    private String countryCode;
     private String englishName;
     private String chineseName;
 

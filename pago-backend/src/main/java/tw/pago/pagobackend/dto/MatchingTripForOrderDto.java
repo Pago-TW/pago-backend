@@ -1,7 +1,5 @@
 package tw.pago.pagobackend.dto;
 
-import com.neovisionaries.i18n.CountryCode;
-import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;

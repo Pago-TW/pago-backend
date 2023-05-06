@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.TripAssembler;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;
@@ -168,6 +170,10 @@ public class TripServiceImpl implements TripService {
   public List<Trip> getMatchingTripListByOrderId(String orderId, ListQueryParametersDto listQueryParametersDto) {
 
     Order order = orderService.getOrderById(orderId);
+    CountryCode purchaseCountry = order.getOrderItem().getPurchaseCountry();
+    CityCode purchaseCity = order.getOrderItem().getPurchaseCity();
+    CountryCode destinationCountry = order.getDestinationCountry();
+    CityCode destinationCity = order.getDestinationCity();
     Date latestReceiveItemDate = order.getLatestReceiveItemDate();
     LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     Date orderCreateDate = order.getCreateDate();
@@ -175,8 +181,10 @@ public class TripServiceImpl implements TripService {
 
 
     listQueryParametersDto.setOrderId(orderId);
-    listQueryParametersDto.setToCity(order.getDestinationCity());
-    listQueryParametersDto.setFromCity(order.getOrderItem().getPurchaseCity());
+    listQueryParametersDto.setPurchaseCountry(purchaseCountry);
+    listQueryParametersDto.setPurchaseCity(purchaseCity);
+    listQueryParametersDto.setDestinationCountry(destinationCountry);
+    listQueryParametersDto.setDestinationCity(destinationCity);
     listQueryParametersDto.setLatestReceiveItemDate(latestReceiveItemLocalDate);
     listQueryParametersDto.setOrderCreateDate(orderCreateLocalDate);
 

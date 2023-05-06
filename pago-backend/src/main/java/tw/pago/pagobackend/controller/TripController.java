@@ -144,7 +144,7 @@ public class TripController {
 
     // If orderId is null
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
-        .userId(userId == null ? currentLoginUserId : null)
+        .userId(userId == null ? currentLoginUserId : userId)
         .latestReceiveItemDate(latestReceiveItemDate)
         .search(search)
         .startIndex(startIndex)

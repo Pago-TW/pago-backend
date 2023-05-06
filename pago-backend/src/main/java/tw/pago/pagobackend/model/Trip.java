@@ -1,12 +1,12 @@
 package tw.pago.pagobackend.model;
 
-import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.TripStatusEnum;
 
 @Getter

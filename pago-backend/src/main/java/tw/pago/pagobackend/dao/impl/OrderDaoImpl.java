@@ -438,6 +438,12 @@ public class OrderDaoImpl implements OrderDao {
   }
 
   private String addTripConditionSql(String sql, Map<String, Object> map, Trip trip) {
+    sql = sql + " AND (oi.purchase_country = :fromCountry OR oi.purchase_country = 'ANY') ";
+    map.put("fromCountry", trip.getFromCountry().name());
+
+    sql = sql + " AND (oi.purchase_city = :fromCity OR oi.purchase_city = 'ANY') ";
+    map.put("fromCity", trip.getFromCity().name());
+
     sql = sql + " AND om.destination_country = :toCountry ";
     map.put("toCountry", trip.getToCountry().name());
 

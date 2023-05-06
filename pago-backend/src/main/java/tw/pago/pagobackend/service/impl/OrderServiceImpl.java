@@ -1081,6 +1081,9 @@ public class OrderServiceImpl implements OrderService {
     String contentTitle = "訂單延期申請通知";
     String postponingUserId = postponeRecord.getUserId();
     String orderCreatorId = order.getConsumerId();
+    String orderId = order.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String serialNumber = order.getSerialNumber();
     String recipientId;
   
     // Check if the postponing user is the order creator or the bidder
@@ -1111,11 +1114,10 @@ public class OrderServiceImpl implements OrderService {
     String postponeNote = postponeRecord.getNote();
     String noteLine = (postponeNote != null) ? String.format("延期原因描述：%s", postponeNote) : "";
     
-    String emailBody = String.format("親愛的 %s 您好，感謝您使用 Pago 的服務<br>" +
-        "於 %s ， %s 想要為「%s」的訂單申請延期，請至 Pago 網站確認並回覆。<br><br>" +
+    String emailBody = String.format("於 %s ， %s 想要為「<a href=\"%s\"  target=\"_blank\">%s</a>」的訂單申請延期，請至 Pago 網站確認並回覆。<br><br>" +
         "以下為 %s 申請延期之詳細資訊：<br>" +
-        "延期原因：%s<br>%s",
-        username, date, postponeRequesterFirstName, orderItemName, postponeRequesterFirstName, postponeRecord.getPostponeReason().getDescription(), noteLine);
+        "延期原因：%s<br>%s<br><br>訂單編號：%s",
+        date, postponeRequesterFirstName, orderUrl, orderItemName, postponeRequesterFirstName, postponeRecord.getPostponeReason().getDescription(), noteLine, serialNumber);
 
     // Prepare the email content
     EmailRequestDto emailRequest = new EmailRequestDto();
@@ -1133,6 +1135,9 @@ public class OrderServiceImpl implements OrderService {
   public void sendCancelRequestEmail(Order order, CancellationRecord cancellationRecord) {
     String contentTitle = "訂單取消申請通知";
     String cancellingUserId = cancellationRecord.getUserId();
+    String orderId = order.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String serialNumber = order.getSerialNumber();
     String orderCreatorId = order.getConsumerId();
     String recipientId;
   
@@ -1164,11 +1169,9 @@ public class OrderServiceImpl implements OrderService {
     String cancelNote = cancellationRecord.getNote();
     String noteLine = (cancelNote != null) ? String.format("取消原因描述：%s", cancelNote) : "";
     
-    String emailBody = String.format("親愛的 %s 您好，感謝您使用 Pago 的服務<br>" +
-        "於 %s ， %s 想要將「%s」的訂單取消，請至 Pago 網站確認並回覆。<br><br>" +
-        "以下為 %s 申請取消之詳細資訊：<br>" +
-        "取消原因：%s<br>%s",
-        username, date, cancelRequesterFirstName, orderItemName, cancelRequesterFirstName, cancellationRecord.getCancelReason().getDescription(), noteLine);
+    String emailBody = String.format("於 %s ， %s 想要將「<a href=\"$s\" target=\"_blank\">%s</a>」的訂單取消，請至 Pago 網站確認並回覆。<br><br>" +
+        "以下為 %s 申請取消之詳細資訊：<br>" + "取消原因：%s<br>%s<br><br>訂單編號：",
+        date, cancelRequesterFirstName, orderUrl, orderItemName, cancelRequesterFirstName, cancellationRecord.getCancelReason().getDescription(), noteLine, serialNumber);
 
     // Prepare the email content
     EmailRequestDto emailRequest = new EmailRequestDto();
@@ -1186,6 +1189,8 @@ public class OrderServiceImpl implements OrderService {
   public void sendOrderUpdateEmail(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
     String contentTitle = "訂單更新通知";
     String consumerId = oldOrder.getConsumerId();
+    String oldOrderId = oldOrder.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", oldOrderId);
     User consumer = userDao.getUserById(consumerId);
   
     // Get the current login user's email
@@ -1198,8 +1203,7 @@ public class OrderServiceImpl implements OrderService {
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
-    String emailBody = String.format("親愛的 %s 您好，感謝您使用 Pago 的服務<br>" +
-        "您的訂單 %s ，已於 %s 更新為「%s」", username, orderItemName, date,
+    String emailBody = String.format("您的訂單 「<a href=\"%s\" target=\"_blank\">%s</a>」 ，已於 %s 更新為「<b>%s</b>」<br><br>", orderItemName, date,
         updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
 
     // Prepare the email content
@@ -1221,17 +1225,17 @@ public class OrderServiceImpl implements OrderService {
     String recipientId = postponeRecord.getUserId();
     User recipientUser = userDao.getUserById(recipientId);
     String recipientUserEmail = recipientUser.getEmail();
-  
+    String orderId = order.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String serialNumber = order.getSerialNumber();
     String orderItemName = order.getOrderItem().getName();
     String username = recipientUser.getFirstName();
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
-  
     String result = updatePostponeRecordRequestDto.getIsPostponed() ? "通過" : "被拒絕";
   
-    String emailBody = String.format("親愛的 %s 您好，感謝您使用 Pago 的服務<br>" +
-        "於 %s，「%s」的訂單延期申請已%s。現在的訂單狀態為 %s，請至 Pago 網站進行確認並查看詳情<br>",
-        username, date, orderItemName, result, updatedOrderStatus);
+    String emailBody = String.format("於 %s，「<a href=\"%s\" target=\"_blank\">%s</a>」的訂單延期申請已 <b>%s<b>。<br>現在的訂單狀態為「<b>%s</b>」，請至 Pago 網站進行確認並查看詳情<br><br>訂單編號：%s",
+        date, orderUrl, orderItemName, result, updatedOrderStatus, serialNumber);
   
     // Prepare the email content
     EmailRequestDto emailRequest = new EmailRequestDto();
@@ -1252,6 +1256,9 @@ public class OrderServiceImpl implements OrderService {
     String recipientId = cancellationRecord.getUserId();
     User recipientUser = userDao.getUserById(recipientId);
     String recipientUserEmail = recipientUser.getEmail();
+    String orderId = order.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String serialNumber = order.getSerialNumber();
 
     String orderItemName = order.getOrderItem().getName();
     String username = recipientUser.getFirstName();
@@ -1260,9 +1267,8 @@ public class OrderServiceImpl implements OrderService {
 
     String result = updateCancellationRecordRequestDto.getIsCancelled() ? "通過" : "被拒絕";
 
-    String emailBody = String.format("親愛的 %s 您好，感謝您使用 Pago 的服務<br>" +
-            "於 %s ，「%s」的訂單取消申請已%s。現在的訂單狀態為 %s ，請至 Pago 網站進行確認並查看詳情<br>",
-            username, date, orderItemName, result, updatedOrderStatus);
+    String emailBody = String.format("於 %s ，「<a href=\"%s\" target=\"_blank\">%s</a>」的訂單取消申請已%s。現在的訂單狀態為 「<b>%s</b>」 ，請至 Pago 網站進行確認並查看詳情<br><br>訂單編號：",
+            date, orderUrl, orderItemName, result, updatedOrderStatus, serialNumber);
 
     // Prepare the email content
     EmailRequestDto emailRequest = new EmailRequestDto();
