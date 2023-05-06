@@ -344,7 +344,7 @@ public class TripDaoImpl implements TripDao {
         sql = sql + " AND from_country IS NOT NULL ";
       } else {
         sql = sql + " AND from_country = :purchaseCountry ";
-        map.put("purchaseCountry", listQueryParametersDto.getPurchaseCountry().name());
+        map.put("purchaseCountry", listQueryParametersDto.getPurchaseCountry());
       }
     }
 
@@ -353,7 +353,7 @@ public class TripDaoImpl implements TripDao {
         sql = sql + " AND from_city IS NOT NULL ";
       } else {
         sql = sql + " AND from_city = :purchaseCity ";
-        map.put("purchaseCity", listQueryParametersDto.getPurchaseCity().name());
+        map.put("purchaseCity", listQueryParametersDto.getPurchaseCity());
       }
     }
 
