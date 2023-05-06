@@ -34,13 +34,13 @@ public class AllInOneBase {
 	protected static String[] ignorePayment;
 	public AllInOneBase(){
 		Document doc;
-		/* when using web project*/
+		/* when using web project, also works on-premise*/
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream inputStream = classLoader.getResourceAsStream("payment_conf.xml");
 		doc = EcpayFunction.xmlParser(inputStream);
 		/* when using testing code*/
-//			String paymentConfPath = "./src/main/resources/payment_conf.xml";
-//			doc = EcpayFunction.xmlParser(paymentConfPath);
+		// String paymentConfPath = "./src/main/resources/payment_conf.xml";
+		// doc = EcpayFunction.xmlParser(paymentConfPath);
 
 		doc.getDocumentElement().normalize();
 		//OperatingMode

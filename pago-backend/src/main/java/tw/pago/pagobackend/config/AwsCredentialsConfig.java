@@ -1,19 +1,25 @@
 package tw.pago.pagobackend.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AwsCredentialsConfig {
 
+    @Value("${aws.profile:}")
+    private String awsProfile;
+
     @Bean
-    public AWSStaticCredentialsProvider awsStaticCredentialsProvider() {
-        String accessKeyId = new ProfileCredentialsProvider("pagodev").getCredentials().getAWSAccessKeyId();
-        String secretAccessKey = new ProfileCredentialsProvider("pagodev").getCredentials().getAWSSecretKey();
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
-        return new AWSStaticCredentialsProvider(awsCredentials);
+    public AWSCredentialsProvider awsCredentialsProvider() {
+        if (awsProfile != null && !awsProfile.isEmpty()) {
+            return new ProfileCredentialsProvider(awsProfile);
+        } else {
+            return new DefaultAWSCredentialsProviderChain();
+        }
     }
 }

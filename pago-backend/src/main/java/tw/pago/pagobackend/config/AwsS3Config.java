@@ -1,6 +1,6 @@
 package tw.pago.pagobackend.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -12,12 +12,12 @@ import org.springframework.context.annotation.Configuration;
 public class AwsS3Config {
 
     @Autowired
-    private AWSStaticCredentialsProvider awsStaticCredentialsProvider;
+    private AWSCredentialsProvider awsCredentialsProvider;
 
     @Bean
     public AmazonS3 amazonS3() {
         return AmazonS3ClientBuilder.standard()
-            .withCredentials(awsStaticCredentialsProvider)
+            .withCredentials(awsCredentialsProvider)
             .withRegion(Regions.AP_NORTHEAST_1)
             .build();
     }
