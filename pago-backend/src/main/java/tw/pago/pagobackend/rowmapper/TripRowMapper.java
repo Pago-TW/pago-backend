@@ -1,10 +1,10 @@
 package tw.pago.pagobackend.rowmapper;
 
-import com.neovisionaries.i18n.CountryCode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.model.Trip;
 
 public class TripRowMapper implements RowMapper<Trip> {

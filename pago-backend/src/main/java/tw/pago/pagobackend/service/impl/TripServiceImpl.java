@@ -1,6 +1,5 @@
 package tw.pago.pagobackend.service.impl;
 
-import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.TripAssembler;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;

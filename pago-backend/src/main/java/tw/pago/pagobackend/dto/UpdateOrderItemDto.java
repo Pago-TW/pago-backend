@@ -1,13 +1,10 @@
 package tw.pago.pagobackend.dto;
 
-import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 
 
 @Data

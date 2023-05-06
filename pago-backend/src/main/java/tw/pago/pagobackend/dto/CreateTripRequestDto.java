@@ -1,13 +1,12 @@
 package tw.pago.pagobackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.neovisionaries.i18n.CountryCode;
 import java.util.Date;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 
 @Data
 @NoArgsConstructor

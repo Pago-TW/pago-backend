@@ -4,13 +4,13 @@ package tw.pago.pagobackend.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.neovisionaries.i18n.CountryCode;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 
 @Data
 @NoArgsConstructor

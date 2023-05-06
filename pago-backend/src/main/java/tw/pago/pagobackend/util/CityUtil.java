@@ -1,8 +1,8 @@
 package tw.pago.pagobackend.util;
 
-import com.neovisionaries.i18n.CountryCode;
 import java.util.Locale;
 import org.springframework.stereotype.Component;
+import tw.pago.pagobackend.constant.CountryCode;
 
 @Component
 @Deprecated
