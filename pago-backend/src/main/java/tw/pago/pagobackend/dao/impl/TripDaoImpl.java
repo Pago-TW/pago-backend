@@ -339,15 +339,33 @@ public class TripDaoImpl implements TripDao {
   }
 
   private String addMatchingTripForOrderSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
-
-    if (listQueryParametersDto.getFromCity() != null) {
-      sql = sql + " AND from_city = :fromCity ";
-      map.put("fromCity", listQueryParametersDto.getFromCity().name());
+    if (listQueryParametersDto.getPurchaseCountry() != null) {
+      if (listQueryParametersDto.getPurchaseCountry().equals("ANY")) { // TODO 現在  CountryCode ENUM 還沒處理好，這裡要想辦法檢查是不是 ANY
+        sql = sql + " AND from_country IS NOT NULL ";
+      } else {
+        sql = sql + " AND from_country = :purchaseCountry ";
+        map.put("purchaseCountry", listQueryParametersDto.getPurchaseCountry().name());
+      }
     }
 
-    if (listQueryParametersDto.getToCity() != null) {
-      sql = sql + " AND to_city = :toCity ";
-      map.put("toCity", listQueryParametersDto.getToCity().name());
+    if (listQueryParametersDto.getPurchaseCity() != null) {
+      if (listQueryParametersDto.getPurchaseCity().equals("ANY")) {
+        sql = sql + " AND from_city IS NOT NULL ";
+      } else {
+        sql = sql + " AND from_city = :purchaseCity ";
+        map.put("purchaseCity", listQueryParametersDto.getPurchaseCity().name());
+      }
+    }
+
+    if (listQueryParametersDto.getDestinationCountry() != null) {
+      sql = sql + " AND to_country = :destinationCountry ";
+      map.put("destinationCountry", listQueryParametersDto.getDestinationCountry().name());
+    }
+
+
+    if (listQueryParametersDto.getDestinationCity() != null) {
+      sql = sql + " AND to_city = :destinationCity ";
+      map.put("destinationCity", listQueryParametersDto.getDestinationCity().name());
     }
 
     if (listQueryParametersDto.getUserId() != null) {
