@@ -60,7 +60,7 @@ public class TripController {
 //    return ResponseEntity.status(HttpStatus.OK).body(trips);
 //  }
 
-  @PostMapping("/trips")
+  @PostMapping("/trips") // TODO 抵達時間不該在今天以前，不合理
   public ResponseEntity<Trip> createTrip(@RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
 
     String tripId = tripService.createTrip(currentUserInfoProvider.getCurrentLoginUserId(), createTripRequestDto);
