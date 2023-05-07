@@ -34,7 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
   public String ecpayCheckout(String bidId) {
 
     Bid bid = bidService.getBidById(bidId);
-    String orderTotalAmountWithChosenBid = orderService.calculateOrderEachAmountDuringChooseBid(bidId).toString();
+    String orderTotalAmountWithChosenBid = orderService.calculateOrderEachAmountDuringChooseBid(bidId).getTotalAmount().toString();
     Order order = orderService.getOrderById(bid.getOrderId());
     
     if (order == null) {
