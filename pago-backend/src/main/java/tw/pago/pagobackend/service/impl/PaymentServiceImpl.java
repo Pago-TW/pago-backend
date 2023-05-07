@@ -34,6 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
   public String ecpayCheckout(String bidId) {
 
     Bid bid = bidService.getBidById(bidId);
+    String orderTotalAmountWithChosenBid = orderService.calculateOrderEachAmountDuringChooseBid(bidId).toString();
     Order order = orderService.getOrderById(bid.getOrderId());
     
     if (order == null) {
@@ -53,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
     AioCheckOutALL obj = new AioCheckOutALL();
     obj.setMerchantTradeNo(merchantTradeNo);
     obj.setMerchantTradeDate(formattedDateTime);
-    obj.setTotalAmount(orderTotalAmount);
+    obj.setTotalAmount(orderTotalAmountWithChosenBid);
     obj.setTradeDesc("test Description");
     obj.setItemName("Pago Service, " + "No. " + serialNumber);
     obj.setReturnURL("https://api.pago-app.me/api/v1/ecpay-checkout/callback");
