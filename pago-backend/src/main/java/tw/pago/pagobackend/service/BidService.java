@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service;
 
 import java.util.List;
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.dto.BidOperationResultDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
@@ -23,6 +24,8 @@ public interface BidService {
 
   void deleteBidsByOrderId(String orderId);
 
+  void deleteBidByOrderIdAndBidStatus(String orderId, BidStatusEnum bidStatus);
+
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto, Bid existingBid, Order order);
@@ -34,6 +37,8 @@ public interface BidService {
   Integer countBid(ListQueryParametersDto listQueryParametersDto);
 
   BidResponseDto getBidResponseById(String bidId);
+
+  BidResponseDto getBidResponseByBid(Bid bid);
 
   BidResponseDto getBidResponseByOrderIdAndBidId(String orderId, String bidId);
 

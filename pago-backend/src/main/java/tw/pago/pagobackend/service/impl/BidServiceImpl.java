@@ -179,6 +179,11 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
+  public void deleteBidByOrderIdAndBidStatus(String orderId, BidStatusEnum bidStatus) {
+    bidDao.deleteBidsByOrderIdAndBidStatus(orderId, bidStatus);
+  }
+
+  @Override
   public void updateBid(UpdateBidRequestDto updateBidRequestDto) {
 
     Bid oldBid = getBidById(updateBidRequestDto.getBidId());
@@ -319,6 +324,29 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
+  public BidResponseDto getBidResponseByBid(Bid bid) {
+    // Get related data
+    Trip trip = tripService.getTripById(bid.getTripId());
+    User creator = userService.getUserById(trip.getShopperId());
+
+    // Get averageRating & totalReview
+    ReviewRatingResultDto reviewRatingResultDto = reviewService.calculateAverageRating(creator.getUserId(), ReviewTypeEnum.FOR_SHOPPER);
+
+
+    // Set value to bidCreatorReviewDto
+    BidCreatorReviewDto bidCreatorReviewDto = new BidCreatorReviewDto();
+    bidCreatorReviewDto.setAverageRating(reviewRatingResultDto.getAverageRating());
+    bidCreatorReviewDto.setTotalReview(reviewRatingResultDto.getTotalReviews());
+    bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+
+
+    // Convert to ResponseDTO
+    BidResponseDto bidResponseDto = bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto);
+
+    return bidResponseDto;
+  }
+
+  @Override
   public BidResponseDto getBidResponseByOrderIdAndBidId(String orderId, String bidId) {
     // Get related data
     Bid bid = bidDao.getBidByOrderIdAndBidId(orderId, bidId);
@@ -369,6 +397,8 @@ public class BidServiceImpl implements BidService {
     // Get the order creator's email
     String orderCreatorId = order.getConsumerId();
     User orderCreator = userService.getUserById(orderCreatorId);
+    String orderId = order.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
     String orderCreatorEmail = orderCreator.getEmail();
 
     // Get the order item name
@@ -383,8 +413,8 @@ public class BidServiceImpl implements BidService {
 
     String currency = bid.getCurrency().toString();
     String bidAmount = bid.getBidAmount().toString();
-    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 更新出價：%s %s<br><br>訂單編號：%s",
-        bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
+    String emailBody = String.format(" %s 已於 %s 在您的訂單 <a href=\"%s\">%s</a> 更新出價：<b>%s %s</b><br><br>訂單編號：%s",
+        bidderName, date, orderUrl, orderItemName, currency, bidAmount, orderSerialNumber);
 
     // Prepare the email content
     EmailRequestDto emailRequestDto = new EmailRequestDto();
@@ -409,6 +439,8 @@ public class BidServiceImpl implements BidService {
     // Get the order creator's email
     String orderCreatorId = order.getConsumerId();
     User orderCreator = userService.getUserById(orderCreatorId);
+    String orderId = order.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
     String orderCreatorEmail = orderCreator.getEmail();
 
     // Get the order item name
@@ -423,8 +455,8 @@ public class BidServiceImpl implements BidService {
 
     String currency = bid.getCurrency().toString();
     String bidAmount = bid.getBidAmount().toString();
-    String emailBody = String.format(" %s 已於 %s 在您的訂單 %s 出價：%s %s<br><br>訂單編號：%s",
-        bidderName, date, orderItemName, currency, bidAmount, orderSerialNumber);
+    String emailBody = String.format(" %s 已於 %s 在您的訂單 <a href=\"%s\">%s</a> 出價：<b>%s %s</b><br><br>訂單編號：%s",
+        bidderName, date, orderUrl, orderItemName, currency, bidAmount, orderSerialNumber);
 
     // Prepare the email content
     EmailRequestDto emailRequestDto = new EmailRequestDto();
@@ -443,9 +475,10 @@ public class BidServiceImpl implements BidService {
     String contentTitle = "訂單出價通知";
     String bidId = bid.getBidId();
     String orderId = order.getOrderId();
+    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
 
     // Get bidder's name and email
-    BidResponseDto bidResponseDto = getBidResponseById(bidId);
+    BidResponseDto bidResponseDto = getBidResponseByBid(bid);
     User bidder = userService.getUserById(bidResponseDto.getCreator().getUserId());
     String bidderName = bidder.getFirstName();
     String bidderEmail = bidder.getEmail();
@@ -461,8 +494,8 @@ public class BidServiceImpl implements BidService {
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
-    String emailBody = String.format("您於 %s 訂單的出價已在 %s 被 %s 選中！請前往 Pago 查看詳情<br><br>訂單編號：%s",
-        orderItemName, date, orderCreatorName, orderSerialNumber);
+    String emailBody = String.format("您於 <a href=\"%s\">%s 訂單的出價已在 %s 被 %s 選中！請前往 Pago 查看詳情<br><br>訂單編號：%s",
+        orderUrl, orderItemName, date, orderCreatorName, orderSerialNumber);
 
     // Prepare the email content
     EmailRequestDto emailRequestDto = new EmailRequestDto();
