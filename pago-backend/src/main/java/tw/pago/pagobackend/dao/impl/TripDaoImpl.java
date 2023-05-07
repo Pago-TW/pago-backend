@@ -342,7 +342,7 @@ public class TripDaoImpl implements TripDao {
 
   private String addMatchingTripForOrderSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
     if (listQueryParametersDto.getPurchaseCountry() != null) {
-      if (listQueryParametersDto.getPurchaseCountry().equals(CountryCode.ANY)) { // TODO 現在  CountryCode ENUM 還沒處理好，這裡要想辦法檢查是不是 ANY
+      if (listQueryParametersDto.getPurchaseCountry().equals(CountryCode.ANY)) {
         sql = sql + " AND from_country IS NOT NULL ";
       } else {
         sql = sql + " AND from_country = :purchaseCountry ";
