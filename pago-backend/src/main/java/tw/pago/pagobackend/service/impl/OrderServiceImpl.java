@@ -748,14 +748,42 @@ public class OrderServiceImpl implements OrderService {
     platformFee = platformFee.setScale(decimalScale, RoundingMode.HALF_EVEN);
     orderTotalAmount = orderTotalAmount.setScale(decimalScale, RoundingMode.HALF_EVEN);
 
+    // 應用四捨五入並進行幣值轉換
+    CurrencyEnum orderCurrency = order.getCurrency();
+    CurrencyEnum bidCurrency = bidResponseDto.getCurrency(); // 假設您已經在 BidResponseDto 中包含了 currency 欄位
+    int decimalScaleForCurrency = CurrencyUtil.getDecimalScale(orderCurrency);
+
+    // 處理貨幣換算
+    BigDecimal orderConversionRate = BigDecimal.ONE;
+    if (orderCurrency == CurrencyEnum.JPY) {
+      orderConversionRate = BigDecimal.valueOf(4.5);
+    } else if (orderCurrency == CurrencyEnum.USD) {
+      orderConversionRate = BigDecimal.valueOf(30);
+    }
+
+    BigDecimal bidConversionRate = BigDecimal.ONE;
+    if (bidCurrency == CurrencyEnum.JPY) {
+      bidConversionRate = BigDecimal.valueOf(4.5);
+    } else if (bidCurrency == CurrencyEnum.USD) {
+      bidConversionRate = BigDecimal.valueOf(30);
+    }
+
+    itemTotalAmount = itemTotalAmount.divide(orderConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
+    tariffFee = tariffFee.divide(orderConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
+    platformFee = platformFee.divide(orderConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
+    travelerFee = travelerFee.divide(bidConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
+
+    BigDecimal totalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
+
     // Prepare response
     CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = new CalculateOrderAmountResponseDto();
     calculateOrderAmountResponseDto.setTariffFee(tariffFee);
     calculateOrderAmountResponseDto.setPlatformFee(platformFee);
-    calculateOrderAmountResponseDto.setTotalAmount(orderTotalAmount);
+    calculateOrderAmountResponseDto.setTotalAmount(totalAmount);
     calculateOrderAmountResponseDto.setTravelerFee(travelerFee);
-    calculateOrderAmountResponseDto.setCurrency(order.getCurrency());
+    calculateOrderAmountResponseDto.setCurrency(CurrencyEnum.TWD);
     calculateOrderAmountResponseDto.setBidder(bidResponseDto.getCreator());
+
 
     return calculateOrderAmountResponseDto;
   }
