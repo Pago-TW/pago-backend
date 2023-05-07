@@ -157,6 +157,18 @@ public class BidDaoImpl implements BidDao {
   }
 
   @Override
+  public void deleteBidByOrderIdAndBidStatus(String orderId, BidStatusEnum bidStatus) {
+    String sql = "DELETE FROM bid "
+        + "WHERE order_id = :orderId AND bid_status = :bidStatus";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderId", orderId);
+    map.put("bidStatus", bidStatus.name());
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
   public void updateBid(UpdateBidRequestDto updateBidRequestDto) {
     String sql = "UPDATE bid SET trip_id = :tripId, bid_amount = :bidAmount, "
     + "currency = :currency, update_date = :updateDate, bid_status = :bidStatus, latest_delivery_date = :latestDeliveryDate "

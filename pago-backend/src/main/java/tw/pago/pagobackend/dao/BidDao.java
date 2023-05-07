@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.dao;
 
 import java.util.List;
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateBidRequestDto;
@@ -21,6 +22,8 @@ public interface BidDao {
   void deleteBidById(String bidId);
 
   void deleteBidsByOrderId(String orderId);
+
+  void deleteBidByOrderIdAndBidStatus(String orderId, BidStatusEnum bidStatus);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
 

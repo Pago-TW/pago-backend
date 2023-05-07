@@ -357,8 +357,6 @@ public class OrderServiceImpl implements OrderService {
 
     updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
 
-    // delete all bids made for the order
-    bidService.deleteBidsByOrderId(updateOrderAndOrderItemRequestDto.getOrderId());
     
     // if status will be modified
     if (!oldOrderStatus.equals(updateOrderAndOrderItemRequestDto.getOrderStatus())) {
