@@ -497,7 +497,7 @@ public class BidServiceImpl implements BidService {
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
-    String emailBody = String.format("您於 <a href=\"%s\">%s 訂單的出價已在 %s 被 %s 選中！請前往 Pago 查看詳情<br><br>訂單編號：%s",
+    String emailBody = String.format("您於 <a href=\"%s\">%s</a> 訂單的出價已在 %s 被 %s 選中！請前往 Pago 查看詳情<br><br>訂單編號：%s",
         orderUrl, orderItemName, date, orderCreatorName, orderSerialNumber);
 
     // Prepare the email content
