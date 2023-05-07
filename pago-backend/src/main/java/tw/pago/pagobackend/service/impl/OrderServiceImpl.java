@@ -1235,8 +1235,8 @@ public class OrderServiceImpl implements OrderService {
     Date now = new Date();
     String date = new SimpleDateFormat("yyyy-MM-dd").format(now);
 
-    String emailBody = String.format("您的訂單 「<a href=\"%s\" target=\"_blank\">%s</a>」 ，已於 %s 更新為「<b>%s</b>」<br><br>", orderItemName, date,
-        updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
+    String emailBody = String.format("您的訂單 「<a href=\"%s\" target=\"_blank\">%s</a>」 ，已於 %s 更新為「<b>%s</b>」<br><br>",
+        orderUrl ,orderItemName, date, updateOrderAndOrderItemRequestDto.getOrderStatus().getDescription());
 
     // Prepare the email content
     EmailRequestDto emailRequest = new EmailRequestDto();
