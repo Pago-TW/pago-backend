@@ -180,7 +180,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public void deleteBidByOrderIdAndBidStatus(String orderId, BidStatusEnum bidStatus) {
-    bidDao.deleteBidsByOrderIdAndBidStatus(orderId, bidStatus);
+    bidDao.deleteBidByOrderIdAndBidStatus(orderId, bidStatus);
   }
 
   @Override
@@ -263,6 +263,9 @@ public class BidServiceImpl implements BidService {
 
     // Update orderStatus & travelerFee
     orderService.updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
+
+    // Delete all NOT_CHOSEN bids made for the order
+    deleteBidByOrderIdAndBidStatus(orderId, BidStatusEnum.NOT_CHOSEN);
 
 
 

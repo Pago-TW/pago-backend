@@ -23,7 +23,7 @@ public interface BidDao {
 
   void deleteBidsByOrderId(String orderId);
 
-  void deleteBidBudOrderIdAndBidStatud(String orderId, BidStatusEnum bidStatus);
+  void deleteBidByOrderIdAndBidStatus(String orderId, BidStatusEnum bidStatus);
 
   void updateBid(UpdateBidRequestDto updateBidRequestDto);
 

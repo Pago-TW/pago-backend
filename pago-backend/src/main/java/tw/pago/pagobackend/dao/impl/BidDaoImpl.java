@@ -157,7 +157,7 @@ public class BidDaoImpl implements BidDao {
   }
 
   @Override
-  public void deleteBidBudOrderIdAndBidStatud(String orderId, BidStatusEnum bidStatus) {
+  public void deleteBidByOrderIdAndBidStatus(String orderId, BidStatusEnum bidStatus) {
     String sql = "DELETE FROM bid "
         + "WHERE order_id = :orderId AND bid_status = :bidStatus";
 
