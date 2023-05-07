@@ -320,6 +320,7 @@ public class OrderServiceImpl implements OrderService {
     return chosenBidderId;
   }
 
+  @Transactional
   @Override
   public void updateOrderAndOrderItemByOrderId(Order oldOrder,
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto, boolean sendStatusUpdateEmail) {
@@ -356,6 +357,9 @@ public class OrderServiceImpl implements OrderService {
 
     updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
 
+    // delete all bids made for the order
+    bidService.deleteBidsByOrderId(updateOrderAndOrderItemRequestDto.getOrderId());
+    
     // if status will be modified
     if (!oldOrderStatus.equals(updateOrderAndOrderItemRequestDto.getOrderStatus())) {
       OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
