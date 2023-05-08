@@ -429,7 +429,18 @@ public class OrderServiceImpl implements OrderService {
       if (order.getOrderStatus().equals(TO_BE_CANCELLED) || order.getOrderStatus().equals(TO_BE_POSTPONED)) {
         order.setIsApplicant(isCurrentLoginUserApplicant(order));
       }
+
+      PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(order.getOrderId());
+      CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(order.getOrderId());
+
+      order.setHasPostponeRecord(postponeRecord != null);
+      order.setIsPostponed(Boolean.TRUE.equals(postponeRecord != null ? postponeRecord.getIsPostponed() : null));
+
+      order.setHasCancellationRecord(cancellationRecord != null);
+      order.setIsCancelled(Boolean.TRUE.equals(cancellationRecord != null ? cancellationRecord.getIsCancelled() : null));
+
     }
+
 
 
     return orderList;
