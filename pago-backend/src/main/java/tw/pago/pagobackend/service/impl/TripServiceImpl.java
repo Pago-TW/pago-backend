@@ -32,6 +32,7 @@ import tw.pago.pagobackend.dto.TripDashboardDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
+import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
@@ -115,6 +116,9 @@ public class TripServiceImpl implements TripService {
 
   @Override
   public String createTrip(String userId, CreateTripRequestDto createTripRequestDto) {
+    if(isDuplicateTrip(userId, createTripRequestDto)) {
+      throw new ConflictException("A trip with the same details already exist!");
+    }
     String tripUuid = uuidGenerator.getUuid();
     createTripRequestDto.setTripId(tripUuid);
     return tripDao.createTrip(userId, createTripRequestDto);
@@ -164,6 +168,11 @@ public class TripServiceImpl implements TripService {
 
     List<Trip> tripList = tripDao.getTripList(listQueryParametersDto);
     return tripList;
+  }
+
+  @Override
+  public List<Trip> getTripsByShopperId(String shopperId) {
+    return tripDao.getTripsByShopperId(shopperId);
   }
 
   @Override
@@ -362,5 +371,24 @@ public class TripServiceImpl implements TripService {
 
     return totalProfit;
   }
+
+  public boolean isDuplicateTrip(String shopperId, CreateTripRequestDto createTripRequestDto) {
+    List<Trip> existingTrips = tripDao.getTripsByShopperId(shopperId);
+    for (Trip trip : existingTrips) {
+        if (trip.getFromCountry().equals(createTripRequestDto.getFromCountry()) &&
+            trip.getToCountry().equals(createTripRequestDto.getToCountry()) &&
+            trip.getFromCity().equals(createTripRequestDto.getFromCity()) &&
+            trip.getToCity().equals(createTripRequestDto.getToCity()) &&
+            dateToLocalDate(trip.getArrivalDate()).equals(dateToLocalDate(createTripRequestDto.getArrivalDate()))) {
+            return true;
+        }
+    }
+    return false;
+  }
+
+  private LocalDate dateToLocalDate(Date date) {
+    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+  }
+
 
 }

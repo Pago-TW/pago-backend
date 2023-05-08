@@ -167,6 +167,21 @@ public class TripDaoImpl implements TripDao {
   }
 
   @Override
+  public List<Trip> getTripsByShopperId(String shopperId) {
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    + "arrival_date, profit, create_date, update_date "
+    + "FROM trip "
+    + "WHERE shopper_id = :shopperId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("shopperId", shopperId);
+
+    List<Trip> tripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return tripList;
+  }
+
+  @Override
   public List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus,
       ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
