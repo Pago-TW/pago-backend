@@ -93,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
   private static final Double TARIFF_FEE_PERCENT = 2.5;
   private static final BigDecimal PERCENT_TO_DECIMAL = BigDecimal.valueOf(0.01);
 
+
   private OrderDao orderDao;
   private UuidGenerator uuidGenerator;
   private FileService fileService;
@@ -209,6 +210,16 @@ public class OrderServiceImpl implements OrderService {
     if (orderStatus.equals(TO_BE_CANCELLED) || orderStatus.equals(TO_BE_POSTPONED)) {
       order.setIsApplicant(isCurrentLoginUserApplicant(order));
     }
+
+    PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(orderId);
+    CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(orderId);
+
+    order.setHasPostponeRecord(postponeRecord != null);
+    order.setIsPostponed(Boolean.TRUE.equals(postponeRecord != null ? postponeRecord.getIsPostponed() : null));
+
+    order.setHasCancellationRecord(cancellationRecord != null);
+    order.setIsCancelled(Boolean.TRUE.equals(cancellationRecord != null ? cancellationRecord.getIsCancelled() : null));
+
 
 
     return order;
@@ -886,7 +897,7 @@ public class OrderServiceImpl implements OrderService {
 
     if (!(order.getOrderStatus().equals(TO_BE_PURCHASED) || order.getOrderStatus().equals(
         TO_BE_DELIVERED))) {
-      throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED or TO_BE_DELIVERED, so you have no permission to request a cancellation.");
+      throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED or TO_BE_DELIVERED, so you have no permission to request a postpone.");
     }
 
 

@@ -52,7 +52,10 @@ public class Order {
   private BigDecimal platformFee;
   private BigDecimal totalAmount;
   private OrderChosenShopperDto shopper;
-
+  private Boolean hasPostponeRecord;
+  private Boolean hasCancellationRecord;
+  private Boolean isPostponed;
+  private Boolean isCancelled;
   @JsonProperty("isApplicant")
   private Boolean isApplicant;
   @JsonProperty("isBidder")
