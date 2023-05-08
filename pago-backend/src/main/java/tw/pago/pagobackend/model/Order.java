@@ -12,6 +12,7 @@ import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
+import tw.pago.pagobackend.dto.ConsumerDto;
 import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 
 @Getter
@@ -25,8 +26,9 @@ public class Order {
 
   @JsonIgnore
   private String orderItemId;
-
+  @JsonIgnore
   private String consumerId;
+  private ConsumerDto consumer;
   private Date createDate;
   private Date updateDate;
   private Boolean isPackagingRequired;

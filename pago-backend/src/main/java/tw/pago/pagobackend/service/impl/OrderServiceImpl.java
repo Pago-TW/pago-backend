@@ -47,6 +47,7 @@ import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.ConsumerDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
@@ -180,6 +181,8 @@ public class OrderServiceImpl implements OrderService {
   public Order getOrderById(String orderId) {
     Order order = orderDao.getOrderById(orderId);
     OrderStatusEnum orderStatus = order.getOrderStatus();
+    String consumerId = order.getConsumerId();
+    User consumer = userDao.getUserById(consumerId);
 
     // Calculate Fee
     Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
@@ -190,6 +193,14 @@ public class OrderServiceImpl implements OrderService {
     // get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
+
+    // Prepare consumerDto
+    ConsumerDto consumerDto = new ConsumerDto();
+    consumerDto.setUserId(consumerId);
+    consumerDto.setFullName(consumer.getFullName());
+    consumerDto.setAvatarUrl(consumer.getAvatarUrl());
+    order.setConsumer(consumerDto);
+
 
     // Check if the current logged-in user has placed a bid for the order
     boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(orderId);
@@ -405,16 +416,27 @@ public class OrderServiceImpl implements OrderService {
 
     // calculate each order amount
     for (Order order : orderList) {
+      String orderId = order.getOrderId();
+      String consumerId = order.getConsumerId();
+      User consumer = userDao.getUserById(consumerId);
+
+      // Prepare consumerDto
+      ConsumerDto consumerDto = new ConsumerDto();
+      consumerDto.setUserId(consumerId);
+      consumerDto.setFullName(consumer.getFullName());
+      consumerDto.setAvatarUrl(consumer.getAvatarUrl());
+      order.setConsumer(consumerDto);
+
       Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
       order.setTariffFee(orderEachAmountMap.get("tariffFee"));
       order.setPlatformFee(orderEachAmountMap.get("platformFee"));
       order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
       // get file url
-      List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
+      List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
       order.getOrderItem().setFileUrls(fileUrls);
 
       // Check if the current logged-in user has placed a bid for the order
-      boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(order.getOrderId());
+      boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(orderId);
       order.setBidder(isCurrentLoginUserPlaceBid);
 
       if (!order.getOrderStatus().equals(REQUESTED)) {
@@ -430,8 +452,8 @@ public class OrderServiceImpl implements OrderService {
         order.setIsApplicant(isCurrentLoginUserApplicant(order));
       }
 
-      PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(order.getOrderId());
-      CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(order.getOrderId());
+      PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(orderId);
+      CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(orderId);
 
       order.setHasPostponeRecord(postponeRecord != null);
       order.setIsPostponed(Boolean.TRUE.equals(postponeRecord != null ? postponeRecord.getIsPostponed() : null));
