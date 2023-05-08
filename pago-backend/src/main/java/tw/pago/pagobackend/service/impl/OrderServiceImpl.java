@@ -32,6 +32,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
@@ -325,65 +327,55 @@ public class OrderServiceImpl implements OrderService {
   public void updateOrderAndOrderItemByOrderId(Order oldOrder,
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto, boolean sendStatusUpdateEmail) {
 
-    // TODO OrderStatus 如果是 REQUESTED ，也代表還沒媒合成功 -> 所以可以更新 Order 資訊，並且更新資訊的話，就會刪除所有該 order 的 NOT_CHOSEN Bid，這是為了保護出價者，避免已經出價了，結果被選中時才發現怎麼跟當初他出價時看到的 order 不一樣
-    // TODO OrderStatus 如果非 REQUESTED，則必定代表這個委託單已經媒合了，代表有選到代購者，因此該 Order 不能更新資訊，只能更新 orderStatus，至於刪除 NOT_CHOSEN bid，則不用在此邏輯中重複實作了，因為在 BidServiceImpl 中的 268行，我在媒合成功後，下一個動作就是刪除其它 NOT_CHOSEN bid 了，所以照理來說只要 Order 非 REQUESTED，那則代表此 order 的 NOT_CHOSEN bid 已經被清空了，因為媒合的下一個動作就是清掉 NOT_CHOSEN bid
-
-    OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
-
-    // Get oldOrder
+    // Check if order is null
     if (oldOrder == null) {
       System.out.println("No such order");
       return;
     }
-
-
-
-
-
-    // Store the old order status
-    if (updateOrderAndOrderItemRequestDto.getOrderStatus() != null){
-      OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
-    }
-
-
-
-    OrderItem oldOrderItem = oldOrder.getOrderItem();
-
-    String[] presentPropertyNamesForOrderDto = EntityPropertyUtil
-        .getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
-    BeanUtils.copyProperties(oldOrder, updateOrderAndOrderItemRequestDto, presentPropertyNamesForOrderDto);
-
-    UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
-    if (updateOrderItemDto == null) {
-      updateOrderItemDto = new UpdateOrderItemDto();
-      BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto);
-    } else {
-    String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil
-        .getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
-    BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto, presentPropertyNamesForOrdetItemDto);
-    }
-
-    updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
-
     
-    // if status will be modified
-    if (!oldOrderStatus.equals(updateOrderAndOrderItemRequestDto.getOrderStatus())) {
-      OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
-      // Check if the Status Transition is legal
-      if (isValidOrderStatusTransition(oldOrderStatus, newOrderStatus)) {
-        orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
-      } else {
-        throw new IllegalStatusTransitionException("Invalid status transition from " + oldOrderStatus.toString() + " to " + newOrderStatus.toString());
-      }
-      // if status won't be modified, directly update Order
-    } else {
-      orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
-    }
+    String orderId = oldOrder.getOrderId();
+    OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
+    OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
 
     // Check if the order status has been modified
-    boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
+    boolean orderStatusChanged = newOrderStatus != null && !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
 
-    // If the order status has been changed AND status update email should be sent, send the email notification
+    // Validate the requested change of order status
+    if (orderStatusChanged) {
+      if (!isValidOrderStatusTransition(oldOrderStatus, newOrderStatus)) {
+        throw new IllegalStatusTransitionException("Invalid status transition from " + oldOrderStatus.toString() + " to " + newOrderStatus.toString());
+      }
+    }
+
+    // If orderStatus is REQUESTED, updates order and order item
+    if(oldOrderStatus == OrderStatusEnum.REQUESTED) {
+      String[] presentPropertyNamesForOrderDto = EntityPropertyUtil
+          .getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
+      BeanUtils.copyProperties(oldOrder, updateOrderAndOrderItemRequestDto, presentPropertyNamesForOrderDto);
+
+      OrderItem oldOrderItem = oldOrder.getOrderItem();
+      UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
+      if (updateOrderItemDto == null) {
+        updateOrderItemDto = new UpdateOrderItemDto();
+        BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto);
+      } else {
+        String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil
+          .getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
+        BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto, presentPropertyNamesForOrdetItemDto);
+      }
+      
+      updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
+
+      // Delete all NOT_CHOSEN bids made for this order
+      bidService.deleteBidByOrderIdAndBidStatus(orderId, BidStatusEnum.NOT_CHOSEN);
+
+      orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
+    } else {
+      // Only update order status if the order status is not REQUESTED
+      orderDao.updateOrderStatusByOrderId(orderId, newOrderStatus);
+    }
+    
+    // Send email notification if needed
     if (orderStatusChanged && sendStatusUpdateEmail) {
       sendOrderUpdateEmail(oldOrder, updateOrderAndOrderItemRequestDto);
     }
