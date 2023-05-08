@@ -22,6 +22,8 @@ public interface TripDao {
 
     List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto);
 
+    List<Trip> getTripsByShopperId(String shopperId);
+
     List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
 
     List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto);

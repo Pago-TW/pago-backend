@@ -16,7 +16,7 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 @JsonPropertyOrder({
     "orderId",
     "serialNumber",
-    "consumerId",
+    "consumer",
     "destinationCountryName",
     "destinationCityName",
     "destinationCountryCode",
@@ -44,7 +44,9 @@ public class OrderResponseDto {
 
   @JsonIgnore
   private String orderItemId;
+  @JsonIgnore
   private String consumerId;
+  private ConsumerDto consumer;
   private String serialNumber;
   private Date createDate;
   private Date updateDate;
@@ -76,6 +78,10 @@ public class OrderResponseDto {
   private BigDecimal platformFee;
   private BigDecimal totalAmount;
   private OrderChosenShopperDto shopper;
+  private Boolean hasPostponeRecord;
+  private Boolean hasCancellationRecord;
+  private Boolean isPostponed;
+  private Boolean isCancelled;
   @JsonProperty("isApplicant")
   private Boolean isApplicant;
   @JsonProperty("isBidder")

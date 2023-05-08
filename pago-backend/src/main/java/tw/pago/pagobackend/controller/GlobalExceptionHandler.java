@@ -9,6 +9,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
@@ -21,7 +22,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
+    // TODO check null pointer exception made by ecpay?
+    // TODO add forbidden: 403
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, Object> errorDetails = new HashMap<>();
@@ -65,18 +67,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGenericException(Exception ex) {
-        Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("timestamp", LocalDateTime.now());
-        errorDetails.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        errorDetails.put("error", "Internal Server Error");
-        errorDetails.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
+    
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         Map<String, Object> errorDetails = new HashMap<>();
@@ -141,5 +132,16 @@ public class GlobalExceptionHandler {
         errorDetails.put("message", ex.getMessage());
 
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<?> handleConflictException(ConflictException ex) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("timestamp", LocalDateTime.now());
+        errorDetails.put("status", HttpStatus.CONFLICT.value());
+        errorDetails.put("error", "Conflict");
+        errorDetails.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 }

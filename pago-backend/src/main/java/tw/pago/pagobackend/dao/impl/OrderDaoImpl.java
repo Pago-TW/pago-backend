@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -240,6 +241,20 @@ public class OrderDaoImpl implements OrderDao {
     namedParameterJdbcTemplate.update(sql, map);
   }
 
+  @Override
+  public void updateOrderStatusByOrderId(String orderId, OrderStatusEnum updatedOrderStatus) {
+    String sql = "UPDATE order_main "
+        + "SET order_status = :orderStatus, update_date = :updateDate "
+        + "WHERE order_id = :orderId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderStatus", updatedOrderStatus.name());
+    Date now = new Date();
+    map.put("updateDate", now);
+    map.put("orderId", orderId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
 
   @Override
   public void deleteOrderById(String orderId) {

@@ -32,6 +32,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
@@ -45,6 +47,7 @@ import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.ConsumerDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
@@ -90,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
   private static final Double PLATFORM_FEE_PERCENT = 4.5;
   private static final Double TARIFF_FEE_PERCENT = 2.5;
   private static final BigDecimal PERCENT_TO_DECIMAL = BigDecimal.valueOf(0.01);
+
 
   private OrderDao orderDao;
   private UuidGenerator uuidGenerator;
@@ -177,6 +181,8 @@ public class OrderServiceImpl implements OrderService {
   public Order getOrderById(String orderId) {
     Order order = orderDao.getOrderById(orderId);
     OrderStatusEnum orderStatus = order.getOrderStatus();
+    String consumerId = order.getConsumerId();
+    User consumer = userDao.getUserById(consumerId);
 
     // Calculate Fee
     Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
@@ -187,6 +193,14 @@ public class OrderServiceImpl implements OrderService {
     // get file url
     List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
     order.getOrderItem().setFileUrls(fileUrls);
+
+    // Prepare consumerDto
+    ConsumerDto consumerDto = new ConsumerDto();
+    consumerDto.setUserId(consumerId);
+    consumerDto.setFullName(consumer.getFullName());
+    consumerDto.setAvatarUrl(consumer.getAvatarUrl());
+    order.setConsumer(consumerDto);
+
 
     // Check if the current logged-in user has placed a bid for the order
     boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(orderId);
@@ -207,6 +221,16 @@ public class OrderServiceImpl implements OrderService {
     if (orderStatus.equals(TO_BE_CANCELLED) || orderStatus.equals(TO_BE_POSTPONED)) {
       order.setIsApplicant(isCurrentLoginUserApplicant(order));
     }
+
+    PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(orderId);
+    CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(orderId);
+
+    order.setHasPostponeRecord(postponeRecord != null);
+    order.setIsPostponed(Boolean.TRUE.equals(postponeRecord != null ? postponeRecord.getIsPostponed() : null));
+
+    order.setHasCancellationRecord(cancellationRecord != null);
+    order.setIsCancelled(Boolean.TRUE.equals(cancellationRecord != null ? cancellationRecord.getIsCancelled() : null));
+
 
 
     return order;
@@ -325,60 +349,64 @@ public class OrderServiceImpl implements OrderService {
   public void updateOrderAndOrderItemByOrderId(Order oldOrder,
       UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto, boolean sendStatusUpdateEmail) {
 
-    // Get oldOrder
+    // Check if order is null
     if (oldOrder == null) {
       System.out.println("No such order");
       return;
     }
-
-
-    // Store the old order status
-    OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
-    if (updateOrderAndOrderItemRequestDto.getOrderStatus() != null){
-      OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
-    }
-
-
-    OrderItem oldOrderItem = oldOrder.getOrderItem();
-
-    String[] presentPropertyNamesForOrderDto = EntityPropertyUtil
-        .getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
-    BeanUtils.copyProperties(oldOrder, updateOrderAndOrderItemRequestDto, presentPropertyNamesForOrderDto);
-
-    UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
-    if (updateOrderItemDto == null) {
-      updateOrderItemDto = new UpdateOrderItemDto();
-      BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto);
-    } else {
-    String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil
-        .getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
-    BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto, presentPropertyNamesForOrdetItemDto);
-    }
-
-    updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
-
     
-    // if status will be modified
-    if (!oldOrderStatus.equals(updateOrderAndOrderItemRequestDto.getOrderStatus())) {
-      OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
-      // Check if the Status Transition is legal
-      if (isValidOrderStatusTransition(oldOrderStatus, newOrderStatus)) {
-        orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
-      } else {
-        throw new IllegalStatusTransitionException("Invalid status transition from " + oldOrderStatus.toString() + " to " + newOrderStatus.toString());
-      }
-      // if status won't be modified, directly update Order
-    } else {
-      orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
-    }
+    String orderId = oldOrder.getOrderId();
+    OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
+    OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
 
     // Check if the order status has been modified
-    boolean orderStatusChanged = !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
+    boolean orderStatusChanged = newOrderStatus != null && !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
 
-    // If the order status has been changed AND status update email should be sent, send the email notification
+    // Validate the requested change of order status
+    if (orderStatusChanged) {
+      if (!isValidOrderStatusTransition(oldOrderStatus, newOrderStatus)) {
+        throw new IllegalStatusTransitionException("Invalid status transition from " + oldOrderStatus.toString() + " to " + newOrderStatus.toString());
+      }
+    }
+
+    // If orderStatus is REQUESTED, updates order and order item
+    if(oldOrderStatus == OrderStatusEnum.REQUESTED) {
+      String[] presentPropertyNamesForOrderDto = EntityPropertyUtil
+          .getPresentPropertyNames(updateOrderAndOrderItemRequestDto);
+      BeanUtils.copyProperties(oldOrder, updateOrderAndOrderItemRequestDto, presentPropertyNamesForOrderDto);
+
+      OrderItem oldOrderItem = oldOrder.getOrderItem();
+      UpdateOrderItemDto updateOrderItemDto = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto();
+      if (updateOrderItemDto == null) {
+        updateOrderItemDto = new UpdateOrderItemDto();
+        BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto);
+      } else {
+        String[] presentPropertyNamesForOrdetItemDto = EntityPropertyUtil
+          .getPresentPropertyNames(updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto());
+        BeanUtils.copyProperties(oldOrderItem, updateOrderItemDto, presentPropertyNamesForOrdetItemDto);
+      }
+      
+      updateOrderAndOrderItemRequestDto.setUpdateOrderItemDto(updateOrderItemDto);
+
+      // Delete all NOT_CHOSEN bids made for this order
+      bidService.deleteBidByOrderIdAndBidStatus(orderId, BidStatusEnum.NOT_CHOSEN);
+
+      orderDao.updateOrderAndOrderItemByOrderId(updateOrderAndOrderItemRequestDto);
+    } else {
+      // Only update order status if the order status is not REQUESTED
+      orderDao.updateOrderStatusByOrderId(orderId, newOrderStatus);
+    }
+    
+    // Send email notification if needed
     if (orderStatusChanged && sendStatusUpdateEmail) {
       sendOrderUpdateEmail(oldOrder, updateOrderAndOrderItemRequestDto);
     }
+  }
+
+  @Override
+  public void updateOrderStatusByOrderId(String orderId, OrderStatusEnum updatedOrderStatus) {
+
+    orderDao.updateOrderStatusByOrderId(orderId, updatedOrderStatus);
   }
 
   @Override
@@ -388,16 +416,27 @@ public class OrderServiceImpl implements OrderService {
 
     // calculate each order amount
     for (Order order : orderList) {
+      String orderId = order.getOrderId();
+      String consumerId = order.getConsumerId();
+      User consumer = userDao.getUserById(consumerId);
+
+      // Prepare consumerDto
+      ConsumerDto consumerDto = new ConsumerDto();
+      consumerDto.setUserId(consumerId);
+      consumerDto.setFullName(consumer.getFullName());
+      consumerDto.setAvatarUrl(consumer.getAvatarUrl());
+      order.setConsumer(consumerDto);
+
       Map<String, BigDecimal> orderEachAmountMap = calculateOrderEachAmount(order);
       order.setTariffFee(orderEachAmountMap.get("tariffFee"));
       order.setPlatformFee(orderEachAmountMap.get("platformFee"));
       order.setTotalAmount(orderEachAmountMap.get("orderTotalAmount"));
       // get file url
-      List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(order.getOrderId(), OBJECT_TYPE);
+      List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, OBJECT_TYPE);
       order.getOrderItem().setFileUrls(fileUrls);
 
       // Check if the current logged-in user has placed a bid for the order
-      boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(order.getOrderId());
+      boolean isCurrentLoginUserPlaceBid = isCurrentLoginUserPlaceBid(orderId);
       order.setBidder(isCurrentLoginUserPlaceBid);
 
       if (!order.getOrderStatus().equals(REQUESTED)) {
@@ -412,7 +451,18 @@ public class OrderServiceImpl implements OrderService {
       if (order.getOrderStatus().equals(TO_BE_CANCELLED) || order.getOrderStatus().equals(TO_BE_POSTPONED)) {
         order.setIsApplicant(isCurrentLoginUserApplicant(order));
       }
+
+      PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(orderId);
+      CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(orderId);
+
+      order.setHasPostponeRecord(postponeRecord != null);
+      order.setIsPostponed(Boolean.TRUE.equals(postponeRecord != null ? postponeRecord.getIsPostponed() : null));
+
+      order.setHasCancellationRecord(cancellationRecord != null);
+      order.setIsCancelled(Boolean.TRUE.equals(cancellationRecord != null ? cancellationRecord.getIsCancelled() : null));
+
     }
+
 
 
     return orderList;
@@ -880,7 +930,7 @@ public class OrderServiceImpl implements OrderService {
 
     if (!(order.getOrderStatus().equals(TO_BE_PURCHASED) || order.getOrderStatus().equals(
         TO_BE_DELIVERED))) {
-      throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED or TO_BE_DELIVERED, so you have no permission to request a cancellation.");
+      throw new AccessDeniedException("OrderStatus is not TO_BE_PURCHASED or TO_BE_DELIVERED, so you have no permission to request a postpone.");
     }
 
 

@@ -32,6 +32,8 @@ public interface TripService {
 
     List<Trip> getTripList(ListQueryParametersDto ListQueryParametersDto);
 
+    List<Trip> getTripsByShopperId(String shopperId);
+
     List<Trip> getMatchingTripListByOrderId(String orderId, ListQueryParametersDto listQueryParametersDto);
 
     List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
