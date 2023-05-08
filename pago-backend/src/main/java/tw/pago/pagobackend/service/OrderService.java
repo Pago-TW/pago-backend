@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
@@ -41,6 +42,8 @@ public interface OrderService {
 
 
   void updateOrderAndOrderItemByOrderId(Order oldOrder, UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto, boolean sendStatusUpdateEmail);
+
+  void updateOrderStatusByOrderId(String orderId, OrderStatusEnum updatedOrderStatus);
 
   void deleteOrderById(String orderId);
 

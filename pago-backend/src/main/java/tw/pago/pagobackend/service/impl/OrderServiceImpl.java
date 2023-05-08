@@ -390,6 +390,12 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
+  public void updateOrderStatusByOrderId(String orderId, OrderStatusEnum updatedOrderStatus) {
+
+    orderDao.updateOrderStatusByOrderId(orderId, updatedOrderStatus);
+  }
+
+  @Override
   public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
 
     List<Order> orderList = orderDao.getOrderList(listQueryParametersDto);
