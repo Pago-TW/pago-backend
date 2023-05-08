@@ -10,8 +10,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.NotificationDao;
 import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateNotificationRequestDto;
+import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.Notification;
+import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 import tw.pago.pagobackend.rowmapper.NotificationRowMapper;
 
 @Repository
@@ -71,5 +74,66 @@ public class NotificationDaoImpl implements NotificationDao {
 
     namedParameterJdbcTemplate.update(sql, map);
 
+  }
+
+  @Override
+  public List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, n.notification_type "
+        + "FROM notification AS n "
+        + "JOIN notification_user_mapping AS num ON n.notification_id = num.notification_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. currentLoginUserId, notificationType
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+
+    List<Notification> notificationList = namedParameterJdbcTemplate.query(sql, map, new NotificationRowMapper());
+
+    return notificationList;
+  }
+
+  @Override
+  public Integer countNotification(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT COUNT(n.notification_id) "
+        + "FROM notification AS n "
+        + "JOIN notification_user_mapping AS num ON n.notification_id = num.notification_id "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. currentLoginUserId, notificationType
+    sql = addFilteringSql(sql, map, listQueryParametersDto);
+
+
+    Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    return total;
+  }
+
+  private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
+
+    if (listQueryParametersDto.getUserId() != null) {
+      sql = sql + " AND num.user_id = :userId ";
+      map.put("userId", listQueryParametersDto.getUserId());
+    }
+
+    if (listQueryParametersDto.getNotificationType() != null) {
+      sql = sql + " AND n.notification_type = :notificationType ";
+      map.put("notificationType", listQueryParametersDto.getNotificationType().name());
+    }
+
+
+
+    return sql;
   }
 }
