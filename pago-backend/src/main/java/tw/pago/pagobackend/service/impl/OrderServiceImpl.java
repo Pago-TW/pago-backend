@@ -34,9 +34,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import tw.pago.pagobackend.constant.ActionTypeEnum;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.CurrencyEnum;
+import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PostponeReasonCategoryEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
@@ -52,6 +54,7 @@ import tw.pago.pagobackend.dto.ConsumerDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateFileRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
@@ -72,6 +75,7 @@ import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.CancellationRecord;
+import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.OrderItem;
 import tw.pago.pagobackend.model.PostponeRecord;
@@ -365,6 +369,9 @@ public class OrderServiceImpl implements OrderService {
     String orderId = oldOrder.getOrderId();
     OrderStatusEnum oldOrderStatus = oldOrder.getOrderStatus();
     OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
+    String orderItemName = oldOrder.getOrderItem().getName();
+    String consumerId = oldOrder.getConsumerId();
+    String orderFileUrl = String.valueOf(oldOrder.getOrderItem().getFileUrls().get(0));
 
     // Check if the order status has been modified
     boolean orderStatusChanged = newOrderStatus != null && !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
@@ -402,6 +409,25 @@ public class OrderServiceImpl implements OrderService {
     } else {
       // Only update order status if the order status is not REQUESTED
       orderDao.updateOrderStatusByOrderId(orderId, newOrderStatus);
+    }
+
+
+
+
+    if (orderStatusChanged) {
+      // Prepare Notification
+      CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+      createNotificationRequestDto.setContent("您的委託單 " + orderItemName + " 狀態已更新為：" + newOrderStatus );
+      createNotificationRequestDto.setActionType(ActionTypeEnum.UPDATE_ORDER_STATUS);
+      createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
+      createNotificationRequestDto.setImageUrl(orderFileUrl);
+      createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+      Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+      // Send notification
+      notificationService.sendNotification(notification, consumerId);
+      System.out.println("......Notification sent! (order status successfully updated)");
+
     }
 
 
@@ -889,6 +915,7 @@ public class OrderServiceImpl implements OrderService {
     createCancellationRecordRequestDto.setCancellationRecordId(cancellationRecordId);
     cancellationRecordDao.createCancellationRecord(createCancellationRecordRequestDto);
 
+
     CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordById(cancellationRecordId);
     if (cancellationRecord == null) {
       throw new ResourceNotFoundException("Create data not found");
@@ -901,6 +928,38 @@ public class OrderServiceImpl implements OrderService {
 
     // Pass false to prevent the order from being updated again
     updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
+
+    User canceller = userDao.getUserById(cancellationRecord.getUserId());
+    String cancellerUserId = canceller.getUserId();
+    String cancellerFullName = canceller.getFullName();
+    String orderId = order.getOrderId();
+    String orderCreatorId = order.getConsumerId();
+    String orderItemName = order.getOrderItem().getName();
+    String cancelReason = cancellationRecord.getCancelReason().toString();
+    String cancellerAvatarUrl = canceller.getAvatarUrl();
+    String recipientId;
+
+    // Check if the cancelling user is the order creator or the bidder
+    if (cancellerUserId.equals(orderCreatorId)) {
+      // If the cancelling user is the order creator, send the email to the bidder
+      recipientId = order.getShopper().getUserId();
+    } else {
+      // If the cancelling user is the bidder, send the email to the order creator
+      recipientId = orderCreatorId;
+    }
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent(cancellerFullName + " 向委託單 " + orderItemName + " 提出了取消申請。原因: " + cancelReason);
+    createNotificationRequestDto.setActionType(ActionTypeEnum.REQUEST_CANCEL_ORDER);
+    createNotificationRequestDto.setNotificationType(cancellerUserId.equals(orderCreatorId)? NotificationTypeEnum.TRIP : NotificationTypeEnum.ORDER);
+    createNotificationRequestDto.setImageUrl(cancellerAvatarUrl);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, recipientId);
+    System.out.println("......Notification sent! (Request cancel order successfully)");
 
     // Send email to notify the other party to reply
     sendCancelRequestEmail(order, cancellationRecord);
@@ -964,6 +1023,38 @@ public class OrderServiceImpl implements OrderService {
     // Pass false to avoid sending email
     updateOrderAndOrderItemByOrderId(order, updateOrderAndOrderItemRequestDto, false);
 
+    User postponer = userDao.getUserById(postponeRecord.getUserId());
+    String postponerUserId = postponer.getUserId();
+    String postponerFullName = postponer.getFullName();
+    String orderId = order.getOrderId();
+    String orderCreatorId = order.getConsumerId();
+    String orderItemName = order.getOrderItem().getName();
+    String postponeReason = postponeRecord.getPostponeReason().toString();
+    String postponerAvatarUrl = postponer.getAvatarUrl();
+    String recipientId;
+
+    // Check if the cancelling user is the order creator or the bidder
+    if (postponerUserId.equals(orderCreatorId)) {
+      // If the cancelling user is the order creator, send the email to the bidder
+      recipientId = order.getShopper().getUserId();
+    } else {
+      // If the cancelling user is the bidder, send the email to the order creator
+      recipientId = orderCreatorId;
+    }
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent(postponerFullName + " 向委託單 " + orderItemName + " 提出了延期申請。原因: " + postponeReason);
+    createNotificationRequestDto.setActionType(ActionTypeEnum.REQUEST_POSTPONE_ORDER);
+    createNotificationRequestDto.setNotificationType(postponerUserId.equals(orderCreatorId)? NotificationTypeEnum.TRIP : NotificationTypeEnum.ORDER);
+    createNotificationRequestDto.setImageUrl(postponerAvatarUrl);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, recipientId);
+    System.out.println("......Notification sent! (Request postpone order successfully)");
+
     // Send email to notify the other party to reply
     sendPostponeRequestEmail(order, postponeRecord);
 
@@ -1011,9 +1102,45 @@ public class OrderServiceImpl implements OrderService {
     }
 
     PostponeRecord postponeRecord = getPostponeRecordByOrderId(order.getOrderId());
+    User postponer = userDao.getUserById(postponeRecord.getUserId());
+    String postponerUserId = postponer.getUserId();
+    String orderId = order.getOrderId();
+    String orderCreatorId = order.getConsumerId();
+    String orderItemName = order.getOrderItem().getName();
+    String postponerAvatarUrl = postponer.getAvatarUrl();
+    String respondentId;
 
-    // Send email to notify the other party about the reply
+    // Check if the cancelling user is the order creator or the bidder
+    if (postponerUserId.equals(orderCreatorId)) {
+      // If the cancelling user is the order creator, send the email to the bidder
+      respondentId = order.getShopper().getUserId();
+    } else {
+      // If the cancelling user is the bidder, send the email to the order creator
+      respondentId = orderCreatorId;
+    }
+
+    User respondent = userDao.getUserById(respondentId);
+    String respondentFullName = respondent.getFullName();
+    String ponstponeResultString = postponeRecord.getIsPostponed() == true? "接受" : "拒絕";
+
+
+    // Send email & notification to notify the other party about the reply
     String updatedOrderStatus = originalOrderStatus.getDescription();
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent(respondentFullName + " " + ponstponeResultString + "了你在委託單 "+ orderItemName + " 提出的延期申請");
+    createNotificationRequestDto.setActionType(ActionTypeEnum.REPLY_POSTPONE_ORDER);
+    createNotificationRequestDto.setNotificationType(postponerUserId.equals(orderCreatorId)? NotificationTypeEnum.TRIP : NotificationTypeEnum.ORDER);
+    createNotificationRequestDto.setImageUrl(postponerAvatarUrl);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, postponerUserId);
+    System.out.println("......Notification sent! (Reply postpone order successfully)");
+
+    // Send Email
     sendReplyPostponeOrderEmail(order, updatePostponeRecordRequestDto, postponeRecord, updatedOrderStatus);
   }
 
@@ -1055,7 +1182,45 @@ public class OrderServiceImpl implements OrderService {
     }
 
     CancellationRecord cancellationRecord = getCancellationRecordByOrderId(order.getOrderId());
-    // Send email to notify the other party about the reply
+    // Send email & notification to notify the other party about the reply
+
+    User canceller = userDao.getUserById(cancellationRecord.getUserId());
+    String cancellerUserId = canceller.getUserId();
+    String orderId = order.getOrderId();
+    String orderCreatorId = order.getConsumerId();
+    String orderItemName = order.getOrderItem().getName();
+    String cancellerAvatarUrl = canceller.getAvatarUrl();
+    String respondentId;
+
+    // Check if the cancelling user is the order creator or the bidder
+    if (cancellerUserId.equals(orderCreatorId)) {
+      // If the cancelling user is the order creator, send the email to the bidder
+      respondentId = order.getShopper().getUserId();
+    } else {
+      // If the cancelling user is the bidder, send the email to the order creator
+      respondentId = orderCreatorId;
+    }
+
+    User respondent = userDao.getUserById(respondentId);
+    String respondentFullName = respondent.getFullName();
+    String cancelResultString = cancellationRecord.getIsCancelled() == true? "接受" : "拒絕";
+
+
+    // Send email & notification to notify the other party about the reply
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent(respondentFullName + " " + cancelResultString + "了你在委託單 "+ orderItemName + " 提出的取消申請");
+    createNotificationRequestDto.setActionType(ActionTypeEnum.REPLY_CANCEL_ORDER);
+    createNotificationRequestDto.setNotificationType(cancellerUserId.equals(orderCreatorId)? NotificationTypeEnum.TRIP : NotificationTypeEnum.ORDER);
+    createNotificationRequestDto.setImageUrl(cancellerAvatarUrl);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, cancellerUserId);
+    System.out.println("......Notification sent! (Reply cancel order successfully)");
+
+    // Send Email
     sendReplyCancelOrderEmail(order, updateCancellationRecordRequestDto, cancellationRecord, updatedOrderStatus);
 
   }

@@ -55,8 +55,7 @@ import tw.pago.pagobackend.util.UuidGenerator;
 @Component
 @AllArgsConstructor
 public class BidServiceImpl implements BidService { // TODO 前端的 選擇代購者 Dialog 統一後面寫 TWD
-  // TODO 出價完沒有及時 render
-  // TODO 旅途那邊看到的應該要是委託商品的圖片
+  // TODO 前端出價完沒有及時 render
   @Value("${base.url}")
   private final String BASE_URL = null;
 
@@ -88,6 +87,7 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
     User bidder = userService.getUserById(trip.getShopperId());
     String bidderFullName = bidder.getFullName();
+    String bidderAvatarUrl = bidder.getAvatarUrl();
     Date arrivalDate = trip.getArrivalDate();
     Date lastReceiveItemDate = order.getLatestReceiveItemDate();
     Date latedDeliveryDate = createBidRequestDto.getLatestDeliveryDate();
@@ -153,8 +153,7 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 出價：" + currency + " " + bidAmount);
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
     createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
-    User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
-    createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
+    createNotificationRequestDto.setImageUrl(bidderAvatarUrl);
     createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
@@ -257,6 +256,7 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     Bid updatedBid = bidDao.getBidById(updateBidRequestDto.getBidId());
     BidResponseDto updatedBidResponseDto = getBidResponseByBid(updatedBid);
     User bidder = userService.getUserById(updatedBidResponseDto.getCreator().getUserId());
+    String bidderAvatarUrl = bidder.getAvatarUrl();
     String bidderFullName = bidder.getFullName();
     String orderItemName = order.getOrderItem().getName();
     String currency = updatedBid.getCurrency().toString();
@@ -268,8 +268,7 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 更新了出價：" + currency + " " + bidAmount);
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
     createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
-    User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
-    createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
+    createNotificationRequestDto.setImageUrl(bidderAvatarUrl);
     createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
@@ -294,6 +293,7 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     String formattedLatestDeliveryDate = formatter.format(bid.getLatestDeliveryDate());
     BidResponseDto bidResponseDto = getBidResponseByBid(bid);
     String bidderId = bidResponseDto.getCreator().getUserId();
+    String orderFileUrl = String.valueOf(order.getOrderItem().getFileUrls().get(0));
 
 
     if (bid == null) {
@@ -334,9 +334,8 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
     createNotificationRequestDto.setContent("您在的委託單 " + orderItemName + " 的出價：" + currency + " " + bidAmount + " 已被選中，請於 " + formattedLatestDeliveryDate + " 前將購買商品並送達"  );
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
-    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
-    List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, "order");
-    createNotificationRequestDto.setImageUrl(String.valueOf(fileUrls.get(0)));
+    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.TRIP);
+    createNotificationRequestDto.setImageUrl(orderFileUrl);
     createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
