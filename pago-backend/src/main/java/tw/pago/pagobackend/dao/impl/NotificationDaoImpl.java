@@ -125,6 +125,22 @@ public class NotificationDaoImpl implements NotificationDao {
   }
 
   @Override
+  public void markNotificationAsRead(String notificationId, String userId) {
+    String sql = "UPDATE notification_user_mapping "
+        + "SET is_read = :isRead, update_date = :updateDate "
+        + "WHERE notification_id = :notificationId AND user_id = :userId ";
+
+    Map<String, Object> map = new HashMap<>();
+    LocalDateTime now = LocalDateTime.now();
+    map.put("isRead", true);
+    map.put("updateDate", now);
+    map.put("notificationId", notificationId);
+    map.put("userId", userId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
   public List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, "
         + "n.notification_type, n.image_url, n.redirect_url, n.action_type, num.is_read "

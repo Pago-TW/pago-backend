@@ -15,6 +15,8 @@ public interface NotificationService {
 
   void sendNotification(Notification notification, String receiverId);
 
+  void markNotificationAsRead(String notificationId, String userId);
+
   Notification getNotificationById(String notificationId);
 
   List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto);

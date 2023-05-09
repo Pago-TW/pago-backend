@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,7 +30,7 @@ public class NotificationController {
   private final NotificationService notificationService;
 
   @PostMapping("/notifications")
-  public ResponseEntity<?> createNotification(@RequestBody @Validated CreateNotificationRequestDto createNotificationRequestDto) {
+  public ResponseEntity<Notification> createNotification(@RequestBody @Validated CreateNotificationRequestDto createNotificationRequestDto) {
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
 
@@ -80,4 +82,12 @@ public class NotificationController {
     return ResponseEntity.status(HttpStatus.OK).body(notificationListResponseDto);
   }
 
+
+  @PatchMapping("/notifications/{notificationId}/read")
+  public ResponseEntity<?> markNotificationAsRead(@PathVariable String notificationId) {
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    notificationService.markNotificationAsRead(notificationId, currentLoginUserId);
+
+    return ResponseEntity.status(HttpStatus.OK).body("Mark Notification as read successfully");
+  }
 }

@@ -20,6 +20,8 @@ public interface NotificationDao {
 
   void updateNotification(UpdateNotificationRequestDto updateNotificationRequestDto);
 
+  void markNotificationAsRead(String notificationId, String userId);
+
   List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countNotification(ListQueryParametersDto listQueryParametersDto);

@@ -51,6 +51,11 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
+  public void markNotificationAsRead(String notificationId, String userId) {
+    notificationDao.markNotificationAsRead(notificationId, userId);
+  }
+
+  @Override
   public Notification getNotificationById(String notificationId) {
     return notificationDao.getNotificationById(notificationId);
   }
