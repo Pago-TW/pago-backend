@@ -17,11 +17,13 @@ import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 import tw.pago.pagobackend.rowmapper.NotificationRowMapper;
+import tw.pago.pagobackend.util.UuidGenerator;
 
 @Repository
 @AllArgsConstructor
 public class NotificationDaoImpl implements NotificationDao {
   private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  private final UuidGenerator uuidGenerator;
 
   @Override
   public void createNotification(CreateNotificationRequestDto createNotificationRequestDto) {
@@ -65,6 +67,25 @@ public class NotificationDaoImpl implements NotificationDao {
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
+  }
+
+  @Override
+  public void createNotificationUserMapping(Notification notification, String receiverId) {
+    String sql = "INSERT INTO notification_user_mapping (notification_user_mapping_id, notification_id, user_id, is_read, create_date, update_date) "
+        + "VALUES (:notificationUserMappingId, :notificationId, :receiverId, :isRead, :createDate, :updateDate)";
+
+    Map<String, Object> map = new HashMap<>();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    map.put("notificationUserMappingId", uuidGenerator.getUuid());
+    map.put("notificationId", notification.getNotificationId());
+    map.put("receiverId", receiverId);
+    map.put("isRead", false);
+    map.put("createDate", now);
+    map.put("updateDate", now);
+
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
   }
 
   @Override

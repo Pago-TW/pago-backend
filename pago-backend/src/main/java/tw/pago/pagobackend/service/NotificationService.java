@@ -14,6 +14,8 @@ public interface NotificationService {
 
   NotificationUserMapping createNotificationUserMapping(CreateNotificationUserMappingRequestDto createNotificationUserMappingRequestDto);
 
+  void sendNotification(Notification notification, String receiverId);
+
   Notification getNotificationById(String notificationId);
 
   NotificationResponseDto getNotificationResponseDtoByNotification(Notification notification);

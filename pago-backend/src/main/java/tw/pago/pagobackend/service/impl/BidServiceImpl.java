@@ -8,10 +8,13 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.BidAssembler;
+import tw.pago.pagobackend.constant.ActionTypeEnum;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dao.BidDao;
@@ -19,6 +22,7 @@ import tw.pago.pagobackend.dto.BidCreatorReviewDto;
 import tw.pago.pagobackend.dto.BidOperationResultDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
@@ -30,10 +34,12 @@ import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
+import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.NotificationService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.SesEmailService;
@@ -57,6 +63,7 @@ public class BidServiceImpl implements BidService {
   private final BidAssembler bidAssembler;
   private final SesEmailService sesEmailService;
   private final CurrentUserInfoProvider currentUserInfoProvider;
+  private final NotificationService notificationService;
 
   @Override
   @Transactional
@@ -130,6 +137,20 @@ public class BidServiceImpl implements BidService {
     BidOperationResultDto bidOperationResultDto = new BidOperationResultDto();
     bidOperationResultDto.setBid(bid);
     bidOperationResultDto.setCreated(true);
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent("有人出價囉");
+    createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
+    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
+    User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
+    createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
+    createNotificationRequestDto.setRedirectUrl("https:google.com/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, order.getConsumerId());
+    System.out.println("......Notification sent! (bid successfully created)");
 
     // Send the email notification
     sendPlaceBidEmail(bid, order);
@@ -208,7 +229,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public void updateBid(UpdateBidRequestDto updateBidRequestDto, Bid existingBid, Order order) {
-
+    String orderId = order.getOrderId();
     Bid oldBid = getBidById(updateBidRequestDto.getBidId());
 
     if (oldBid == null) {
@@ -224,6 +245,22 @@ public class BidServiceImpl implements BidService {
     bidDao.updateBid(updateBidRequestDto);
 
     Bid updatedBid = bidDao.getBidById(updateBidRequestDto.getBidId());
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent("有人更新出價囉");
+    createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
+    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
+    User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
+    createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
+    createNotificationRequestDto.setRedirectUrl("https:google.com/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, order.getConsumerId());
+    System.out.println("......Notification sent! (bid successfully updated)");
+
+    // Send Email
     sendUpdateBidEmail(updatedBid, order);
     System.out.println("......Email sent! (bid successfully updated)");
   }

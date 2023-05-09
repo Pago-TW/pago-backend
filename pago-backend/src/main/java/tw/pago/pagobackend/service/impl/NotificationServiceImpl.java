@@ -48,6 +48,11 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
+  public void sendNotification(Notification notification, String receiverId) {
+    notificationDao.createNotificationUserMapping(notification, receiverId);
+  }
+
+  @Override
   public Notification getNotificationById(String notificationId) {
     return notificationDao.getNotificationById(notificationId);
   }

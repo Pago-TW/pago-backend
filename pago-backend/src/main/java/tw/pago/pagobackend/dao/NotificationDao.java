@@ -14,6 +14,8 @@ public interface NotificationDao {
 
   void createNotificationUserMapping(CreateNotificationUserMappingRequestDto createNotificationUserMappingRequestDto);
 
+  void createNotificationUserMapping(Notification notification, String receiverId);
+
   Notification getNotificationById(String notificationId);
 
   void updateNotification(UpdateNotificationRequestDto updateNotificationRequestDto);
