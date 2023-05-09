@@ -150,16 +150,12 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public PasswordResetToken requestPasswordReset(PasswordRequestDto passwordRequestDto) {
-    // 1. Find the user by email
     User user = userDao.getUserByEmail(passwordRequestDto.getEmail());
     if (user == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
     }
 
-    // 2. Generate a password  token
     String token = uuidGenerator.getUuid();
-
-    // 3. Store the token in the database
     String passwordResetTokenId = uuidGenerator.getUuid();
 
     PasswordResetToken passwordResetToken = PasswordResetToken.builder()
@@ -171,18 +167,13 @@ public class AuthServiceImpl implements AuthService {
 
     authDao.createToken(passwordResetToken);
 
-    // TODO finish email
-    // 4. Send an email to the user with the token
     String passwordUrl = "https://pago-app.me/reset-password/" + token;
-    // String subject = "Password Reset Request";
-    // String body = "To reset your password, please click the link below:\n" + passwordResetUrl;
     String contentTitle = "重設密碼";
     String recipientUserEmail = user.getEmail();
     String username = user.getFirstName();
     String emailBody = String.format("您已提出重設密碼的請求，請點擊下方連結進行密碼重設。<br><br><p><a href=\"%s\">重設密碼</a></p>" +
     "<br><br>如果您並未申請重設密碼，請忽略此電子郵件", passwordUrl);
 
-    // Prepare the email content
     EmailRequestDto emailRequest = new EmailRequestDto();
     emailRequest.setTo(recipientUserEmail);
     emailRequest.setSubject("【Pago " + contentTitle + "】");
@@ -190,7 +181,6 @@ public class AuthServiceImpl implements AuthService {
     emailRequest.setContentTitle(contentTitle);
     emailRequest.setRecipientName(username);
 
-    // Send the email notification
     sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent! (requestPasswordReset)");
 
@@ -199,34 +189,28 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public void resetPassword(NewPasswordDto newPasswordDto) {
-    // 1. Find the token in the database
+
     PasswordResetToken passwordResetToken = authDao.getPasswordResetTokenByToken(newPasswordDto.getToken());
 
-    // 2. Check if the token is valid
     if (passwordResetToken == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Token not found");
     }
 
-    // 3. Check if the token has expired
     if (passwordResetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token has expired");
     }
 
-    // 4. Get the user by the user ID
     User user = userDao.getUserById(passwordResetToken.getUserId());
 
-    // 5. Update the user's password
     String hashedPassword = passwordEncoder.encode(newPasswordDto.getNewPassword());
     UpdateUserRequestDto updateUserRequestDto = UpdateUserRequestDto.builder()
         .password(hashedPassword)
         .build();
 
-    // Copy the properties from the user to the updateUserRequestDto object
     String[] presentPropertyNames = EntityPropertyUtil.getPresentPropertyNames(updateUserRequestDto);
     BeanUtils.copyProperties(user, updateUserRequestDto, presentPropertyNames);
     userDao.updateUser(updateUserRequestDto);
 
-    // 6. Delete the token from the database
     authDao.deletePasswordResetTokenById(passwordResetToken.getPasswordResetTokenId());
   }
 }
