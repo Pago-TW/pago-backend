@@ -24,18 +24,21 @@ public class NotificationDaoImpl implements NotificationDao {
 
   @Override
   public void createNotification(CreateNotificationRequestDto createNotificationRequestDto) {
-    String sql = "INSERT INTO notification (notification_id, content, create_date, update_date, notification_type) "
-        + "VALUES (:notificationId, :content, :createDate, :updateDate, :notificationType)";
+    String sql = "INSERT INTO notification (notification_id, content, create_date, update_date, notification_type, image_url, redirect_url, action_type) "
+        + "VALUES (:notificationId, :content, :createDate, :updateDate, :notificationType, :imageUrl, :redirectUrl, :actionType)";
 
     Map<String, Object> map = new HashMap<>();
 
     LocalDateTime now = LocalDateTime.now();
 
-    map.put("chatroomId", createNotificationRequestDto.getNotificationId());
+    map.put("notificationId", createNotificationRequestDto.getNotificationId());
     map.put("content", createNotificationRequestDto.getContent());
     map.put("createDate", now);
     map.put("updateDate", now);
     map.put("notificationType", createNotificationRequestDto.getNotificationType().name());
+    map.put("imageUrl", createNotificationRequestDto.getImageUrl());
+    map.put("redirectUrl", createNotificationRequestDto.getRedirectUrl());
+    map.put("actionType", createNotificationRequestDto.getActionType().name());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
@@ -45,7 +48,7 @@ public class NotificationDaoImpl implements NotificationDao {
   public Notification getNotificationById(String notificationId) {
     String sql = "SELECT notification_id, content, create_date, update_date, notification_type, image_url, redirect_url, action_type "
         + "FROM notification "
-        + "WHERE notificationm_id = :notificationId ";
+        + "WHERE notification_id = :notificationId ";
 
     Map<String, Object> map = new HashMap<>();
     map.put("notificationId", notificationId);
