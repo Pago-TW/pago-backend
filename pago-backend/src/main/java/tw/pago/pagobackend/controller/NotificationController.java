@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.controller;
 
 import java.util.List;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.model.Notification;
@@ -26,12 +28,21 @@ public class NotificationController {
   private final NotificationService notificationService;
 
   @PostMapping("/notifications")
-  public ResponseEntity<?> createNotification(@RequestBody CreateNotificationRequestDto createNotificationRequestDto) {
+  public ResponseEntity<?> createNotification(@RequestBody @Validated CreateNotificationRequestDto createNotificationRequestDto) {
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
 
 
     return ResponseEntity.status(HttpStatus.CREATED).body(notification);
+  }
+
+
+  @PostMapping("/notification-user-mapping")
+  public ResponseEntity<?> createNotificationUserMapping(@RequestBody @Valid
+      CreateNotificationUserMappingRequestDto createNotificationUserMappingRequestDto) {
+
+    notificationService.createNotificationUserMapping(createNotificationUserMappingRequestDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body("");
   }
 
 

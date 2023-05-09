@@ -2,6 +2,7 @@ package tw.pago.pagobackend.dao;
 
 import java.util.List;
 import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateNotificationRequestDto;
 import tw.pago.pagobackend.model.Notification;
@@ -10,6 +11,8 @@ import tw.pago.pagobackend.model.NotificationUserMapping;
 public interface NotificationDao {
 
   void createNotification(CreateNotificationRequestDto createNotificationRequestDto);
+
+  void createNotificationUserMapping(CreateNotificationUserMappingRequestDto createNotificationUserMappingRequestDto);
 
   Notification getNotificationById(String notificationId);
 

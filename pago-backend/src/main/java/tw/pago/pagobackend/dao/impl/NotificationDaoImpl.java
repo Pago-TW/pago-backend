@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.NotificationDao;
 import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateNotificationRequestDto;
 import tw.pago.pagobackend.model.Chatroom;
@@ -39,6 +40,28 @@ public class NotificationDaoImpl implements NotificationDao {
     map.put("imageUrl", createNotificationRequestDto.getImageUrl());
     map.put("redirectUrl", createNotificationRequestDto.getRedirectUrl());
     map.put("actionType", createNotificationRequestDto.getActionType().name());
+
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
+
+  }
+
+  @Override
+  public void createNotificationUserMapping(
+      CreateNotificationUserMappingRequestDto createNotificationUserMappingRequestDto) {
+
+    String sql = "INSERT INTO notification_user_mapping (notification_user_mapping_id, notification_id, user_id, is_read, create_date, update_date) "
+        + "VALUES (:notificationUserMappingId, :notificationId, :userId, :isRead, :createDate, :updateDate)";
+
+    Map<String, Object> map = new HashMap<>();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    map.put("notificationUserMappingId", createNotificationUserMappingRequestDto.getNotificationUserMappingId());
+    map.put("notificationId", createNotificationUserMappingRequestDto.getNotificationId());
+    map.put("userId", createNotificationUserMappingRequestDto.getUserId());
+    map.put("isRead", createNotificationUserMappingRequestDto.isRead());
+    map.put("createDate", now);
+    map.put("updateDate", now);
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 

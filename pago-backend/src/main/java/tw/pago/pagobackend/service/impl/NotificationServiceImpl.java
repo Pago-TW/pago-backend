@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.dao.NotificationDao;
 import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.NotificationResponseDto;
 import tw.pago.pagobackend.model.Notification;
+import tw.pago.pagobackend.model.NotificationUserMapping;
 import tw.pago.pagobackend.service.NotificationService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
@@ -31,6 +33,18 @@ public class NotificationServiceImpl implements NotificationService {
 
     Notification notification = notificationDao.getNotificationById(notificationId);
     return notification;
+  }
+
+  @Override
+  public NotificationUserMapping createNotificationUserMapping(
+      CreateNotificationUserMappingRequestDto createNotificationUserMappingRequestDto) {
+    String notificationUserMappingId = uuidGenerator.getUuid();
+    createNotificationUserMappingRequestDto.setNotificationUserMappingId(notificationUserMappingId);
+
+
+    notificationDao.createNotificationUserMapping(createNotificationUserMappingRequestDto);
+
+    return null;
   }
 
   @Override
