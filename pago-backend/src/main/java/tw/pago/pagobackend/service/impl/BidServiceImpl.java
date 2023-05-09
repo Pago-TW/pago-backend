@@ -2,11 +2,13 @@ package tw.pago.pagobackend.service.impl;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
@@ -53,6 +55,8 @@ import tw.pago.pagobackend.util.UuidGenerator;
 @Component
 @AllArgsConstructor
 public class BidServiceImpl implements BidService {
+  @Value("${base.url}")
+  private String BASE_URL;
 
   private final BidDao bidDao;
   private final UuidGenerator uuidGenerator;
@@ -70,6 +74,7 @@ public class BidServiceImpl implements BidService {
   public BidOperationResultDto createOrUpdateBid(CreateBidRequestDto createBidRequestDto) {
     String orderId = createBidRequestDto.getOrderId();
     Order order = orderService.getOrderById(orderId);
+    String orderItemName = order.getOrderItem().getName();
 
     // Check whether the order status is REQUESTED
     if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
@@ -78,6 +83,8 @@ public class BidServiceImpl implements BidService {
 
 
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
+    User bidder = userService.getUserById(trip.getShopperId());
+    String bidderFullName = bidder.getFullName();
     Date arrivalDate = trip.getArrivalDate();
     Date lastReceiveItemDate = order.getLatestReceiveItemDate();
     Date latedDeliveryDate = createBidRequestDto.getLatestDeliveryDate();
@@ -140,12 +147,12 @@ public class BidServiceImpl implements BidService {
 
     // Prepare Notification
     CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
-    createNotificationRequestDto.setContent("有人出價囉");
+    createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 出價：" + currency + " " + bidAmount);
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
     createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
     User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
     createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
-    createNotificationRequestDto.setRedirectUrl("https:google.com/" + orderId);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
     // Send notification
@@ -245,19 +252,26 @@ public class BidServiceImpl implements BidService {
     bidDao.updateBid(updateBidRequestDto);
 
     Bid updatedBid = bidDao.getBidById(updateBidRequestDto.getBidId());
+    BidResponseDto updatedBidResponseDto = getBidResponseByBid(updatedBid);
+    User bidder = userService.getUserById(updatedBidResponseDto.getCreator().getUserId());
+    String bidderFullName = bidder.getFullName();
+    String orderItemName = order.getOrderItem().getName();
+    String currency = updatedBid.getCurrency().toString();
+    String bidAmount = updatedBid.getBidAmount().toString();
+    String consumerId = order.getConsumerId();
 
     // Prepare Notification
     CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
-    createNotificationRequestDto.setContent("有人更新出價囉");
+    createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 更新了出價：" + currency + " " + bidAmount);
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
     createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
     User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
     createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
-    createNotificationRequestDto.setRedirectUrl("https:google.com/" + orderId);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
     // Send notification
-    notificationService.sendNotification(notification, order.getConsumerId());
+    notificationService.sendNotification(notification, consumerId);
     System.out.println("......Notification sent! (bid successfully updated)");
 
     // Send Email
@@ -271,6 +285,13 @@ public class BidServiceImpl implements BidService {
     Bid bid = getBidById(bidId);
     BigDecimal bidAmount = bid.getBidAmount();
     Order order = orderService.getOrderById(orderId);
+    String orderItemName = order.getOrderItem().getName();
+    String currency = bid.getCurrency().toString();
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    String formattedLatestDeliveryDate = formatter.format(bid.getLatestDeliveryDate());
+    BidResponseDto bidResponseDto = getBidResponseByBid(bid);
+    String bidderId = bidResponseDto.getCreator().getUserId();
+
 
     if (bid == null) {
         throw new ResourceNotFoundException(bidId, "Bid not found", bidId);
@@ -303,6 +324,22 @@ public class BidServiceImpl implements BidService {
 
     // Delete all NOT_CHOSEN bids made for the order
     deleteBidByOrderIdAndBidStatus(orderId, BidStatusEnum.NOT_CHOSEN);
+
+
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent("您在的委託單 " + orderItemName + " 的出價：" + currency + " " + bidAmount + " 已被選中，請於 " + formattedLatestDeliveryDate + " 前將購買商品並送達"  );
+    createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
+    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
+    User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
+    createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, bidderId);
+    System.out.println("......Notification sent! (bid chosen)");
 
 
 
