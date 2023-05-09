@@ -475,7 +475,7 @@ public class BidServiceImpl implements BidService {
     String orderCreatorId = order.getConsumerId();
     User orderCreator = userService.getUserById(orderCreatorId);
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String orderCreatorEmail = orderCreator.getEmail();
 
     // Get the order item name
@@ -517,7 +517,7 @@ public class BidServiceImpl implements BidService {
     String orderCreatorId = order.getConsumerId();
     User orderCreator = userService.getUserById(orderCreatorId);
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String orderCreatorEmail = orderCreator.getEmail();
 
     // Get the order item name
@@ -552,7 +552,7 @@ public class BidServiceImpl implements BidService {
     String contentTitle = "訂單出價通知";
     String bidId = bid.getBidId();
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
 
     // Get bidder's name and email
     BidResponseDto bidResponseDto = getBidResponseByBid(bid);

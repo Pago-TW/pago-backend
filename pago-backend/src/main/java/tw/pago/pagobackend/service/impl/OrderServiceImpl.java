@@ -28,6 +28,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +79,7 @@ import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.FileService;
+import tw.pago.pagobackend.service.NotificationService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
 import tw.pago.pagobackend.util.CurrencyUtil;
@@ -88,6 +90,9 @@ import tw.pago.pagobackend.util.UuidGenerator;
 @Service
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
+
+  @Value("${base.url}")
+  private String BASE_URL;
 
   private static final String OBJECT_TYPE = "order";
   private static final Double PLATFORM_FEE_PERCENT = 4.5;
@@ -106,6 +111,7 @@ public class OrderServiceImpl implements OrderService {
   private BidService bidService;
   private CancellationRecordDao cancellationRecordDao;
   private PostponeRecordDao postponeRecordDao;
+  private NotificationService notificationService;
 
   @Autowired
   public OrderServiceImpl(OrderDao orderDao,
@@ -117,7 +123,7 @@ public class OrderServiceImpl implements OrderService {
       UserDao userDao,
       ModelMapper modelMapper,
       CancellationRecordDao cancellationRecordDao,
-      PostponeRecordDao postponeRecordDao
+      PostponeRecordDao postponeRecordDao, NotificationService notificationService
       ) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
@@ -129,6 +135,7 @@ public class OrderServiceImpl implements OrderService {
     this.modelMapper = modelMapper;
     this.cancellationRecordDao = cancellationRecordDao;
     this.postponeRecordDao = postponeRecordDao;
+    this.notificationService = notificationService;
   }
 
   @Autowired
@@ -396,6 +403,8 @@ public class OrderServiceImpl implements OrderService {
       // Only update order status if the order status is not REQUESTED
       orderDao.updateOrderStatusByOrderId(orderId, newOrderStatus);
     }
+
+
     
     // Send email notification if needed
     if (orderStatusChanged && sendStatusUpdateEmail) {
@@ -1162,7 +1171,7 @@ public class OrderServiceImpl implements OrderService {
     String postponingUserId = postponeRecord.getUserId();
     String orderCreatorId = order.getConsumerId();
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String serialNumber = order.getSerialNumber();
     String recipientId;
   
@@ -1216,7 +1225,7 @@ public class OrderServiceImpl implements OrderService {
     String contentTitle = "訂單取消申請通知";
     String cancellingUserId = cancellationRecord.getUserId();
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String serialNumber = order.getSerialNumber();
     String orderCreatorId = order.getConsumerId();
     String recipientId;
@@ -1270,7 +1279,7 @@ public class OrderServiceImpl implements OrderService {
     String contentTitle = "訂單更新通知";
     String consumerId = oldOrder.getConsumerId();
     String oldOrderId = oldOrder.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", oldOrderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", oldOrderId);
     User consumer = userDao.getUserById(consumerId);
   
     // Get the current login user's email
@@ -1306,7 +1315,7 @@ public class OrderServiceImpl implements OrderService {
     User recipientUser = userDao.getUserById(recipientId);
     String recipientUserEmail = recipientUser.getEmail();
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String serialNumber = order.getSerialNumber();
     String orderItemName = order.getOrderItem().getName();
     String username = recipientUser.getFirstName();
@@ -1337,7 +1346,7 @@ public class OrderServiceImpl implements OrderService {
     User recipientUser = userDao.getUserById(recipientId);
     String recipientUserEmail = recipientUser.getEmail();
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String serialNumber = order.getSerialNumber();
 
     String orderItemName = order.getOrderItem().getName();
