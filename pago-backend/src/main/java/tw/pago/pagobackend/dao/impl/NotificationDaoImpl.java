@@ -43,7 +43,7 @@ public class NotificationDaoImpl implements NotificationDao {
 
   @Override
   public Notification getNotificationById(String notificationId) {
-    String sql = "SELECT notification_id, content, create_date, update_date, notification_type "
+    String sql = "SELECT notification_id, content, create_date, update_date, notification_type, image_url, redirect_url, action_type "
         + "FROM notification "
         + "WHERE notificationm_id = :notificationId ";
 
@@ -78,7 +78,7 @@ public class NotificationDaoImpl implements NotificationDao {
 
   @Override
   public List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, n.notification_type "
+    String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, n.notification_type, n.image_url, n.redirect_url, n.action_type "
         + "FROM notification AS n "
         + "JOIN notification_user_mapping AS num ON n.notification_id = num.notification_id "
         + "WHERE 1=1 ";

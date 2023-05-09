@@ -3,6 +3,7 @@ package tw.pago.pagobackend.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
+import tw.pago.pagobackend.constant.ActionTypeEnum;
 import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.model.Notification;
 
@@ -17,6 +18,9 @@ public class NotificationRowMapper implements RowMapper<Notification> {
     notification.setUpdateDate(resultSet.getTimestamp("update_date").toLocalDateTime());
     notification.setNotificationType(
         NotificationTypeEnum.valueOf(resultSet.getString("notification_type")));
+    notification.setImageUrl(resultSet.getString("image_url"));
+    notification.setRedirectUrl(resultSet.getString("redirect_url"));
+    notification.setActionType(ActionTypeEnum.valueOf(resultSet.getString("action_type")));
 
 
     return notification;
