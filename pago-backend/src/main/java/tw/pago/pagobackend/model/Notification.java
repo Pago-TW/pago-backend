@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,9 @@ public class Notification {
   private String imageUrl;
   private String redirectUrl;
   private ActionTypeEnum actionType;
+
+  // for program use
+  @JsonProperty("isRead")
+  private boolean isRead;
 
 }

@@ -17,6 +17,7 @@ import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 import tw.pago.pagobackend.rowmapper.NotificationRowMapper;
+import tw.pago.pagobackend.rowmapper.NotificationWithIsReadRowMapper;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Repository
@@ -125,7 +126,8 @@ public class NotificationDaoImpl implements NotificationDao {
 
   @Override
   public List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, n.notification_type, n.image_url, n.redirect_url, n.action_type "
+    String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, "
+        + "n.notification_type, n.image_url, n.redirect_url, n.action_type, num.is_read "
         + "FROM notification AS n "
         + "JOIN notification_user_mapping AS num ON n.notification_id = num.notification_id "
         + "WHERE 1=1 ";
@@ -144,7 +146,7 @@ public class NotificationDaoImpl implements NotificationDao {
     map.put("startIndex", listQueryParametersDto.getStartIndex());
 
 
-    List<Notification> notificationList = namedParameterJdbcTemplate.query(sql, map, new NotificationRowMapper());
+    List<Notification> notificationList = namedParameterJdbcTemplate.query(sql, map, new NotificationWithIsReadRowMapper());
 
     return notificationList;
   }
