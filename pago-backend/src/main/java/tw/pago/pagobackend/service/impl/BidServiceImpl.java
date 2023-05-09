@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,7 @@ import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.NotificationService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.ReviewService;
@@ -52,7 +54,9 @@ import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
 @AllArgsConstructor
-public class BidServiceImpl implements BidService {
+public class BidServiceImpl implements BidService { // TODO 前端的 選擇代購者 Dialog 統一後面寫 TWD
+  // TODO 出價完沒有及時 render
+  // TODO 旅途那邊看到的應該要是委託商品的圖片
   @Value("${base.url}")
   private final String BASE_URL = null;
 
@@ -66,6 +70,7 @@ public class BidServiceImpl implements BidService {
   private final SesEmailService sesEmailService;
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final NotificationService notificationService;
+  private final FileService fileService;
 
   @Override
   @Transactional
@@ -330,8 +335,8 @@ public class BidServiceImpl implements BidService {
     createNotificationRequestDto.setContent("您在的委託單 " + orderItemName + " 的出價：" + currency + " " + bidAmount + " 已被選中，請於 " + formattedLatestDeliveryDate + " 前將購買商品並送達"  );
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
     createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
-    User currentLoginUser =  currentUserInfoProvider.getCurrentLoginUser();
-    createNotificationRequestDto.setImageUrl(currentLoginUser.getAvatarUrl());
+    List<URL> fileUrls = fileService.getFileUrlsByObjectIdnType(orderId, "order");
+    createNotificationRequestDto.setImageUrl(String.valueOf(fileUrls.get(0)));
     createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
     Notification notification = notificationService.createNotification(createNotificationRequestDto);
 
