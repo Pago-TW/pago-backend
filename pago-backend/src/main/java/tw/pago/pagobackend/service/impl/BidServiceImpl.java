@@ -2,7 +2,6 @@ package tw.pago.pagobackend.service.impl;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,7 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.BidAssembler;
@@ -56,7 +54,7 @@ import tw.pago.pagobackend.util.UuidGenerator;
 @AllArgsConstructor
 public class BidServiceImpl implements BidService {
   @Value("${base.url}")
-  private String BASE_URL;
+  private final String BASE_URL = null;
 
   private final BidDao bidDao;
   private final UuidGenerator uuidGenerator;
