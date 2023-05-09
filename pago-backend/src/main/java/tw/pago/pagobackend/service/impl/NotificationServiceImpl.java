@@ -3,12 +3,10 @@ package tw.pago.pagobackend.service.impl;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.dao.NotificationDao;
 import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
 import tw.pago.pagobackend.dto.CreateNotificationUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
-import tw.pago.pagobackend.dto.NotificationResponseDto;
 import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.model.NotificationUserMapping;
 import tw.pago.pagobackend.service.NotificationService;
@@ -57,18 +55,7 @@ public class NotificationServiceImpl implements NotificationService {
     return notificationDao.getNotificationById(notificationId);
   }
 
-  @Override
-  public NotificationResponseDto getNotificationResponseDtoByNotification(
-      Notification notification) {
-    NotificationTypeEnum notificationType = notification.getNotificationType();
 
-    if (notificationType.equals(NotificationTypeEnum.ORDER)) {
-
-    }
-
-
-    return null;
-  }
 
   @Override
   public List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto) {
@@ -77,17 +64,6 @@ public class NotificationServiceImpl implements NotificationService {
     return notificationList;
   }
 
-  @Override
-  public List<NotificationResponseDto> getNotificationResponseDtoListByNotificationList(
-      List<Notification> notificationList) {
-
-    for (Notification notification: notificationList) {
-
-    }
-
-
-    return null;
-  }
 
   @Override
   public Integer countNotification(ListQueryParametersDto listQueryParametersDto) {

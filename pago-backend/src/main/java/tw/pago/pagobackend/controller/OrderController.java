@@ -73,7 +73,8 @@ public class OrderController {
   private final Validator validator;
 
   @PostMapping("/orders")
-  public ResponseEntity<OrderResponseDto> createOrder(@RequestParam(value = "file", required = false) List<MultipartFile> files,
+  public ResponseEntity<OrderResponseDto> createOrder(
+      @RequestParam(value = "file", required = false) List<MultipartFile> files,
       @RequestParam("data") String createOrderRequestDtoString) throws JsonMappingException, JsonProcessingException {
 
     // If no files are provided or all files are empty, initialize an empty list
@@ -83,7 +84,8 @@ public class OrderController {
 
     // Convert data to DTO
     ObjectMapper objectMapper = new ObjectMapper();
-    CreateOrderRequestDto createOrderRequestDto = objectMapper.readValue(createOrderRequestDtoString, CreateOrderRequestDto.class);
+    CreateOrderRequestDto createOrderRequestDto = objectMapper.readValue(createOrderRequestDtoString,
+        CreateOrderRequestDto.class);
 
     // Perform validation
     Set<ConstraintViolation<CreateOrderRequestDto>> violations = validator.validate(createOrderRequestDto);
@@ -97,17 +99,15 @@ public class OrderController {
     Order order = orderService.createOrder(currentLoginUserId, files, createOrderRequestDto);
     OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoByOrder(order);
 
-//    Order order = orderService.getOrderById(orderId);
+    // Order order = orderService.getOrderById(orderId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDto);
   }
 
-
   @PatchMapping("/orders/{orderId}")
   public ResponseEntity<?> updateOrder(
-      @PathVariable String orderId, @RequestBody @Valid
-  UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
-
+      @PathVariable String orderId,
+      @RequestBody @Valid UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto) {
 
     // Get currentLoginUser
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
@@ -118,7 +118,6 @@ public class OrderController {
 
     // Get chosenBidderId
     String chosenBidderId = orderService.getChosenBidderIdByOrderId(orderId);
-
 
     // Check permission, only order creator or shopper can update Order
     if (!(currentLoginUserId.equals(orderCreatorId) || currentLoginUserId.equals(chosenBidderId))) {
@@ -196,9 +195,6 @@ public class OrderController {
       @RequestParam(defaultValue = "create_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort) {
 
-
-
-
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .userId(userId)
         .tripId(tripId)
@@ -240,10 +236,10 @@ public class OrderController {
     Order order = orderService.getOrderById(orderId);
 
     Date latestReceiveItemDate = order.getLatestReceiveItemDate();
-    LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault())
+        .toLocalDate();
     Date orderCreateDate = order.getCreateDate();
     LocalDate orderCreateLocalDate = orderCreateDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .orderId(orderId)
@@ -280,7 +276,8 @@ public class OrderController {
   }
 
   @PostMapping("/favorites")
-  public ResponseEntity<?> createFavoriteOrder(@RequestBody CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto) {
+  public ResponseEntity<?> createFavoriteOrder(
+      @RequestBody CreateFavoriteOrderRequestDto createFavoriteOrderRequestDto) {
 
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
     createFavoriteOrderRequestDto.setUserId(currentLoginUserId);
@@ -313,11 +310,11 @@ public class OrderController {
     }
     return ResponseEntity.status(HttpStatus.OK).body(calculateOrderAmountResponseDto);
 
-
   }
 
   @PostMapping("/orders/{orderId}/cancellation-record")
-  public ResponseEntity<?> requestCancelOrder(@PathVariable String orderId, @RequestBody @Valid CreateCancellationRecordRequestDto createCancellationRecordRequestDto) {
+  public ResponseEntity<?> requestCancelOrder(@PathVariable String orderId,
+      @RequestBody @Valid CreateCancellationRecordRequestDto createCancellationRecordRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     // Permission checking
@@ -332,11 +329,11 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
-
     createCancellationRecordRequestDto.setUserId(currentLoginUserId);
     createCancellationRecordRequestDto.setOrderId(orderId);
     try {
-      CancellationRecord cancellationRecord = orderService.requestCancelOrder(order, createCancellationRecordRequestDto);
+      CancellationRecord cancellationRecord = orderService.requestCancelOrder(order,
+          createCancellationRecordRequestDto);
       return ResponseEntity.status(HttpStatus.CREATED).body(cancellationRecord);
     } catch (BadRequestException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -355,13 +352,12 @@ public class OrderController {
 
     CancellationRecord cancellationRecord = orderService.getCancellationRecordByOrderId(orderId);
 
-
     return ResponseEntity.status(HttpStatus.OK).body(cancellationRecord);
   }
 
-
   @PatchMapping("/orders/{orderId}/cancellation-record")
-  public ResponseEntity<?> replyCancelOrder(@PathVariable String orderId, @RequestBody @Valid UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
+  public ResponseEntity<?> replyCancelOrder(@PathVariable String orderId,
+      @RequestBody @Valid UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     // Permission checking
@@ -376,7 +372,6 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
-
     try {
       updateCancellationRecordRequestDto.setOrderId(orderId);
       orderService.replyCancelOrder(order, updateCancellationRecordRequestDto);
@@ -387,9 +382,6 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
-
-
-
   }
 
   @GetMapping("/orders/{orderId}/postpone-record")
@@ -399,9 +391,9 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.OK).body(postponeRecord);
   }
 
-
   @PostMapping("/orders/{orderId}/postpone-record")
-  public ResponseEntity<?> requestPostponeOrder(@PathVariable String orderId, @RequestBody @Valid CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
+  public ResponseEntity<?> requestPostponeOrder(@PathVariable String orderId,
+      @RequestBody @Valid CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     // Permission checking
@@ -415,7 +407,6 @@ public class OrderController {
     if (!(currentLoginUserId.equals(cosumerId) || currentLoginUserId.equals(shopperId))) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
-
 
     createPostponeRecordRequestDto.setUserId(currentLoginUserId);
     createPostponeRecordRequestDto.setOrderId(orderId);
@@ -435,8 +426,8 @@ public class OrderController {
   }
 
   @PatchMapping("/orders/{orderId}/postpone-record")
-  public ResponseEntity<?> replyPostponeOrder(@PathVariable String orderId, @RequestBody @Valid
-      UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto) {
+  public ResponseEntity<?> replyPostponeOrder(@PathVariable String orderId,
+      @RequestBody @Valid UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     // Permission checking
@@ -451,8 +442,6 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no Permission.");
     }
 
-
-
     try {
       updatePostponeRecordRequestDto.setOrderId(orderId);
       orderService.replyPostponeOrder(order, updatePostponeRecordRequestDto);
@@ -463,52 +452,50 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
-
   }
 
-
-
-//  @PostMapping("/ecpay-checkout/callback")
-//  public String paymentCallback(
-//      @RequestParam(value = "MerchantTradeNo", required = true) String merchantTradeNo,
-//      @RequestParam(value = "PaymentDate", required = false) String paymentDate,
-//      @RequestParam(value = "PaymentType",required = false) String paymentType,
-//      @RequestParam(value = "PaymentTypeChargeFee", required = false) String paymentTypeChargeFee,
-//      @RequestParam(value = "RtnCode", required = true) String rtnCode,
-//      @RequestParam(value = "RtnMsg", required = false) String rtnMsg,
-//      @RequestParam(value = "SimulatePaid", required = false) String simulatePaid,
-//      @RequestParam(value = "StoreID", required = false) String storeId,
-//      @RequestParam(value = "TradeAmt", required = false) String tradeAmt,
-//      @RequestParam(value = "TradeDate", required = false) String tradeDate,
-//      @RequestParam(value = "TradeNo", required = false) String tradeNo,
-//      @RequestParam(value = "CheckMacValue", required = false) String checkMacValue
-//      ) {
-//    System.out.println("ECpay-checkout Callback");
-//
-//    if (rtnCode.equals("1")) {
-//      UpdatePaymentRequestDto updatePaymentRequestDto = new UpdatePaymentRequestDto();
-//      updatePaymentRequestDto.setPaymentId(merchantTradeNo);
-//      updatePaymentRequestDto.setIsPaid(true);
-//
-//      paymentService.updatePayment(updatePaymentRequestDto);
-//
-//      Payment payment = paymentService.getPaymentById(merchantTradeNo);
-//
-//      try {
-//        bidService.chooseBid(payment.getOrderId(), payment.getBidId());
-//
-//      } catch (IllegalStatusTransitionException e) {
-//        return e.getMessage();
-//      }
-//
-//    } else {
-//      return null;
-//    }
-//
-//
-//    return "1|OK";
-//  }
-
-
+  // @PostMapping("/ecpay-checkout/callback")
+  // public String paymentCallback(
+  // @RequestParam(value = "MerchantTradeNo", required = true) String
+  // merchantTradeNo,
+  // @RequestParam(value = "PaymentDate", required = false) String paymentDate,
+  // @RequestParam(value = "PaymentType",required = false) String paymentType,
+  // @RequestParam(value = "PaymentTypeChargeFee", required = false) String
+  // paymentTypeChargeFee,
+  // @RequestParam(value = "RtnCode", required = true) String rtnCode,
+  // @RequestParam(value = "RtnMsg", required = false) String rtnMsg,
+  // @RequestParam(value = "SimulatePaid", required = false) String simulatePaid,
+  // @RequestParam(value = "StoreID", required = false) String storeId,
+  // @RequestParam(value = "TradeAmt", required = false) String tradeAmt,
+  // @RequestParam(value = "TradeDate", required = false) String tradeDate,
+  // @RequestParam(value = "TradeNo", required = false) String tradeNo,
+  // @RequestParam(value = "CheckMacValue", required = false) String checkMacValue
+  // ) {
+  // System.out.println("ECpay-checkout Callback");
+  //
+  // if (rtnCode.equals("1")) {
+  // UpdatePaymentRequestDto updatePaymentRequestDto = new
+  // UpdatePaymentRequestDto();
+  // updatePaymentRequestDto.setPaymentId(merchantTradeNo);
+  // updatePaymentRequestDto.setIsPaid(true);
+  //
+  // paymentService.updatePayment(updatePaymentRequestDto);
+  //
+  // Payment payment = paymentService.getPaymentById(merchantTradeNo);
+  //
+  // try {
+  // bidService.chooseBid(payment.getOrderId(), payment.getBidId());
+  //
+  // } catch (IllegalStatusTransitionException e) {
+  // return e.getMessage();
+  // }
+  //
+  // } else {
+  // return null;
+  // }
+  //
+  //
+  // return "1|OK";
+  // }
 
 }
