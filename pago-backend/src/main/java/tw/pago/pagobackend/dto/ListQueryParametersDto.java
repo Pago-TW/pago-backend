@@ -26,7 +26,9 @@ public class ListQueryParametersDto {
 
   // Order
   private OrderStatusEnum orderStatus;
+  private CountryCode fromCountry;
   private CityCode fromCity;
+  private CountryCode toCountry;
   private CityCode toCity;
   private Boolean isPackagingRequired;
   private LocalDate orderCreateDate;

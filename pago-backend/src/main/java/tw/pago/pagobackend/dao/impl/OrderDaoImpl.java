@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
@@ -433,14 +435,40 @@ public class OrderDaoImpl implements OrderDao {
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
 
+    if (listQueryParametersDto.getFromCountry() != null) {
+      if (listQueryParametersDto.getFromCountry().equals(CountryCode.ANY)) {
+        sql = sql + " AND oi.purchase_country IS NOT NULL ";
+      } else {
+        sql = sql + " AND oi.purchase_country = :purchaseCountry ";
+        map.put("purchaseCountry", listQueryParametersDto.getFromCountry().name());
+      }
+    }
+
     if (listQueryParametersDto.getFromCity() != null) {
-      sql = sql + " AND oi.purchase_city = :purchaseCity ";
-      map.put("purchaseCity", listQueryParametersDto.getFromCity().name());
+      if (listQueryParametersDto.getFromCity().equals(CityCode.ANY)) {
+        sql = sql + " AND oi.purchase_country IS NOT NULL ";
+      } else {
+        sql = sql + " AND oi.purchase_city = :purchaseCity ";
+        map.put("purchaseCity", listQueryParametersDto.getFromCity().name());
+      }
+    }
+
+    if (listQueryParametersDto.getToCountry() != null) {
+      if (listQueryParametersDto.getToCountry().equals(CountryCode.ANY)) {
+        sql = sql + " AND om.destination_country IS NOT NULL ";
+      } else {
+        sql = sql + " AND om.destination_country = :destinationCountry ";
+        map.put("destinationCountry", listQueryParametersDto.getToCountry().name());
+      }
     }
 
     if (listQueryParametersDto.getToCity() != null) {
-      sql = sql + " AND om.destination_city = :destinationCity ";
-      map.put("destinationCity", listQueryParametersDto.getToCity().name());
+      if (listQueryParametersDto.getToCity().equals(CityCode.ANY)) {
+        sql = sql + " AND om.destination_city IS NOT NULL ";
+      } else {
+        sql = sql + " AND om.destination_city = :destinationCity ";
+        map.put("destinationCity", listQueryParametersDto.getToCity().name());
+      }
     }
 
     if (listQueryParametersDto.getIsPackagingRequired() != null) {

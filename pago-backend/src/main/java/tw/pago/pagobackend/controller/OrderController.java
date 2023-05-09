@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.CityCode;
+import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
@@ -185,8 +186,10 @@ public class OrderController {
       @RequestParam(required = false) String tripId,
       @RequestParam(required = false) OrderStatusEnum status,
       @RequestParam(required = false) String search,
-      @RequestParam(required = false) CityCode from,
-      @RequestParam(required = false) CityCode to,
+      @RequestParam(required = false) CountryCode fromCountry,
+      @RequestParam(required = false) CityCode fromCity,
+      @RequestParam(required = false) CountryCode toCountry,
+      @RequestParam(required = false) CityCode toCity,
       @RequestParam(required = false) Boolean isPackagingRequired,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
@@ -201,8 +204,10 @@ public class OrderController {
         .tripId(tripId)
         .orderStatus(status)
         .search(search)
-        .fromCity(from)
-        .toCity(to)
+        .fromCountry(fromCountry)
+        .fromCity(fromCity)
+        .toCountry(toCountry)
+        .toCity(toCity)
         .isPackagingRequired(isPackagingRequired)
         .startIndex(startIndex)
         .size(size)
