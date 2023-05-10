@@ -1,13 +1,16 @@
 package tw.pago.pagobackend.service.impl;
 
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
@@ -44,6 +48,9 @@ import tw.pago.pagobackend.util.UuidGenerator;
 public class AuthServiceImpl implements AuthService {
 
   private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
+
+  @Value("${base.url}")
+  private final String BASE_URL = null;
 
   @Autowired
   private ModelMapper modelMapper;
@@ -149,10 +156,11 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  @Transactional
   public PasswordResetToken requestPasswordReset(PasswordRequestDto passwordRequestDto) {
     User user = userDao.getUserByEmail(passwordRequestDto.getEmail());
     if (user == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"); // TODO 不能給 Google 登陸的用戶使用忘記密碼功能
     }
 
     String token = uuidGenerator.getUuid();
@@ -167,12 +175,14 @@ public class AuthServiceImpl implements AuthService {
 
     authDao.createToken(passwordResetToken);
 
-    String passwordUrl = "https://pago-app.me/reset-password/" + token;
+    String passwordUrl = BASE_URL + "/auth/reset-password/" + token;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String passwordResetRequestCreateDate = formatter.format(LocalDateTime.now());
     String contentTitle = "重設密碼";
     String recipientUserEmail = user.getEmail();
     String username = user.getFirstName();
-    String emailBody = String.format("您已提出重設密碼的請求，請點擊下方連結進行密碼重設。<br><br><p><a href=\"%s\">重設密碼</a></p>" +
-    "<br><br>如果您並未申請重設密碼，請忽略此電子郵件", passwordUrl);
+    String emailBody = String.format("您已於 <b>%s</b> 提出重設密碼的請求，請點擊下方連結進行密碼重設。<br><br><p><a href=\"%s\">重設密碼連結</a></p>" +
+    "<br><br>如果您並未申請重設密碼，請忽略此電子郵件", passwordResetRequestCreateDate, passwordUrl);
 
     EmailRequestDto emailRequest = new EmailRequestDto();
     emailRequest.setTo(recipientUserEmail);
@@ -185,6 +195,17 @@ public class AuthServiceImpl implements AuthService {
     System.out.println("......Email sent! (requestPasswordReset)");
 
     return authDao.getPasswordResetTokenByToken(token);
+  }
+
+  @Override
+  public String fetchEmailFromToken(String token) {
+    PasswordResetToken passwordResetToken = authDao.getPasswordResetTokenByToken(token);
+    String userId = passwordResetToken.getUserId();
+    User user = userDao.getUserById(userId);
+    String email = user.getEmail();
+
+
+    return email;
   }
 
   @Override
