@@ -565,14 +565,26 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public List<MatchingShopperResponseDto> getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto) {
 
+    String orderId = order.getOrderId();
     List<Trip> matchingTripList = tripDao.getMatchingTripListForOrder(listQueryParametersDto);
+    List<Bid> orderBidList = bidService.getBidListByOrderId(orderId);
+    List<BidResponseDto> orderBidResponseDtoList = bidService.getBidResponseDtoByBidList(orderBidList);
+    List<MatchingShopperResponseDto> matchingShopperResponseDtoList = new ArrayList<>();
+
+
+
+    // Use a Map to collect this order's bidder
+    Map<String, List<BidResponseDto>> bidderIdToBidsMap = orderBidResponseDtoList.stream()
+        .collect(Collectors.groupingBy(bidResponseDto -> bidResponseDto.getCreator().getUserId()));
 
     // Use a Map to collect all matching trips for each user
-    Map<String, List<Trip>> userIdToTripsMap = matchingTripList.stream()
+    Map<String, List<Trip>> shopperIdToTripsMap = matchingTripList.stream()
         .collect(Collectors.groupingBy(Trip::getShopperId));
 
-    List<MatchingShopperResponseDto> matchingShopperResponseDtoList = new ArrayList<>();
-    for (Map.Entry<String, List<Trip>> entry : userIdToTripsMap.entrySet()) {
+    // Remove matching-shoppers who have placed a bid
+    bidderIdToBidsMap.keySet().forEach(shopperIdToTripsMap::remove);
+
+    for (Map.Entry<String, List<Trip>> entry : shopperIdToTripsMap.entrySet()) {
       String userId = entry.getKey();
       User user = userDao.getUserById(userId);
       MatchingShopperResponseDto matchingShopperResponseDto = modelMapper.map(user, MatchingShopperResponseDto.class);
@@ -926,7 +938,7 @@ public class OrderServiceImpl implements OrderService {
       throw new ResourceNotFoundException("Create data not found");
     }
 
-    // Change OrderStatus to TO_BE_CANCELLED
+    // Change OrderStatus to TO_BE_CANCELLED // TODO 修改委託 notification 不要用 Enum，用 description
     UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
         .orderStatus(TO_BE_CANCELLED)
         .build();
