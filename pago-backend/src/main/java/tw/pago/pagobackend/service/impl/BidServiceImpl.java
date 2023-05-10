@@ -293,7 +293,11 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     String formattedLatestDeliveryDate = formatter.format(bid.getLatestDeliveryDate());
     BidResponseDto bidResponseDto = getBidResponseByBid(bid);
     String bidderId = bidResponseDto.getCreator().getUserId();
-    String orderFileUrl = String.valueOf(order.getOrderItem().getFileUrls().get(0))==null? String.valueOf(order.getOrderItem().getFileUrls().get(0)):"";
+    String orderFileUrl = "";
+    List<URL> orderFileUrls = order.getOrderItem().getFileUrls();
+    if (!orderFileUrls.isEmpty()) {
+      orderFileUrl = String.valueOf(orderFileUrls.get(0));
+    }
 
 
     if (bid == null) {
