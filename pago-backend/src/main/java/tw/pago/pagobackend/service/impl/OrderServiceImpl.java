@@ -422,7 +422,7 @@ public class OrderServiceImpl implements OrderService {
     if (orderStatusChanged) {
       // Prepare Notification
       CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
-      createNotificationRequestDto.setContent("您的委託單 " + orderItemName + " 狀態已更新為：" + newOrderStatus );
+      createNotificationRequestDto.setContent("您的委託單 " + orderItemName + " 狀態已更新為：" + newOrderStatus.getDescription() );
       createNotificationRequestDto.setActionType(ActionTypeEnum.UPDATE_ORDER_STATUS);
       createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
       createNotificationRequestDto.setImageUrl(orderFileUrl);
@@ -565,14 +565,26 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public List<MatchingShopperResponseDto> getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto) {
 
+    String orderId = order.getOrderId();
     List<Trip> matchingTripList = tripDao.getMatchingTripListForOrder(listQueryParametersDto);
+    List<Bid> orderBidList = bidService.getBidListByOrderId(orderId);
+    List<BidResponseDto> orderBidResponseDtoList = bidService.getBidResponseDtoByBidList(orderBidList);
+    List<MatchingShopperResponseDto> matchingShopperResponseDtoList = new ArrayList<>();
+
+
+
+    // Use a Map to collect this order's bidder
+    Map<String, List<BidResponseDto>> bidderIdToBidsMap = orderBidResponseDtoList.stream()
+        .collect(Collectors.groupingBy(bidResponseDto -> bidResponseDto.getCreator().getUserId()));
 
     // Use a Map to collect all matching trips for each user
-    Map<String, List<Trip>> userIdToTripsMap = matchingTripList.stream()
+    Map<String, List<Trip>> shopperIdToTripsMap = matchingTripList.stream()
         .collect(Collectors.groupingBy(Trip::getShopperId));
 
-    List<MatchingShopperResponseDto> matchingShopperResponseDtoList = new ArrayList<>();
-    for (Map.Entry<String, List<Trip>> entry : userIdToTripsMap.entrySet()) {
+    // Remove matching-shoppers who have placed a bid
+    bidderIdToBidsMap.keySet().forEach(shopperIdToTripsMap::remove);
+
+    for (Map.Entry<String, List<Trip>> entry : shopperIdToTripsMap.entrySet()) {
       String userId = entry.getKey();
       User user = userDao.getUserById(userId);
       MatchingShopperResponseDto matchingShopperResponseDto = modelMapper.map(user, MatchingShopperResponseDto.class);
@@ -926,7 +938,7 @@ public class OrderServiceImpl implements OrderService {
       throw new ResourceNotFoundException("Create data not found");
     }
 
-    // Change OrderStatus to TO_BE_CANCELLED
+    // Change OrderStatus to TO_BE_CANCELLED // TODO 修改委託 notification 不要用 Enum，用 description
     UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
         .orderStatus(TO_BE_CANCELLED)
         .build();
@@ -940,7 +952,7 @@ public class OrderServiceImpl implements OrderService {
     String orderId = order.getOrderId();
     String orderCreatorId = order.getConsumerId();
     String orderItemName = order.getOrderItem().getName();
-    String cancelReason = cancellationRecord.getCancelReason().toString();
+    String cancelReason = cancellationRecord.getCancelReason().getDescription();
     String cancellerAvatarUrl = canceller.getAvatarUrl();
     String recipientId;
 
@@ -1034,7 +1046,7 @@ public class OrderServiceImpl implements OrderService {
     String orderId = order.getOrderId();
     String orderCreatorId = order.getConsumerId();
     String orderItemName = order.getOrderItem().getName();
-    String postponeReason = postponeRecord.getPostponeReason().toString();
+    String postponeReason = postponeRecord.getPostponeReason().getDescription();
     String postponerAvatarUrl = postponer.getAvatarUrl();
     String recipientId;
 
