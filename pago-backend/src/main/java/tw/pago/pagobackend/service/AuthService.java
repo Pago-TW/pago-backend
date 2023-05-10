@@ -1,8 +1,11 @@
 package tw.pago.pagobackend.service;
 
 import tw.pago.pagobackend.dto.JwtAuthenticationResponseDto;
+import tw.pago.pagobackend.dto.NewPasswordDto;
+import tw.pago.pagobackend.dto.PasswordRequestDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
+import tw.pago.pagobackend.model.PasswordResetToken;
 import tw.pago.pagobackend.model.User;
 
 public interface AuthService {
@@ -11,4 +14,7 @@ public interface AuthService {
 
   User register(UserRegisterRequestDto userRegisterRequestDto);
 
+  PasswordResetToken requestPasswordReset(PasswordRequestDto passwordRequestDto);
+
+  void resetPassword(NewPasswordDto newPasswordDto);
 }

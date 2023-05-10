@@ -1,17 +1,21 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.assembler.BidAssembler;
+import tw.pago.pagobackend.constant.ActionTypeEnum;
 import tw.pago.pagobackend.constant.BidStatusEnum;
+import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dao.BidDao;
@@ -19,6 +23,7 @@ import tw.pago.pagobackend.dto.BidCreatorReviewDto;
 import tw.pago.pagobackend.dto.BidOperationResultDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CreateBidRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
@@ -30,10 +35,13 @@ import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
+import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.FileService;
+import tw.pago.pagobackend.service.NotificationService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.SesEmailService;
@@ -46,7 +54,10 @@ import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
 @AllArgsConstructor
-public class BidServiceImpl implements BidService {
+public class BidServiceImpl implements BidService { // TODO 前端的 選擇代購者 Dialog 統一後面寫 TWD
+  // TODO 前端出價完沒有及時 render
+  @Value("${base.url}")
+  private final String BASE_URL = null;
 
   private final BidDao bidDao;
   private final UuidGenerator uuidGenerator;
@@ -57,12 +68,15 @@ public class BidServiceImpl implements BidService {
   private final BidAssembler bidAssembler;
   private final SesEmailService sesEmailService;
   private final CurrentUserInfoProvider currentUserInfoProvider;
+  private final NotificationService notificationService;
+  private final FileService fileService;
 
   @Override
   @Transactional
   public BidOperationResultDto createOrUpdateBid(CreateBidRequestDto createBidRequestDto) {
     String orderId = createBidRequestDto.getOrderId();
     Order order = orderService.getOrderById(orderId);
+    String orderItemName = order.getOrderItem().getName();
 
     // Check whether the order status is REQUESTED
     if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
@@ -71,6 +85,9 @@ public class BidServiceImpl implements BidService {
 
 
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
+    User bidder = userService.getUserById(trip.getShopperId());
+    String bidderFullName = bidder.getFullName();
+    String bidderAvatarUrl = bidder.getAvatarUrl();
     Date arrivalDate = trip.getArrivalDate();
     Date lastReceiveItemDate = order.getLatestReceiveItemDate();
     Date latedDeliveryDate = createBidRequestDto.getLatestDeliveryDate();
@@ -130,6 +147,19 @@ public class BidServiceImpl implements BidService {
     BidOperationResultDto bidOperationResultDto = new BidOperationResultDto();
     bidOperationResultDto.setBid(bid);
     bidOperationResultDto.setCreated(true);
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 出價：" + currency + " " + bidAmount);
+    createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
+    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
+    createNotificationRequestDto.setImageUrl(bidderAvatarUrl);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, order.getConsumerId());
+    System.out.println("......Notification sent! (bid successfully created)");
 
     // Send the email notification
     sendPlaceBidEmail(bid, order);
@@ -208,7 +238,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public void updateBid(UpdateBidRequestDto updateBidRequestDto, Bid existingBid, Order order) {
-
+    String orderId = order.getOrderId();
     Bid oldBid = getBidById(updateBidRequestDto.getBidId());
 
     if (oldBid == null) {
@@ -224,6 +254,29 @@ public class BidServiceImpl implements BidService {
     bidDao.updateBid(updateBidRequestDto);
 
     Bid updatedBid = bidDao.getBidById(updateBidRequestDto.getBidId());
+    BidResponseDto updatedBidResponseDto = getBidResponseByBid(updatedBid);
+    User bidder = userService.getUserById(updatedBidResponseDto.getCreator().getUserId());
+    String bidderAvatarUrl = bidder.getAvatarUrl();
+    String bidderFullName = bidder.getFullName();
+    String orderItemName = order.getOrderItem().getName();
+    String currency = updatedBid.getCurrency().toString();
+    String bidAmount = updatedBid.getBidAmount().toString();
+    String consumerId = order.getConsumerId();
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 更新了出價：" + currency + " " + bidAmount);
+    createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
+    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
+    createNotificationRequestDto.setImageUrl(bidderAvatarUrl);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, consumerId);
+    System.out.println("......Notification sent! (bid successfully updated)");
+
+    // Send Email
     sendUpdateBidEmail(updatedBid, order);
     System.out.println("......Email sent! (bid successfully updated)");
   }
@@ -234,6 +287,14 @@ public class BidServiceImpl implements BidService {
     Bid bid = getBidById(bidId);
     BigDecimal bidAmount = bid.getBidAmount();
     Order order = orderService.getOrderById(orderId);
+    String orderItemName = order.getOrderItem().getName();
+    String currency = bid.getCurrency().toString();
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    String formattedLatestDeliveryDate = formatter.format(bid.getLatestDeliveryDate());
+    BidResponseDto bidResponseDto = getBidResponseByBid(bid);
+    String bidderId = bidResponseDto.getCreator().getUserId();
+    String orderFileUrl = String.valueOf(order.getOrderItem().getFileUrls().get(0));
+
 
     if (bid == null) {
         throw new ResourceNotFoundException(bidId, "Bid not found", bidId);
@@ -266,6 +327,21 @@ public class BidServiceImpl implements BidService {
 
     // Delete all NOT_CHOSEN bids made for the order
     deleteBidByOrderIdAndBidStatus(orderId, BidStatusEnum.NOT_CHOSEN);
+
+
+
+    // Prepare Notification
+    CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
+    createNotificationRequestDto.setContent("您在的委託單 " + orderItemName + " 的出價：" + currency + " " + bidAmount + " 已被選中，請於 " + formattedLatestDeliveryDate + " 前將購買商品並送達"  );
+    createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
+    createNotificationRequestDto.setNotificationType(NotificationTypeEnum.TRIP);
+    createNotificationRequestDto.setImageUrl(orderFileUrl);
+    createNotificationRequestDto.setRedirectUrl(BASE_URL + "/orders/" + orderId);
+    Notification notification = notificationService.createNotification(createNotificationRequestDto);
+
+    // Send notification
+    notificationService.sendNotification(notification, bidderId);
+    System.out.println("......Notification sent! (bid chosen)");
 
 
 
@@ -401,7 +477,7 @@ public class BidServiceImpl implements BidService {
     String orderCreatorId = order.getConsumerId();
     User orderCreator = userService.getUserById(orderCreatorId);
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String orderCreatorEmail = orderCreator.getEmail();
 
     // Get the order item name
@@ -443,7 +519,7 @@ public class BidServiceImpl implements BidService {
     String orderCreatorId = order.getConsumerId();
     User orderCreator = userService.getUserById(orderCreatorId);
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
     String orderCreatorEmail = orderCreator.getEmail();
 
     // Get the order item name
@@ -478,7 +554,7 @@ public class BidServiceImpl implements BidService {
     String contentTitle = "訂單出價通知";
     String bidId = bid.getBidId();
     String orderId = order.getOrderId();
-    String orderUrl = String.format("https://pago-app.me/ordrs/%s", orderId);
+    String orderUrl = String.format(BASE_URL + "/orders/%s", orderId);
 
     // Get bidder's name and email
     BidResponseDto bidResponseDto = getBidResponseByBid(bid);
