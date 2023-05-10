@@ -938,7 +938,7 @@ public class OrderServiceImpl implements OrderService {
       throw new ResourceNotFoundException("Create data not found");
     }
 
-    // Change OrderStatus to TO_BE_CANCELLED // TODO 修改委託 notification 不要用 Enum，用 description
+    // Change OrderStatus to TO_BE_CANCELLED
     UpdateOrderAndOrderItemRequestDto updateOrderAndOrderItemRequestDto = UpdateOrderAndOrderItemRequestDto.builder()
         .orderStatus(TO_BE_CANCELLED)
         .build();
