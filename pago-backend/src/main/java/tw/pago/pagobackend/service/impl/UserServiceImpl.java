@@ -258,6 +258,8 @@ public class UserServiceImpl implements UserService {
     int totalOrdersInProcurementProcess = getUserTotalOrdersInProcurementProcess(user.getUserId());
     int totalCancellationRecords = cancellationRecordDao.countCancellationRecord(user.getUserId());
 
+    System.out.println("totalOrdersInProcurementProcess: " + totalOrdersInProcurementProcess);
+    System.out.println("totalCancellationRecords: " + totalCancellationRecords);
     // Check if the user is new
     if (totalOrdersInProcurementProcess == 0 && totalCancellationRecords == 0) {
       return CompletionRatingEnum.NOU;
