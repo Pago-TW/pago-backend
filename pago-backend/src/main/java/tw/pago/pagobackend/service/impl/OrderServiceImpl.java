@@ -1455,7 +1455,7 @@ public class OrderServiceImpl implements OrderService {
     // Get the current login user's email
     String currentLoginUserEmail = consumer.getEmail();
     // Get the order item name
-    String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
+    String orderItemName = oldOrder.getOrderItem().getName();
     // Get the user name
     String username = consumer.getFirstName();
     // Get current date
