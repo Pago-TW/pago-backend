@@ -54,8 +54,7 @@ import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
 @AllArgsConstructor
-public class BidServiceImpl implements BidService { // TODO 前端的 選擇代購者 Dialog 統一後面寫 TWD
-  // TODO 前端出價完沒有及時 render
+public class BidServiceImpl implements BidService {
   @Value("${base.url}")
   private final String BASE_URL = null;
 

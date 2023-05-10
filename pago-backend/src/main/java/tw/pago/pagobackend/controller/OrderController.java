@@ -226,7 +226,7 @@ public class OrderController {
   }
 
   @GetMapping("/orders/{orderId}/matching-shoppers")
-  public ResponseEntity<?> getMatchingShopperList(
+  public ResponseEntity<?> getMatchingShopperList( // TODO 已出價的要排除掉
       @PathVariable String orderId,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
