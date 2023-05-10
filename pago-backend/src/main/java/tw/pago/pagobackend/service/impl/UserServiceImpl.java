@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
     return cancellationRating;
   }
 
-  public CompletionRatingEnum getUserCompletionRating(User user) {
+  public CompletionRatingEnum getUserCompletionRating(User user) { // TODO check what exactly is being sent to getuserCompletionRating
 
     int totalOrdersInProcurementProcess = getUserTotalOrdersInProcurementProcess(user.getUserId());
     int totalCancellationRecords = cancellationRecordDao.countCancellationRecord(user.getUserId());
@@ -263,10 +263,13 @@ public class UserServiceImpl implements UserService {
     // Check if the user is new
     if (totalOrdersInProcurementProcess == 0 && totalCancellationRecords == 0) {
       return CompletionRatingEnum.NOU;
+    } else if (totalCancellationRecords == 0) {
+      return CompletionRatingEnum.EXCELLENT;
     }
 
     double cancellationRating = calculateUserCancellationRating(totalCancellationRecords, totalOrdersInProcurementProcess);
     System.out.println("Cancellation: " + cancellationRating);
+
 
     if (cancellationRating >= 90) {
       return CompletionRatingEnum.EXCELLENT;
