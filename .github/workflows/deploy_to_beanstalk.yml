@@ -21,6 +21,14 @@ jobs:
 
     - name: Build with Maven
       run: mvn clean package --file pago-backend/pom.xml
+      env:
+        DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        APP_TOKEN_SECRET: ${{ secrets.APP_TOKEN_SECRET }}
+        APP_CORS_ALLOWED_ORIGINS: ${{ secrets.APP_CORS_ALLOWED_ORIGINS }}
+        APP_OAUTH2_REDIRECT_URIS: ${{ secrets.APP_OAUTH2_REDIRECT_URIS }}
 
     - name: Set version label
       run: echo "VERSION_LABEL=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_ENV
