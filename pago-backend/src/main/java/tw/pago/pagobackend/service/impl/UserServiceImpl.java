@@ -260,7 +260,7 @@ public class UserServiceImpl implements UserService {
 
     // Check if the user is new
     if (totalOrdersInProcurementProcess == 0 && totalCancellationRecords == 0) {
-      return CompletionRatingEnum.EXCELLENT;
+      return CompletionRatingEnum.NOU;
     }
 
     double cancellationRating = calculateUserCancellationRating(totalCancellationRecords, totalOrdersInProcurementProcess);
