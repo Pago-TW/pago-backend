@@ -1,0 +1,12 @@
+package tw.pago.pagobackend.constant;
+
+public enum ActionTypeEnum {
+  PLACE_BID,
+  CHOOSE_BID,
+  UPDATE_ORDER_STATUS,
+  REQUEST_POSTPONE_ORDER,
+  REQUEST_CANCEL_ORDER,
+  REPLY_POSTPONE_ORDER,
+  REPLY_CANCEL_ORDER
+
+}

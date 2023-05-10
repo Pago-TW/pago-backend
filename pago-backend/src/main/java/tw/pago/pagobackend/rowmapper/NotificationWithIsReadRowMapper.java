@@ -7,7 +7,7 @@ import tw.pago.pagobackend.constant.ActionTypeEnum;
 import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.model.Notification;
 
-public class NotificationRowMapper implements RowMapper<Notification> {
+public class NotificationWithIsReadRowMapper implements RowMapper<Notification> {
 
   @Override
   public Notification mapRow(ResultSet resultSet, int rowNum) throws SQLException {
@@ -22,6 +22,8 @@ public class NotificationRowMapper implements RowMapper<Notification> {
     notification.setRedirectUrl(resultSet.getString("redirect_url"));
     notification.setActionType(ActionTypeEnum.valueOf(resultSet.getString("action_type")));
 
+    // isRead, from table notification_user_mapping
+    notification.setRead(resultSet.getBoolean("is_read"));
 
     return notification;
   }

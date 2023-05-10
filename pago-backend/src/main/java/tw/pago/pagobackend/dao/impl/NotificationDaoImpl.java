@@ -10,42 +10,90 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.NotificationDao;
 import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
+import tw.pago.pagobackend.dto.CreateNotificationUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateNotificationRequestDto;
 import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 import tw.pago.pagobackend.rowmapper.NotificationRowMapper;
+import tw.pago.pagobackend.rowmapper.NotificationWithIsReadRowMapper;
+import tw.pago.pagobackend.util.UuidGenerator;
 
 @Repository
 @AllArgsConstructor
 public class NotificationDaoImpl implements NotificationDao {
   private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+  private final UuidGenerator uuidGenerator;
 
   @Override
   public void createNotification(CreateNotificationRequestDto createNotificationRequestDto) {
-    String sql = "INSERT INTO notification (notification_id, content, create_date, update_date, notification_type) "
-        + "VALUES (:notificationId, :content, :createDate, :updateDate, :notificationType)";
+    String sql = "INSERT INTO notification (notification_id, content, create_date, update_date, notification_type, image_url, redirect_url, action_type) "
+        + "VALUES (:notificationId, :content, :createDate, :updateDate, :notificationType, :imageUrl, :redirectUrl, :actionType)";
 
     Map<String, Object> map = new HashMap<>();
 
     LocalDateTime now = LocalDateTime.now();
 
-    map.put("chatroomId", createNotificationRequestDto.getNotificationId());
+    map.put("notificationId", createNotificationRequestDto.getNotificationId());
     map.put("content", createNotificationRequestDto.getContent());
     map.put("createDate", now);
     map.put("updateDate", now);
     map.put("notificationType", createNotificationRequestDto.getNotificationType().name());
+    map.put("imageUrl", createNotificationRequestDto.getImageUrl());
+    map.put("redirectUrl", createNotificationRequestDto.getRedirectUrl());
+    map.put("actionType", createNotificationRequestDto.getActionType().name());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
   }
 
   @Override
+  public void createNotificationUserMapping(
+      CreateNotificationUserMappingRequestDto createNotificationUserMappingRequestDto) {
+
+    String sql = "INSERT INTO notification_user_mapping (notification_user_mapping_id, notification_id, user_id, is_read, create_date, update_date) "
+        + "VALUES (:notificationUserMappingId, :notificationId, :userId, :isRead, :createDate, :updateDate)";
+
+    Map<String, Object> map = new HashMap<>();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    map.put("notificationUserMappingId", createNotificationUserMappingRequestDto.getNotificationUserMappingId());
+    map.put("notificationId", createNotificationUserMappingRequestDto.getNotificationId());
+    map.put("userId", createNotificationUserMappingRequestDto.getUserId());
+    map.put("isRead", createNotificationUserMappingRequestDto.isRead());
+    map.put("createDate", now);
+    map.put("updateDate", now);
+
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
+
+  }
+
+  @Override
+  public void createNotificationUserMapping(Notification notification, String receiverId) {
+    String sql = "INSERT INTO notification_user_mapping (notification_user_mapping_id, notification_id, user_id, is_read, create_date, update_date) "
+        + "VALUES (:notificationUserMappingId, :notificationId, :receiverId, :isRead, :createDate, :updateDate)";
+
+    Map<String, Object> map = new HashMap<>();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    map.put("notificationUserMappingId", uuidGenerator.getUuid());
+    map.put("notificationId", notification.getNotificationId());
+    map.put("receiverId", receiverId);
+    map.put("isRead", false);
+    map.put("createDate", now);
+    map.put("updateDate", now);
+
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
+  }
+
+  @Override
   public Notification getNotificationById(String notificationId) {
-    String sql = "SELECT notification_id, content, create_date, update_date, notification_type "
+    String sql = "SELECT notification_id, content, create_date, update_date, notification_type, image_url, redirect_url, action_type "
         + "FROM notification "
-        + "WHERE notificationm_id = :notificationId ";
+        + "WHERE notification_id = :notificationId ";
 
     Map<String, Object> map = new HashMap<>();
     map.put("notificationId", notificationId);
@@ -77,8 +125,25 @@ public class NotificationDaoImpl implements NotificationDao {
   }
 
   @Override
+  public void markNotificationAsRead(String notificationId, String userId) {
+    String sql = "UPDATE notification_user_mapping "
+        + "SET is_read = :isRead, update_date = :updateDate "
+        + "WHERE notification_id = :notificationId AND user_id = :userId ";
+
+    Map<String, Object> map = new HashMap<>();
+    LocalDateTime now = LocalDateTime.now();
+    map.put("isRead", true);
+    map.put("updateDate", now);
+    map.put("notificationId", notificationId);
+    map.put("userId", userId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
   public List<Notification> getNotificationList(ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, n.notification_type "
+    String sql = "SELECT n.notification_id, n.content, n.create_date, n.update_date, "
+        + "n.notification_type, n.image_url, n.redirect_url, n.action_type, num.is_read "
         + "FROM notification AS n "
         + "JOIN notification_user_mapping AS num ON n.notification_id = num.notification_id "
         + "WHERE 1=1 ";
@@ -97,7 +162,7 @@ public class NotificationDaoImpl implements NotificationDao {
     map.put("startIndex", listQueryParametersDto.getStartIndex());
 
 
-    List<Notification> notificationList = namedParameterJdbcTemplate.query(sql, map, new NotificationRowMapper());
+    List<Notification> notificationList = namedParameterJdbcTemplate.query(sql, map, new NotificationWithIsReadRowMapper());
 
     return notificationList;
   }
