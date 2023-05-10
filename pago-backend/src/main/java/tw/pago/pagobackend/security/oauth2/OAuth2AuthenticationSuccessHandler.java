@@ -156,7 +156,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
       UpdateUserRequestDto updateUserRequestDto = UpdateUserRequestDto.builder()
           .email(userInfoMap.get("email").toString())
           .firstName(userInfoMap.get("firstName").toString())
-          .lastName(userInfoMap.get("firstName").toString())
+          .lastName(userInfoMap.get("lastName").toString())
           .avatarUrl(userInfoMap.get("avatarUrl").toString())
           .lastLogin(new Date())
           .build();
