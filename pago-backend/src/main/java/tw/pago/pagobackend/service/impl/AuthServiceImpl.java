@@ -209,6 +209,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  @Transactional
   public void resetPassword(NewPasswordDto newPasswordDto) {
 
     PasswordResetToken passwordResetToken = authDao.getPasswordResetTokenByToken(newPasswordDto.getToken());
@@ -233,5 +234,26 @@ public class AuthServiceImpl implements AuthService {
     userDao.updateUser(updateUserRequestDto);
 
     authDao.deletePasswordResetTokenById(passwordResetToken.getPasswordResetTokenId());
+
+    // Prepare email content
+    String loginUrl = BASE_URL + "/auth/signin/";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String passwordResetRequestCreateDate = formatter.format(LocalDateTime.now());
+    String contentTitle = "重設密碼成功";
+    String recipientUserEmail = user.getEmail();
+    String username = user.getFirstName();
+    String emailBody = String.format("您已於 <b>%s</b> 成功重設密碼，現在您可以使用新密碼登入。<br><br><b>若此操作非您本人，請立即聯繫客服:</b> pago.service.me@gmail.com。<br><br><p><a href=\"%s\">登入連結</a></p>" +
+        "<br><br>如果您並未申請重設密碼，請忽略此電子郵件", passwordResetRequestCreateDate, loginUrl);
+
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setTo(recipientUserEmail);
+    emailRequest.setSubject("【Pago " + contentTitle + "】");
+    emailRequest.setBody(emailBody);
+    emailRequest.setContentTitle(contentTitle);
+    emailRequest.setRecipientName(username);
+
+    // Send Email
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (resetPassword successfully)");
   }
 }
