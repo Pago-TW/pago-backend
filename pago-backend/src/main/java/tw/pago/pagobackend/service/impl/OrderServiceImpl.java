@@ -371,7 +371,12 @@ public class OrderServiceImpl implements OrderService {
     OrderStatusEnum newOrderStatus = updateOrderAndOrderItemRequestDto.getOrderStatus();
     String orderItemName = oldOrder.getOrderItem().getName();
     String consumerId = oldOrder.getConsumerId();
-    String orderFileUrl = String.valueOf(oldOrder.getOrderItem().getFileUrls().get(0));
+    String orderFileUrl = "";
+    List<URL> orderFileUrls = oldOrder.getOrderItem().getFileUrls();
+    if (!orderFileUrls.isEmpty()) {
+      orderFileUrl = String.valueOf(orderFileUrls.get(0));
+    }
+
 
     // Check if the order status has been modified
     boolean orderStatusChanged = newOrderStatus != null && !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
@@ -1450,7 +1455,7 @@ public class OrderServiceImpl implements OrderService {
     // Get the current login user's email
     String currentLoginUserEmail = consumer.getEmail();
     // Get the order item name
-    String orderItemName = updateOrderAndOrderItemRequestDto.getUpdateOrderItemDto().getName();
+    String orderItemName = oldOrder.getOrderItem().getName();
     // Get the user name
     String username = consumer.getFirstName();
     // Get current date

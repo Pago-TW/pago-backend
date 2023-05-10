@@ -150,7 +150,7 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
 
     // Prepare Notification
     CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
-    createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 出價：" + currency + " " + bidAmount);
+    createNotificationRequestDto.setContent(bidderFullName + " 在您的委託單 " + orderItemName + " 出價：" + currency + " " + bidAmount);
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
     createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
     createNotificationRequestDto.setImageUrl(bidderAvatarUrl);
@@ -265,7 +265,7 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
 
     // Prepare Notification
     CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
-    createNotificationRequestDto.setContent(bidderFullName + "在您的委託單 " + orderItemName + " 更新了出價：" + currency + " " + bidAmount);
+    createNotificationRequestDto.setContent(bidderFullName + " 在您的委託單 " + orderItemName + " 更新了出價：" + currency + " " + bidAmount);
     createNotificationRequestDto.setActionType(ActionTypeEnum.PLACE_BID);
     createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
     createNotificationRequestDto.setImageUrl(bidderAvatarUrl);
@@ -293,7 +293,11 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     String formattedLatestDeliveryDate = formatter.format(bid.getLatestDeliveryDate());
     BidResponseDto bidResponseDto = getBidResponseByBid(bid);
     String bidderId = bidResponseDto.getCreator().getUserId();
-    String orderFileUrl = String.valueOf(order.getOrderItem().getFileUrls().get(0));
+    String orderFileUrl = "";
+    List<URL> orderFileUrls = order.getOrderItem().getFileUrls();
+    if (!orderFileUrls.isEmpty()) {
+      orderFileUrl = String.valueOf(orderFileUrls.get(0));
+    }
 
 
     if (bid == null) {
