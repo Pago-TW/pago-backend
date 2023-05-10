@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
     return cancellationRating;
   }
 
-  public CompletionRatingEnum getUserCompletionRating(User user) { // TODO check what exactly is being sent to getuserCompletionRating
+  public CompletionRatingEnum getUserCompletionRating(User user) {
 
     int totalOrdersInProcurementProcess = getUserTotalOrdersInProcurementProcess(user.getUserId());
     int totalCancellationRecords = cancellationRecordDao.countCancellationRecord(user.getUserId());

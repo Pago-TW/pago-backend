@@ -249,6 +249,21 @@ public class BidDaoImpl implements BidDao {
     return bidList;
   }
 
+  @Override
+  public List<Bid> getBidListByOrderId(String orderId) {
+    String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
+        + "update_date, latest_delivery_date, bid_status "
+        + "FROM bid "
+        + "WHERE order_id = :orderId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("orderId", orderId);
+
+    List<Bid> bidList = namedParameterJdbcTemplate.query(sql, map, new BidRowMapper());
+
+    return bidList;
+  }
+
 
   @Override
   public Integer countBid(ListQueryParametersDto listQueryParametersDto) {

@@ -373,6 +373,16 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
     return bidList;
   }
 
+  @Override
+  public List<Bid> getBidListByTripId(String tripId) {
+    return bidDao.getBidListByTripId(tripId);
+  }
+
+
+  @Override
+  public List<Bid> getBidListByOrderId(String orderId) {
+    return bidDao.getBidListByOrderId(orderId);
+  }
 
   @Override
   public Integer countBid(ListQueryParametersDto listQueryParametersDto) {
@@ -460,6 +470,18 @@ public class BidServiceImpl implements BidService { // TODO 前端的 選擇代�
 
     List<Bid> bidList = getBidList(listQueryParametersDto);
 
+    // Assemble bid list into BidResponseDto list
+    List<BidResponseDto> bidResponseDtoList = bidList.stream()
+        .map(bid -> getBidResponseById(bid.getBidId()))
+        .collect(Collectors.toList());
+
+
+
+    return bidResponseDtoList;
+  }
+
+  @Override
+  public List<BidResponseDto> getBidResponseDtoByBidList(List<Bid> bidList) {
     // Assemble bid list into BidResponseDto list
     List<BidResponseDto> bidResponseDtoList = bidList.stream()
         .map(bid -> getBidResponseById(bid.getBidId()))
