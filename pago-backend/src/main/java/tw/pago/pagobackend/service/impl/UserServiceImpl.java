@@ -258,13 +258,18 @@ public class UserServiceImpl implements UserService {
     int totalOrdersInProcurementProcess = getUserTotalOrdersInProcurementProcess(user.getUserId());
     int totalCancellationRecords = cancellationRecordDao.countCancellationRecord(user.getUserId());
 
+    System.out.println("totalOrdersInProcurementProcess: " + totalOrdersInProcurementProcess);
+    System.out.println("totalCancellationRecords: " + totalCancellationRecords);
     // Check if the user is new
     if (totalOrdersInProcurementProcess == 0 && totalCancellationRecords == 0) {
+      return CompletionRatingEnum.NOU;
+    } else if (totalCancellationRecords == 0) {
       return CompletionRatingEnum.EXCELLENT;
     }
 
     double cancellationRating = calculateUserCancellationRating(totalCancellationRecords, totalOrdersInProcurementProcess);
     System.out.println("Cancellation: " + cancellationRating);
+
 
     if (cancellationRating >= 90) {
       return CompletionRatingEnum.EXCELLENT;
