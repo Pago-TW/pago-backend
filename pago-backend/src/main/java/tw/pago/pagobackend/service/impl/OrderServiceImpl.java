@@ -422,7 +422,7 @@ public class OrderServiceImpl implements OrderService {
     if (orderStatusChanged) {
       // Prepare Notification
       CreateNotificationRequestDto createNotificationRequestDto = new CreateNotificationRequestDto();
-      createNotificationRequestDto.setContent("您的委託單 " + orderItemName + " 狀態已更新為：" + newOrderStatus );
+      createNotificationRequestDto.setContent("您的委託單 " + orderItemName + " 狀態已更新為：" + newOrderStatus.getDescription() );
       createNotificationRequestDto.setActionType(ActionTypeEnum.UPDATE_ORDER_STATUS);
       createNotificationRequestDto.setNotificationType(NotificationTypeEnum.ORDER);
       createNotificationRequestDto.setImageUrl(orderFileUrl);
@@ -952,7 +952,7 @@ public class OrderServiceImpl implements OrderService {
     String orderId = order.getOrderId();
     String orderCreatorId = order.getConsumerId();
     String orderItemName = order.getOrderItem().getName();
-    String cancelReason = cancellationRecord.getCancelReason().toString();
+    String cancelReason = cancellationRecord.getCancelReason().getDescription();
     String cancellerAvatarUrl = canceller.getAvatarUrl();
     String recipientId;
 
@@ -1046,7 +1046,7 @@ public class OrderServiceImpl implements OrderService {
     String orderId = order.getOrderId();
     String orderCreatorId = order.getConsumerId();
     String orderItemName = order.getOrderItem().getName();
-    String postponeReason = postponeRecord.getPostponeReason().toString();
+    String postponeReason = postponeRecord.getPostponeReason().getDescription();
     String postponerAvatarUrl = postponer.getAvatarUrl();
     String recipientId;
 
