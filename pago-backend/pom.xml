@@ -237,6 +237,29 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                    <goals>
+                        <goal>set-system-properties</goal>
+                    </goals>
+                    <configuration>
+                        <properties>
+                        <spring.datasource.username>${spring.datasource.username}</spring.datasource.username>
+                        <spring.datasource.password>${spring.datasource.password}</spring.datasource.password>
+                        <spring.security.oauth2.client.registration.google.client-id>${spring.security.oauth2.client.registration.google.client-id}</spring.security.oauth2.client.registration.google.client-id>
+                        <spring.security.oauth2.client.registration.google.client-secret>${spring.security.oauth2.client.registration.google.client-secret}</spring.security.oauth2.client.registration.google.client-secret>
+                        <app.auth.tokenSecret>${app.auth.tokenSecret}</app.auth.tokenSecret>
+                        <app.cors.allowedOrigins>${app.cors.allowedOrigins}</app.cors.allowedOrigins>
+                        <app.oauth2.authorizedRedirectUris>${app.oauth2.authorizedRedirectUris}</app.oauth2.authorizedRedirectUris>
+                        </properties>
+                    </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
