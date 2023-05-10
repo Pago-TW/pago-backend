@@ -34,6 +34,10 @@ public interface BidService {
 
   List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto);
 
+  List<Bid> getBidListByTripId(String tripId);
+
+  List<Bid> getBidListByOrderId(String orderId);
+
   Integer countBid(ListQueryParametersDto listQueryParametersDto);
 
   BidResponseDto getBidResponseById(String bidId);
@@ -43,4 +47,6 @@ public interface BidService {
   BidResponseDto getBidResponseByOrderIdAndBidId(String orderId, String bidId);
 
   List<BidResponseDto> getBidResponseDtoList(ListQueryParametersDto listQueryParametersDto);
+
+  List<BidResponseDto> getBidResponseDtoByBidList(List<Bid> bidList);
 }

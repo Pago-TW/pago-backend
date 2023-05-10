@@ -33,6 +33,8 @@ public interface BidDao {
 
   List<Bid> getBidListByTripId(String tripId);
 
+  List<Bid> getBidListByOrderId(String orderId);
+
   Integer countBid(ListQueryParametersDto listQueryParametersDto);
 
   Integer countBidByTripId(String tripId);
