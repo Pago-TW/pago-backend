@@ -1,7 +1,7 @@
 package tw.pago.pagobackend.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.ActionTypeEnum;
@@ -12,8 +12,8 @@ import tw.pago.pagobackend.constant.NotificationTypeEnum;
 public class Notification {
   private String notificationId;
   private String content;
-  private LocalDateTime createDate;
-  private LocalDateTime updateDate;
+  private ZonedDateTime createDate;
+  private ZonedDateTime updateDate;
   private NotificationTypeEnum notificationType;
   private String imageUrl;
   private String redirectUrl;

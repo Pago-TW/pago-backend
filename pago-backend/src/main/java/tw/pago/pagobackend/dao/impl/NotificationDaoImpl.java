@@ -1,6 +1,9 @@
 package tw.pago.pagobackend.dao.impl;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +16,7 @@ import tw.pago.pagobackend.dto.CreateNotificationRequestDto;
 import tw.pago.pagobackend.dto.CreateNotificationUserMappingRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.UpdateNotificationRequestDto;
-import tw.pago.pagobackend.model.Chatroom;
 import tw.pago.pagobackend.model.Notification;
-import tw.pago.pagobackend.rowmapper.ChatroomRowMapper;
 import tw.pago.pagobackend.rowmapper.NotificationRowMapper;
 import tw.pago.pagobackend.rowmapper.NotificationWithIsReadRowMapper;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -26,6 +27,7 @@ public class NotificationDaoImpl implements NotificationDao {
   private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
   private final UuidGenerator uuidGenerator;
 
+
   @Override
   public void createNotification(CreateNotificationRequestDto createNotificationRequestDto) {
     String sql = "INSERT INTO notification (notification_id, content, create_date, update_date, notification_type, image_url, redirect_url, action_type) "
@@ -33,12 +35,11 @@ public class NotificationDaoImpl implements NotificationDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDateTime now = LocalDateTime.now();
-
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
     map.put("notificationId", createNotificationRequestDto.getNotificationId());
     map.put("content", createNotificationRequestDto.getContent());
-    map.put("createDate", now);
-    map.put("updateDate", now);
+    map.put("createDate", Timestamp.from(now.toInstant()));
+    map.put("updateDate", Timestamp.from(now.toInstant()));
     map.put("notificationType", createNotificationRequestDto.getNotificationType().name());
     map.put("imageUrl", createNotificationRequestDto.getImageUrl());
     map.put("redirectUrl", createNotificationRequestDto.getRedirectUrl());
@@ -57,14 +58,14 @@ public class NotificationDaoImpl implements NotificationDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
 
     map.put("notificationUserMappingId", createNotificationUserMappingRequestDto.getNotificationUserMappingId());
     map.put("notificationId", createNotificationUserMappingRequestDto.getNotificationId());
     map.put("userId", createNotificationUserMappingRequestDto.getUserId());
     map.put("isRead", createNotificationUserMappingRequestDto.isRead());
-    map.put("createDate", now);
-    map.put("updateDate", now);
+    map.put("createDate", Timestamp.from(now.toInstant()));
+    map.put("updateDate", Timestamp.from(now.toInstant()));
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
@@ -77,14 +78,14 @@ public class NotificationDaoImpl implements NotificationDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
 
     map.put("notificationUserMappingId", uuidGenerator.getUuid());
     map.put("notificationId", notification.getNotificationId());
     map.put("receiverId", receiverId);
     map.put("isRead", false);
-    map.put("createDate", now);
-    map.put("updateDate", now);
+    map.put("createDate", Timestamp.from(now.toInstant()));
+    map.put("updateDate", Timestamp.from(now.toInstant()));
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
   }
@@ -115,9 +116,9 @@ public class NotificationDaoImpl implements NotificationDao {
         + "WHERE notification_id = :notificationId ";
 
     Map<String, Object> map = new HashMap<>();
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
     map.put("content", updateNotificationRequestDto.getContent());
-    map.put("updateDate", now);
+    map.put("updateDate", Timestamp.from(now.toInstant()));
     map.put("notificationId", updateNotificationRequestDto.getNotificationId());
 
     namedParameterJdbcTemplate.update(sql, map);
@@ -131,9 +132,9 @@ public class NotificationDaoImpl implements NotificationDao {
         + "WHERE notification_id = :notificationId AND user_id = :userId ";
 
     Map<String, Object> map = new HashMap<>();
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
     map.put("isRead", true);
-    map.put("updateDate", now);
+    map.put("updateDate", Timestamp.from(now.toInstant()));
     map.put("notificationId", notificationId);
     map.put("userId", userId);
 
