@@ -2,6 +2,7 @@ package tw.pago.pagobackend.model;
 
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +13,7 @@ public class ChatroomUserMapping {
   private String chatroomId;
   private String userId;
   private String lastReadMessageId;
-  private LocalDateTime createDate;
-  private LocalDateTime updateDate;
+  private ZonedDateTime createDate;
+  private ZonedDateTime updateDate;
 
 }
