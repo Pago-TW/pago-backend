@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.dto;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.pago.pagobackend.constant.MessageTypeEnum;
@@ -12,7 +13,7 @@ public class MessageResponseDto {
   private String chatroomId;
   private String content;
   private String senderName;
-  private LocalDateTime sendDate;
+  private ZonedDateTime sendDate;
   private MessageTypeEnum messageType;
 
 }

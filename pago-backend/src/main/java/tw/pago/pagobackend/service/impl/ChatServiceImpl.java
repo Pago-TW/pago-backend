@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -166,7 +167,7 @@ public class ChatServiceImpl implements ChatService {
     String latestMessageSenderId = "";
     String latestMessageContent = "";
     MessageTypeEnum latestMessageType = null;
-    LocalDateTime latestMessageSendDate = null;
+    ZonedDateTime latestMessageSendDate = null;
 
     // Check if messageList is not empty before accessing its elements
     if (!messageList.isEmpty()) {
