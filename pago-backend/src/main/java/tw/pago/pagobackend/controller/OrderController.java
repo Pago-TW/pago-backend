@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -190,6 +191,9 @@ public class OrderController {
       @RequestParam(required = false) CountryCode toCountry,
       @RequestParam(required = false) CityCode toCity,
       @RequestParam(required = false) Boolean isPackagingRequired,
+      @RequestParam(required = false) @Min(0) BigDecimal minTravelerFee,
+      @RequestParam(required = false) @Min(1) BigDecimal maxTravelerFee,
+      @RequestParam(required = false) Date latestReceiveItemDate,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
@@ -205,6 +209,9 @@ public class OrderController {
         .toCountry(toCountry)
         .toCity(toCity)
         .isPackagingRequired(isPackagingRequired)
+        .minTravelerFee(minTravelerFee)
+        .maxTravelerFee(maxTravelerFee)
+        .orderLatestReceiveItemDate(latestReceiveItemDate)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)
