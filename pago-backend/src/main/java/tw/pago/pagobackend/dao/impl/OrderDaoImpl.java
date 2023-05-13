@@ -486,6 +486,11 @@ public class OrderDaoImpl implements OrderDao {
       map.put("maxTravelerFee", listQueryParametersDto.getMaxTravelerFee());
     }
 
+    if (listQueryParametersDto.getOrderLatestReceiveItemDate() != null) {
+      sql = sql + " AND om.latest_receive_item_date >= :latestReceiveItemDate ";
+      map.put("latestReceiveItemDate", listQueryParametersDto.getOrderLatestReceiveItemDate());
+    }
+
 
 
     return sql;

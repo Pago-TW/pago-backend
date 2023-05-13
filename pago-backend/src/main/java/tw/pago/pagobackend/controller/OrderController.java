@@ -19,6 +19,9 @@ import javax.validation.constraints.Min;
 import javax.validation.Validator;
 
 import lombok.AllArgsConstructor;
+import org.joda.time.format.ISODateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -193,7 +196,7 @@ public class OrderController {
       @RequestParam(required = false) Boolean isPackagingRequired,
       @RequestParam(required = false) @Min(0) BigDecimal minTravelerFee,
       @RequestParam(required = false) @Min(1) BigDecimal maxTravelerFee,
-      @RequestParam(required = false) Date latestReceiveItemDate,
+      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) Date  latestReceiveItemDate,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
