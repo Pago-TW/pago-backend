@@ -30,6 +30,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -451,6 +452,11 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public List<Order> getOrderList(ListQueryParametersDto listQueryParametersDto) {
+
+    // Checking is maxTravelerFee < minTravelerFee
+    if (listQueryParametersDto.getMinTravelerFee() != null && listQueryParametersDto.getMaxTravelerFee() != null && listQueryParametersDto.getMaxTravelerFee().compareTo(listQueryParametersDto.getMinTravelerFee()) < 0) {
+      throw new BadRequestException("maxTravelerFee cannot be less than minTravelerFee.");
+    }
 
     List<Order> orderList = orderDao.getOrderList(listQueryParametersDto);
 

@@ -476,6 +476,22 @@ public class OrderDaoImpl implements OrderDao {
       map.put("packaging", listQueryParametersDto.getIsPackagingRequired());
     }
 
+    if (listQueryParametersDto.getMinTravelerFee() != null) {
+      sql = sql + " AND om.traveler_fee >= :minTravelerFee ";
+      map.put("minTravelerFee", listQueryParametersDto.getMinTravelerFee());
+    }
+
+    if (listQueryParametersDto.getMaxTravelerFee() != null) {
+      sql = sql + " AND om.traveler_fee <= :maxTravelerFee ";
+      map.put("maxTravelerFee", listQueryParametersDto.getMaxTravelerFee());
+    }
+
+    if (listQueryParametersDto.getOrderLatestReceiveItemDate() != null) {
+      sql = sql + " AND om.latest_receive_item_date >= :latestReceiveItemDate ";
+      map.put("latestReceiveItemDate", listQueryParametersDto.getOrderLatestReceiveItemDate());
+    }
+
+
 
     return sql;
   }
