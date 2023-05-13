@@ -1,10 +1,16 @@
 name: Slack Deployment Notification
-on: 
-  deployment_status:
+on:
+  workflow_run:
+    workflows: ["Deploy to AWS Beanstalk"]
+    types:
+      - completed
 
 jobs:
   notify:
     runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' ||
+      github.event.workflow_run.conclusion == 'failure'
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -12,8 +18,7 @@ jobs:
     - name: Slack Notification
       uses: 8398a7/action-slack@v3
       with:
-        status: ${{ github.event.deployment_status.state }}
+        status: ${{ github.event.workflow_run.conclusion }}
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: always()
