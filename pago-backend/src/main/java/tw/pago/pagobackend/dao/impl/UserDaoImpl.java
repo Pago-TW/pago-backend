@@ -157,4 +157,18 @@ public class UserDaoImpl implements UserDao {
 
     namedParameterJdbcTemplate.update(sql, map);
   }
+
+  @Override
+  public List<User> searchUsers(String query) {
+    String sql = "SELECT user_id, account, password, first_name, last_name,"
+    + "phone, email, gender, google_id, account_status, update_date,"
+    + "create_date, avatar_url, about_me, country, last_login, provider "
+    + "FROM user "
+    + "WHERE account LIKE :query OR first_name LIKE :query OR last_name LIKE :query OR country LIKE :query ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("query", "%" + query + "%");
+    
+    return namedParameterJdbcTemplate.query(sql, map, new UserRowMapper());
+  }
 }

@@ -1,5 +1,7 @@
 package tw.pago.pagobackend.dao;
 
+import java.util.List;
+
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.model.User;
@@ -14,4 +16,6 @@ public interface UserDao {
   User getUserByPhone(String phone);
 
   void updateUser(UpdateUserRequestDto updateUserRequestDto);
+
+  List<User> searchUsers(String query);
 }

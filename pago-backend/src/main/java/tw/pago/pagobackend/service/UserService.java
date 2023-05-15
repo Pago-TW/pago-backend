@@ -1,5 +1,7 @@
 package tw.pago.pagobackend.service;
 
+import java.util.List;
+
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
@@ -19,5 +21,5 @@ public interface UserService {
 
   void processOAuth2PostLogin(String userEmail);
 
-
+  List<User> searchUsers(String query);
 }
