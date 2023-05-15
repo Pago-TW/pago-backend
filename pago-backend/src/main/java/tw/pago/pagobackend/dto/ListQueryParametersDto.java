@@ -1,7 +1,9 @@
 package tw.pago.pagobackend.dto;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,6 +38,9 @@ public class ListQueryParametersDto {
   private CityCode purchaseCity;
   private CountryCode destinationCountry;
   private CityCode destinationCity;
+  private BigDecimal minTravelerFee;
+  private BigDecimal maxTravelerFee;
+  private Date orderLatestReceiveItemDate; // TODO 待完成 LocalDateTime -> ZonedDateTime，要修正這裡的命名為latestReceiveItemDate
 
   // Order, Trip
   private String userId;

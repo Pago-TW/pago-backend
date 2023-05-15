@@ -1,6 +1,9 @@
 package tw.pago.pagobackend.dao.impl;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +35,12 @@ public class ChatroomDaoImpl implements ChatroomDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now();
+    Timestamp timestamp = Timestamp.from(now.toInstant());
 
     map.put("chatroomId", createChatRoomRequestDto.getChatroomId());
-    map.put("createDate", now);
-    map.put("updateDate", now);
+    map.put("createDate", timestamp);
+    map.put("updateDate", timestamp);
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
   }
@@ -48,8 +52,9 @@ public class ChatroomDaoImpl implements ChatroomDao {
         + "WHERE chatroom_id = :chatroomId ";
 
     Map<String, Object> map = new HashMap<>();
-    LocalDateTime now = LocalDateTime.now();
-    map.put("updateDate", now);
+    ZonedDateTime now = ZonedDateTime.now();
+    Timestamp timestamp = Timestamp.from(now.toInstant());
+    map.put("updateDate", timestamp);
     map.put("chatroomId", chatroomId);
 
     namedParameterJdbcTemplate.update(sql, map);
@@ -82,13 +87,14 @@ public class ChatroomDaoImpl implements ChatroomDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now();
+    Timestamp timestamp = Timestamp.from(now.toInstant());
     map.put("chatroomUserMappingId", createChatRoomUserMappingRequestDto.getChatroomUserMappingId());
     map.put("chatroomId", createChatRoomUserMappingRequestDto.getChatroomId());
     map.put("userId", createChatRoomUserMappingRequestDto.getUserId());
     map.put("lastReadMessageId", null);
-    map.put("createDate", now);
-    map.put("updateDate", now);
+    map.put("createDate", timestamp);
+    map.put("updateDate", timestamp);
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
   }
@@ -157,10 +163,11 @@ public class ChatroomDaoImpl implements ChatroomDao {
         + "WHERE chatroom_id = :chatroomId "
         + "AND user_id = :userId ";
 
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now();
+    Timestamp timestamp = Timestamp.from(now.toInstant());
     Map<String, Object> map = new HashMap<>();
     map.put("lastReadMessageId", updateChatroomUserMappingRequestDto.getLastReadMessageId());
-    map.put("updateDate", now);
+    map.put("updateDate", timestamp);
     map.put("chatroomId", updateChatroomUserMappingRequestDto.getChatroomId());
     map.put("userId", updateChatroomUserMappingRequestDto.getUserId());
 

@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.model;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import lombok.Builder;
 import lombok.Data;
 import tw.pago.pagobackend.constant.MessageTypeEnum;
@@ -13,7 +14,7 @@ public class Message {
   private String senderId;
   private String content;
   private MessageTypeEnum messageType;
-  private LocalDateTime sendDate;
+  private ZonedDateTime sendDate;
 
 
 

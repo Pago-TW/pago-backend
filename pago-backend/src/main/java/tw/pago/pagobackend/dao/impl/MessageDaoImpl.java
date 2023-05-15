@@ -1,6 +1,8 @@
 package tw.pago.pagobackend.dao.impl;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +29,15 @@ public class MessageDaoImpl implements MessageDao {
 
     Map<String, Object> map = new HashMap<>();
 
-    LocalDateTime now = LocalDateTime.now();
+    ZonedDateTime now = ZonedDateTime.now();
+    Timestamp timestamp = Timestamp.from(now.toInstant());
 
     map.put("messageId", sendMessageRequestDto.getMessageId());
     map.put("chatroomId", sendMessageRequestDto.getChatroomId());
     map.put("senderId", sendMessageRequestDto.getSenderId());
     map.put("content", sendMessageRequestDto.getContent());
     map.put("messageType", sendMessageRequestDto.getMessageType().name());
-    map.put("sendDate", now);
+    map.put("sendDate", timestamp);
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
