@@ -2,6 +2,7 @@ package tw.pago.pagobackend.dao.impl;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -43,7 +44,30 @@ public class AuthDaoImpl implements AuthDao{
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
 
-        return namedParameterJdbcTemplate.queryForObject(sql, map, new PasswordResetTokenRowMapper());
+        List<PasswordResetToken> passwordResetTokenList = namedParameterJdbcTemplate.query(sql, map, new PasswordResetTokenRowMapper());
+
+        if (passwordResetTokenList.size() > 0) {
+            return passwordResetTokenList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public PasswordResetToken getPasswordResetTokenByUserId(String userId) {
+        String sql = "SELECT password_reset_token_id, user_id, token, expiry_date, create_date " +
+        "FROM password_reset_token WHERE user_id = :userId";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+
+        List<PasswordResetToken> passwordResetTokenList = namedParameterJdbcTemplate.query(sql, map, new PasswordResetTokenRowMapper());
+
+        if (passwordResetTokenList.size() > 0) {
+            return passwordResetTokenList.get(0);
+        } else {
+            return null;
+        }
     }
 
     @Override
