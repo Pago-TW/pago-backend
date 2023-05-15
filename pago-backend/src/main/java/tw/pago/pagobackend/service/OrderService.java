@@ -99,5 +99,6 @@ public interface OrderService {
 
   void sendReplyCancelOrderEmail(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto, CancellationRecord cancellationRecord, String updatedOrderStatus);
   
+  List<Order> searchOrders(String query);
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }
