@@ -50,7 +50,7 @@ public class AuthController {
 
   }
 
-  @PostMapping("/auth/request-password-reset") // TODO，如果 帳號的 Provider 是 GOOGLE，不能給他重設密碼
+  @PostMapping("/auth/request-password-reset")
   public ResponseEntity<?> requestPasswordReset(@RequestBody @Valid PasswordRequestDto passwordRequestDto) {
 // TODO 該 user 如果二次發起重設密碼請求，直接更新原資料，把上一次的 token 蓋掉，避免該用戶重複發起多次請求，信箱內有很多連結都可以成功重設密碼，只能讓最新連結可以重設密碼
     PasswordResetToken passwordResetToken = authService.requestPasswordReset(passwordRequestDto);

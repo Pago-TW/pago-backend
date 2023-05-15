@@ -36,6 +36,7 @@ import tw.pago.pagobackend.dto.UserDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.NotFoundException;
 import tw.pago.pagobackend.model.PasswordResetToken;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.AuthService;
@@ -160,7 +161,11 @@ public class AuthServiceImpl implements AuthService {
   public PasswordResetToken requestPasswordReset(PasswordRequestDto passwordRequestDto) {
     User user = userDao.getUserByEmail(passwordRequestDto.getEmail());
     if (user == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"); // TODO 不能給 Google 登陸的用戶使用忘記密碼功能
+      throw new NotFoundException("User not found"); 
+    }
+
+    if (user.getAccount().endsWith("@gmail.com") && user.getPassword() == null) {
+      throw new BadRequestException("Google account cannot reset password");
     }
 
     String token = uuidGenerator.getUuid();
