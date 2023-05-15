@@ -13,9 +13,7 @@ import org.springframework.stereotype.Repository;
 import tw.pago.pagobackend.dao.BankAccountDao;
 import tw.pago.pagobackend.dto.CreateBankAccountRequestDto;
 import tw.pago.pagobackend.model.BankAccount;
-import tw.pago.pagobackend.model.Notification;
 import tw.pago.pagobackend.rowmapper.BankAccountRowMapper;
-import tw.pago.pagobackend.rowmapper.NotificationRowMapper;
 
 @Repository
 @AllArgsConstructor
@@ -40,7 +38,7 @@ public class BankAccountDaoImpl implements BankAccountDao {
     map.put("userId", createBankAccountRequestDto.getUserId());
     map.put("legalName", createBankAccountRequestDto.getLegalName());
     map.put("birthDate", createBankAccountRequestDto.getBirthDate());
-    map.put("identityNumber", createBankAccountRequestDto.getIdentifyNumber());
+    map.put("identityNumber", createBankAccountRequestDto.getIdentityNumber());
     map.put("residentialAddress", createBankAccountRequestDto.getResidentialAddress());
     map.put("bankName", createBankAccountRequestDto.getBankName());
     map.put("bankLocation", createBankAccountRequestDto.getBankLocation());

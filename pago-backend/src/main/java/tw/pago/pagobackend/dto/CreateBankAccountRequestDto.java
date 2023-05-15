@@ -12,7 +12,7 @@ public class CreateBankAccountRequestDto {
   private String userId;
   private String legalName;
   private LocalDate birthDate;
-  private String identifyNumber;
+  private String identityNumber;
   private String residentialAddress;
   private String bankName;
   private String bankLocation;

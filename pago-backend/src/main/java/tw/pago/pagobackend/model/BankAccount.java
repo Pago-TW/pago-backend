@@ -1,7 +1,6 @@
 package tw.pago.pagobackend.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ public class BankAccount {
   private String userId;
   private String legalName;
   private LocalDate birthDate;
-  private String identifyNumber;
+  private String identityNumber;
   private String residentialAddress;
   private String bankName;
   private String bankLocation;
