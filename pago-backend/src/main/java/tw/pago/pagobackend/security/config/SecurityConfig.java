@@ -118,7 +118,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/users/{userId}",
             "/trips/**",
             "/orders/**",
-            "/bids/**"
+            "/bids/**",
+            "/search"
             ) 
         .permitAll()
         .anyRequest()
