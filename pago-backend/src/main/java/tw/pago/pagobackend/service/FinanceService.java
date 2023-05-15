@@ -6,4 +6,6 @@ import tw.pago.pagobackend.model.BankAccount;
 public interface FinanceService {
   BankAccount createBankAccount(CreateBankAccountRequestDto createBankAccountRequestDto);
 
+  BankAccount getBankAccountById(String bankAccountId);
+
 }
