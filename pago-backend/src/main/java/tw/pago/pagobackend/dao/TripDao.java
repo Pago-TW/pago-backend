@@ -33,4 +33,6 @@ public interface TripDao {
     Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
 
     Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
+
+    List<Trip> searchTrips(String query);
 }

@@ -325,6 +325,22 @@ public class TripDaoImpl implements TripDao {
     return total;
   }
 
+  @Override
+  public List<Trip> searchTrips(String query) {
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    + "arrival_date, profit, create_date, update_date "
+    + "FROM trip "
+    + "WHERE from_country LIKE :query OR from_city LIKE :query OR to_country LIKE :query OR to_city LIKE :query OR "
+    + "arrival_date LIKE :query";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("query", "%" + query + "%");
+
+    List<Trip> tripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return tripList;
+  }
+
   private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {
 
     if (listQueryParametersDto.getUserId() != null) {
