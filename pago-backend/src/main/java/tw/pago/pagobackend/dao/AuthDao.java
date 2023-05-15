@@ -7,5 +7,7 @@ public interface AuthDao {
 
     PasswordResetToken getPasswordResetTokenByToken(String token);
 
+    PasswordResetToken getPasswordResetTokenByUserId(String userId);
+
     void deletePasswordResetTokenById(String tokenId);
 }

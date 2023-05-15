@@ -51,4 +51,6 @@ public interface TripService {
     Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
 
     Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
+
+    List<Trip> searchTrips(String query);
 }

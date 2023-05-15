@@ -1559,4 +1559,8 @@ public class OrderServiceImpl implements OrderService {
     sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent! (cancelReply)");
   }
+
+  public List<Order> searchOrders(String query) {
+    return orderDao.searchOrders(query);
+  }
 }

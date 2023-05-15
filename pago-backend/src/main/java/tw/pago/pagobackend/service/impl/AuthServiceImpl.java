@@ -1,7 +1,7 @@
 package tw.pago.pagobackend.service.impl;
 
 
-import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,7 +19,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
@@ -36,6 +34,8 @@ import tw.pago.pagobackend.dto.UserDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.NotFoundException;
+import tw.pago.pagobackend.exception.TooManyRequestsException;
 import tw.pago.pagobackend.model.PasswordResetToken;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.AuthService;
@@ -160,7 +160,31 @@ public class AuthServiceImpl implements AuthService {
   public PasswordResetToken requestPasswordReset(PasswordRequestDto passwordRequestDto) {
     User user = userDao.getUserByEmail(passwordRequestDto.getEmail());
     if (user == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"); // TODO 不能給 Google 登陸的用戶使用忘記密碼功能
+      throw new NotFoundException("User not found"); 
+    }
+
+    if (user.getAccount().endsWith("@gmail.com") && user.getPassword() == null) {
+      throw new BadRequestException("Google account cannot reset password");
+    }
+
+    PasswordResetToken existingPasswordResetToken = authDao.getPasswordResetTokenByUserId(user.getUserId());
+
+    if (existingPasswordResetToken != null) {
+
+      LocalDateTime latestResetDateTime = existingPasswordResetToken.getCreateDate();
+      LocalDateTime currentDateTime = LocalDateTime.now();
+  
+      Duration duration = Duration.between(latestResetDateTime, currentDateTime);
+      long differenceInSeconds = duration.getSeconds();
+      
+      long cooldownInSeconds = 3 * 60; // 3 minutes in seconds
+  
+      if (differenceInSeconds < cooldownInSeconds) {
+        // It's been less than 3 minutes since the last reset request
+        throw new TooManyRequestsException("You must wait at least 3 minutes between password reset requests.");
+      }
+      // It's been more than 3 minutes, deleting existing token
+      authDao.deletePasswordResetTokenById(existingPasswordResetToken.getPasswordResetTokenId());
     }
 
     String token = uuidGenerator.getUuid();
@@ -215,11 +239,11 @@ public class AuthServiceImpl implements AuthService {
     PasswordResetToken passwordResetToken = authDao.getPasswordResetTokenByToken(newPasswordDto.getToken());
 
     if (passwordResetToken == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Token not found");
+        throw new BadRequestException("Token not found");
     }
 
     if (passwordResetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token has expired");
+        throw new NotFoundException("Token has expired");
     }
 
     User user = userDao.getUserById(passwordResetToken.getUserId());

@@ -13,7 +13,9 @@ import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
+import tw.pago.pagobackend.exception.NotFoundException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
+import tw.pago.pagobackend.exception.TooManyRequestsException;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
@@ -143,5 +145,27 @@ public class GlobalExceptionHandler {
         errorDetails.put("message", ex.getMessage());
 
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("timestamp", LocalDateTime.now());
+        errorDetails.put("status", HttpStatus.NOT_FOUND.value());
+        errorDetails.put("error", "Not Found");
+        errorDetails.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<?> handleTooManyRequestsException(TooManyRequestsException ex) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("timestamp", LocalDateTime.now());
+        errorDetails.put("status", HttpStatus.TOO_MANY_REQUESTS.value());
+        errorDetails.put("error", "Too Many Requests");
+        errorDetails.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.TOO_MANY_REQUESTS);
     }
 }

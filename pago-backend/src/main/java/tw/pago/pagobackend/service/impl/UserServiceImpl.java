@@ -281,4 +281,8 @@ public class UserServiceImpl implements UserService {
       return CompletionRatingEnum.POOR;
     }
   }
+
+  public List<User> searchUsers(String query) {
+    return userDao.searchUsers(query);
+  }
 }
