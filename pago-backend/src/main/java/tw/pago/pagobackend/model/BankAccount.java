@@ -23,6 +23,7 @@ public class BankAccount {
   private String accountNumber;
   private ZonedDateTime createDate;
   private ZonedDateTime updateDate;
+  private Boolean isDefault;
 
 
 

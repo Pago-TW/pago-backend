@@ -22,10 +22,10 @@ public class FinanceDaoImpl implements FinanceDao {
   public void createBankAccount(CreateBankAccountRequestDto createBankAccountRequestDto) {
     String sql = "INSERT INTO bank_account (bank_account_id, user_id, legal_name, birth_date, "
         + "identity_number, residential_address, bank_name, bank_location, branch_name, "
-        + "account_holder_name, account_number, create_date, update_date) "
+        + "account_holder_name, account_number, is_default, create_date, update_date) "
         + "VALUES (:bankAccountId, :userId, :legalName, :birthDate, :identityNumber, "
         + ":residentialAddress, :bankName, :bankLocation, :branchName, :accountHolderName, "
-        + ":accountNumber, :createDate, :updateDate )";
+        + ":accountNumber, :isDefault, :createDate, :updateDate )";
 
     Map<String, Object> map = new HashMap<>();
 
@@ -42,6 +42,7 @@ public class FinanceDaoImpl implements FinanceDao {
     map.put("branchName", createBankAccountRequestDto.getBranchName());
     map.put("accountHolderName", createBankAccountRequestDto.getAccountHolderName());
     map.put("accountNumber", createBankAccountRequestDto.getAccountNumber());
+    map.put("isDefault", createBankAccountRequestDto.getIsDefault());
     map.put("createDate", Timestamp.from(now.toInstant()));
     map.put("updateDate", Timestamp.from(now.toInstant()));
 

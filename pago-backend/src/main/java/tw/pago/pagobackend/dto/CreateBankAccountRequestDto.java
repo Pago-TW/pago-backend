@@ -21,5 +21,6 @@ public class CreateBankAccountRequestDto {
   private String accountNumber;
   private ZonedDateTime createDate;
   private ZonedDateTime updateDate;
+  private Boolean isDefault;
 
 }
