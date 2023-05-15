@@ -1,15 +1,13 @@
-package tw.pago.pagobackend.model;
+package tw.pago.pagobackend.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 @Data
-public class BankAccount {
-
+@NoArgsConstructor
+public class CreateBankAccountRequestDto {
   private String bankAccountId;
   private String userId;
   private String legalName;
@@ -23,8 +21,5 @@ public class BankAccount {
   private String accountNumber;
   private ZonedDateTime createDate;
   private ZonedDateTime updateDate;
-
-
-
 
 }
