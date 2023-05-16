@@ -2,10 +2,14 @@ package tw.pago.pagobackend.controller;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +25,7 @@ import tw.pago.pagobackend.util.CountryUtil;
 public class CountryAndCityController {
 
   private final CountryUtil countryUtil;
+  private final ResourceLoader resourceLoader;
 
 //  @Deprecated
 //  @GetMapping("/countries")
@@ -144,6 +149,38 @@ public class CountryAndCityController {
     }
 
     return locations;
+  }
+
+
+  @GetMapping("/administrative-divisions")
+  public ResponseEntity<List<String>> getAdministrativeDivision() {
+
+    List<String> taiwanAdministrativeDivision = Arrays.asList(
+        "台北市",
+        "新北市",
+        "基隆市",
+        "桃園市",
+        "新竹市",
+        "新竹縣",
+        "苗栗縣",
+        "台中市",
+        "彰化縣",
+        "南投縣",
+        "雲林縣",
+        "嘉義市",
+        "嘉義縣",
+        "台南市",
+        "高雄市",
+        "屏東縣",
+        "宜蘭縣",
+        "花蓮縣",
+        "台東縣",
+        "澎湖縣",
+        "金門縣",
+        "連江縣"
+    );
+
+    return ResponseEntity.status(HttpStatus.OK).body(taiwanAdministrativeDivision);
   }
 
 }
