@@ -14,9 +14,8 @@ public class CreateBankAccountRequestDto {
   private LocalDate birthDate;
   private String identityNumber;
   private String residentialAddress;
-  private String bankName;
-  private String bankLocation;
-  private String branchName;
+  private String bankCode;
+  private String branchCode;
   private String accountHolderName;
   private String accountNumber;
   private ZonedDateTime createDate;

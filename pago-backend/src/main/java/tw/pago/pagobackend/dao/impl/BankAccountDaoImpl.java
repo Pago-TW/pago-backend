@@ -24,10 +24,10 @@ public class BankAccountDaoImpl implements BankAccountDao {
   @Override
   public void createBankAccount(CreateBankAccountRequestDto createBankAccountRequestDto) {
     String sql = "INSERT INTO bank_account (bank_account_id, user_id, legal_name, birth_date, "
-        + "identity_number, residential_address, bank_name, bank_location, branch_name, "
+        + "identity_number, residential_address, bank_code, branch_code, "
         + "account_holder_name, account_number, is_default, create_date, update_date) "
         + "VALUES (:bankAccountId, :userId, :legalName, :birthDate, :identityNumber, "
-        + ":residentialAddress, :bankName, :bankLocation, :branchName, :accountHolderName, "
+        + ":residentialAddress, :bankCode, :branchCode, :accountHolderName, "
         + ":accountNumber, :isDefault, :createDate, :updateDate )";
 
     Map<String, Object> map = new HashMap<>();
@@ -40,9 +40,8 @@ public class BankAccountDaoImpl implements BankAccountDao {
     map.put("birthDate", createBankAccountRequestDto.getBirthDate());
     map.put("identityNumber", createBankAccountRequestDto.getIdentityNumber());
     map.put("residentialAddress", createBankAccountRequestDto.getResidentialAddress());
-    map.put("bankName", createBankAccountRequestDto.getBankName());
-    map.put("bankLocation", createBankAccountRequestDto.getBankLocation());
-    map.put("branchName", createBankAccountRequestDto.getBranchName());
+    map.put("bankCode", createBankAccountRequestDto.getBankCode());
+    map.put("branchCode", createBankAccountRequestDto.getBranchCode());
     map.put("accountHolderName", createBankAccountRequestDto.getAccountHolderName());
     map.put("accountNumber", createBankAccountRequestDto.getAccountNumber());
     map.put("isDefault", createBankAccountRequestDto.getIsDefault());
@@ -56,7 +55,7 @@ public class BankAccountDaoImpl implements BankAccountDao {
   @Override
   public BankAccount getBankAccountById(String bankAccountId) {
     String sql = "SELECT bank_account_id, user_id, legal_name, birth_date, "
-        + "identity_number, residential_address, bank_name, bank_location, branch_name, "
+        + "identity_number, residential_address, bank_code, branch_code, "
         + "account_holder_name, account_number, is_default, create_date, update_date "
         + "FROM bank_account "
         + "WHERE bank_account_id = :bankAccountId ";

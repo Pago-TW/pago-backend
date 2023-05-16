@@ -17,9 +17,8 @@ public class BankAccountRowMapper implements RowMapper<BankAccount> {
     bankAccount.setBirthDate(resultSet.getDate("birth_date").toLocalDate());
     bankAccount.setIdentityNumber(resultSet.getString("identity_number"));
     bankAccount.setResidentialAddress(resultSet.getString("residential_address"));
-    bankAccount.setBankName(resultSet.getString("bank_name"));
-    bankAccount.setBankLocation(resultSet.getString("bank_location"));
-    bankAccount.setBranchName(resultSet.getString("branch_name"));
+    bankAccount.setBankCode(resultSet.getString("bank_code"));
+    bankAccount.setBranchCode(resultSet.getString("branch_code"));
     bankAccount.setAccountHolderName(resultSet.getString("account_holder_name"));
     bankAccount.setAccountNumber(resultSet.getString("account_number"));
     bankAccount.setIsDefault(resultSet.getBoolean("is_default"));
