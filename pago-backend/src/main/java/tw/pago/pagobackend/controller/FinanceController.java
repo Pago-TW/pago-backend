@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.controller;
 
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.CreateBankAccountRequestDto;
+import tw.pago.pagobackend.model.Bank;
 import tw.pago.pagobackend.model.BankAccount;
 import tw.pago.pagobackend.service.FinanceService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
@@ -41,5 +43,12 @@ public class FinanceController {
     return ResponseEntity.status(HttpStatus.OK).body(bankAccount);
   }
 
+
+  @GetMapping("/banks")
+  public ResponseEntity<List<Bank>> getBankList() {
+    List<Bank> bankList = financeService.getBankList();
+
+    return ResponseEntity.status(HttpStatus.OK).body(bankList);
+  }
 
 }
