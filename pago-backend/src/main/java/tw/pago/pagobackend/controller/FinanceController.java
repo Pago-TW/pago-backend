@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.CreateBankAccountRequestDto;
 import tw.pago.pagobackend.model.Bank;
 import tw.pago.pagobackend.model.BankAccount;
+import tw.pago.pagobackend.model.BankBranch;
 import tw.pago.pagobackend.service.FinanceService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
@@ -51,4 +53,12 @@ public class FinanceController {
     return ResponseEntity.status(HttpStatus.OK).body(bankList);
   }
 
+  @GetMapping("/bank-branches")
+  public ResponseEntity<List<BankBranch>> getBankBranchList(
+      @RequestParam(required = true) String administrativeDivision,
+      @RequestParam(required = true) String bankCode) {
+    List<BankBranch> bankBranchList = financeService.getBankBranchListByAdministrativeDivisionAndBankCode(administrativeDivision, bankCode);
+
+    return ResponseEntity.status(HttpStatus.OK).body(bankBranchList);
+  }
 }
