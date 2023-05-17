@@ -119,7 +119,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/trips/**",
             "/orders/**",
             "/bids/**",
-            "/search"
+            "/search",
+            "/banks",
+            "/bank-branches",
+            "/districts",
+            "/administrative-divisions"
             ) 
         .permitAll()
         .anyRequest()
