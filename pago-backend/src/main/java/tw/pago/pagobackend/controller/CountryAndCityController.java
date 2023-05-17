@@ -1,12 +1,20 @@
 package tw.pago.pagobackend.controller;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.CityCode;
 import tw.pago.pagobackend.constant.CountryCode;
+import tw.pago.pagobackend.dto.AdministrativeDivisionDto;
 import tw.pago.pagobackend.dto.CountryAndCityResponseDto;
 import tw.pago.pagobackend.model.City;
 import tw.pago.pagobackend.model.Country;
@@ -26,6 +35,7 @@ public class CountryAndCityController {
 
   private final CountryUtil countryUtil;
   private final ResourceLoader resourceLoader;
+  private List<AdministrativeDivisionDto> administrativeDivisionDtoList;
 
 //  @Deprecated
 //  @GetMapping("/countries")
@@ -181,6 +191,31 @@ public class CountryAndCityController {
     );
 
     return ResponseEntity.status(HttpStatus.OK).body(taiwanAdministrativeDivision);
+  }
+
+
+  @PostConstruct
+  public void init() throws IOException {
+    Resource resource = resourceLoader.getResource("classpath:TaiwanCityCountyData.json");
+    InputStream input = resource.getInputStream();
+    ObjectMapper mapper = new ObjectMapper();
+    administrativeDivisionDtoList = mapper.readValue(input, new TypeReference<List<AdministrativeDivisionDto>>() {});
+  }
+
+
+  @GetMapping("/districts")
+  public ResponseEntity<?> getDistrictsList(@RequestParam(required = false) String administrativeDivision) {
+    if (administrativeDivision != null) {
+      Optional<AdministrativeDivisionDto> matchingDivision = administrativeDivisionDtoList.stream()
+          .filter(administrativeDivisionDto -> administrativeDivisionDto.getAdministrativeDivisionChineseName().equals(administrativeDivision))
+          .findFirst();
+
+      return matchingDivision
+          .map(division -> ResponseEntity.status(HttpStatus.OK).body(Collections.singletonList(division)))
+          .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    return ResponseEntity.status(HttpStatus.OK).body(administrativeDivisionDtoList);
   }
 
 }
