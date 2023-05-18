@@ -587,7 +587,7 @@ public class OrderServiceImpl implements OrderService {
     Map<String, List<Trip>> shopperIdToTripsMap = matchingTripList.stream()
         .collect(Collectors.groupingBy(Trip::getShopperId));
 
-    // Remove matching-shoppers who have placed a bid
+    // Remove matching-shoppers who have placed a bid // TODO is this removing matching shopper
     bidderIdToBidsMap.keySet().forEach(shopperIdToTripsMap::remove);
 
     for (Map.Entry<String, List<Trip>> entry : shopperIdToTripsMap.entrySet()) {
