@@ -214,11 +214,13 @@ public class AuthServiceImpl implements AuthService {
     String passwordResetRequestCreateDate = formatter.format(LocalDateTime.now());
     String contentTitle = "重設密碼";
     String recipientUserEmail = user.getEmail();
+    String recipientUserId = user.getUserId();
     String username = user.getFirstName();
     String emailBody = String.format("您已於 <b>%s</b> 提出重設密碼的請求，請點擊下方連結進行密碼重設。<br><br><p><a href=\"%s\">重設密碼連結</a></p>" +
     "<br><br>如果您並未申請重設密碼，請忽略此電子郵件", passwordResetRequestCreateDate, passwordUrl);
 
     EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setRecipientUserId(recipientUserId);
     emailRequest.setTo(recipientUserEmail);
     emailRequest.setSubject("【Pago " + contentTitle + "】");
     emailRequest.setBody(emailBody);
