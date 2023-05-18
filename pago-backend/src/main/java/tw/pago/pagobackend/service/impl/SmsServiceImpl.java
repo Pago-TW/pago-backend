@@ -8,16 +8,28 @@ import com.amazonaws.services.sns.model.PublishResult;
 
 import lombok.AllArgsConstructor;
 import tw.pago.pagobackend.dto.SmsRequestDto;
+import tw.pago.pagobackend.exception.TooManyRequestsException;
+import tw.pago.pagobackend.service.DailyCountService;
 import tw.pago.pagobackend.service.SmsService;
+import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @Service
 @AllArgsConstructor
 public class SmsServiceImpl implements SmsService {
     
     private final AmazonSNS amazonSNS;
+    private final DailyCountService dailyCountService;
+    private final CurrentUserInfoProvider currentUserInfoProvider;
 
     @Override
     public void sendSms(SmsRequestDto smsRequestDto) {
+        String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+        if (dailyCountService.isReachedDailySmsLimit(currentLoginUserId)) {
+            throw new TooManyRequestsException("You have reached the daily SMS limit. Please try again tomorrow");
+        }
+
+        dailyCountService.incrementSmsCount(currentLoginUserId);
         
         PublishRequest publishRequest = new PublishRequest()
         .withMessage(smsRequestDto.getMessage())
