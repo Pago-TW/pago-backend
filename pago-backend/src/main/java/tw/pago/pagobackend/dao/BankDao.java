@@ -7,4 +7,6 @@ public interface BankDao {
 
   List<Bank> getBankList();
 
+  Bank getBankByBankCode(String bankCode);
+
 }

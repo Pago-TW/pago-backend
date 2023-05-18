@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tw.pago.pagobackend.dto.BankAccountResponseDto;
 import tw.pago.pagobackend.dto.CreateBankAccountRequestDto;
 import tw.pago.pagobackend.model.Bank;
 import tw.pago.pagobackend.model.BankAccount;
@@ -39,10 +40,11 @@ public class FinanceController {
   }
 
   @GetMapping("/bank-accounts/{bankAccountId}")
-  public ResponseEntity<BankAccount> getBankAccount(@PathVariable String bankAccountId) {
+  public ResponseEntity<BankAccountResponseDto> getBankAccount(@PathVariable String bankAccountId) {
     BankAccount bankAccount = financeService.getBankAccountById(bankAccountId);
+    BankAccountResponseDto bankAccountResponseDto = financeService.getBankAccountResponseDtoByBankAccount(bankAccount);
 
-    return ResponseEntity.status(HttpStatus.OK).body(bankAccount);
+    return ResponseEntity.status(HttpStatus.OK).body(bankAccountResponseDto);
   }
 
 
