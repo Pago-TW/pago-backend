@@ -23,6 +23,7 @@ import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.AuthDao;
+import tw.pago.pagobackend.dao.PhoneVerificationDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.JwtAuthenticationResponseDto;
@@ -37,8 +38,10 @@ import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.NotFoundException;
 import tw.pago.pagobackend.exception.TooManyRequestsException;
 import tw.pago.pagobackend.model.PasswordResetToken;
+import tw.pago.pagobackend.model.PhoneVerification;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.AuthService;
+import tw.pago.pagobackend.service.OtpService;
 import tw.pago.pagobackend.service.SesEmailService;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.JwtTokenProvider;
@@ -68,12 +71,15 @@ public class AuthServiceImpl implements AuthService {
   private UuidGenerator uuidGenerator;
   @Autowired
   private SesEmailService sesEmailService;
+  @Autowired
+  private PhoneVerificationDao phoneVerificationDao;
 
   @Override
   public JwtAuthenticationResponseDto login(UserLoginRequestDto userLoginRequestDto) {
 
     // Retrieve the user by email
     User user = userDao.getUserByEmail(userLoginRequestDto.getEmail());
+    String userId = user.getUserId();
 
     // Authenticate the user with the given email and password
     Authentication authentication = authenticationManager.authenticate(
@@ -101,6 +107,10 @@ public class AuthServiceImpl implements AuthService {
 
     // Convert the user object to a user DTO
     UserDto userDto = modelMapper.map(user, UserDto.class);
+
+    // Check login user is verified phone
+    PhoneVerification phoneVerification = phoneVerificationDao.getPhoneVerificationByUserId(userId);
+    userDto.setIsPhoneVerified(phoneVerification != null);
 
     // Build the JWT authentication response DTO with the token and user DTO
     JwtAuthenticationResponseDto jwtAuthenticationResponseDto = JwtAuthenticationResponseDto.builder()

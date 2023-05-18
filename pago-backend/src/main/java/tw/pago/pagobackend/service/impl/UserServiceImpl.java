@@ -17,6 +17,7 @@ import tw.pago.pagobackend.constant.CompletionRatingEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
+import tw.pago.pagobackend.dao.PhoneVerificationDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
@@ -27,6 +28,7 @@ import tw.pago.pagobackend.dto.UserResponseDto;
 import tw.pago.pagobackend.dto.UserReviewDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
+import tw.pago.pagobackend.model.PhoneVerification;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
@@ -49,19 +51,22 @@ public class UserServiceImpl implements UserService {
   private final TripService tripService;
   private BidService bidService;
   private final CancellationRecordDao cancellationRecordDao;
+  private final PhoneVerificationDao phoneVerificationDao;
 
   public UserServiceImpl(UuidGenerator uuidGenerator,
       UserDao userDao,
       ModelMapper modelMapper,
       ReviewService reviewService,
       TripService tripService,
-      CancellationRecordDao cancellationRecordDao) {
+      CancellationRecordDao cancellationRecordDao,
+      PhoneVerificationDao phoneVerificationDao) {
     this.uuidGenerator = uuidGenerator;
     this.userDao = userDao;
     this.modelMapper = modelMapper;
     this.reviewService = reviewService;
     this.tripService = tripService;
     this.cancellationRecordDao = cancellationRecordDao;
+    this.phoneVerificationDao = phoneVerificationDao;
   }
 
   @Autowired
@@ -116,6 +121,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserResponseDto getUserResponseDtoByUser(User user) {
+    String userId = user.getUserId();
 
     UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
 
@@ -139,11 +145,16 @@ public class UserServiceImpl implements UserService {
     CompletionRatingEnum completionRating = getUserCompletionRating(user);
     userResponseDto.setCompletionRating(completionRating);
 
+    // Check login user is verified phone
+    PhoneVerification phoneVerification = phoneVerificationDao.getPhoneVerificationByUserId(userId);
+    userResponseDto.setIsPhoneVerified(phoneVerification != null);
+
 
     return userResponseDto;
   }
 
   @Override
+  @Deprecated
   public User login(UserLoginRequestDto userLoginRequestDto) {
     User user = userDao.getUserByEmail(userLoginRequestDto.getEmail());
 

@@ -34,6 +34,7 @@ public class UserResponseDto {
 
   // For programing use;
   private String fullName;
+  private Boolean isPhoneVerified;
   private CompletionRatingEnum completionRating;
 
 
