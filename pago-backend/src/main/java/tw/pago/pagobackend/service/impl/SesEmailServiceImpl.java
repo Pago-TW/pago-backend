@@ -35,8 +35,13 @@ public class SesEmailServiceImpl implements SesEmailService {
     @Override
     public void sendEmail(EmailRequestDto emailRequestDto) {
         try {
-            User recipient = userDao.getUserByEmail(emailRequestDto.getTo());
-            String recipientUserId = recipient.getUserId();
+            String recipientEmail = emailRequestDto.getTo();
+            String recipientUserId = emailRequestDto.getRecipientUserId();
+
+            if (recipientUserId == null) {
+                User recipient = userDao.getUserByEmail(recipientEmail);
+                recipientUserId = recipient.getUserId();
+            }
 
             if (dailyCountService.isReachedDailyEmailLimit(recipientUserId)) {
                 throw new TooManyRequestsException("You have reached the daily Email limit. Please try again tomorrow");

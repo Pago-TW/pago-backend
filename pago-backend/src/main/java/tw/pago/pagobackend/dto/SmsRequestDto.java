@@ -13,4 +13,7 @@ public class SmsRequestDto {
 
     @NotNull
     private String message;
+
+    @NotNull
+    private String recipientUserId;
 }

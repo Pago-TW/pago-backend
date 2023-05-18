@@ -19,17 +19,16 @@ public class SmsServiceImpl implements SmsService {
     
     private final AmazonSNS amazonSNS;
     private final DailyCountService dailyCountService;
-    private final CurrentUserInfoProvider currentUserInfoProvider;
 
     @Override
     public void sendSms(SmsRequestDto smsRequestDto) {
-        String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+        String recipientUserId = smsRequestDto.getRecipientUserId();
 
-        if (dailyCountService.isReachedDailySmsLimit(currentLoginUserId)) {
+        if (dailyCountService.isReachedDailySmsLimit(recipientUserId)) {
             throw new TooManyRequestsException("You have reached the daily SMS limit. Please try again tomorrow");
         }
 
-        dailyCountService.incrementSmsCount(currentLoginUserId);
+        dailyCountService.incrementSmsCount(recipientUserId);
         
         PublishRequest publishRequest = new PublishRequest()
         .withMessage(smsRequestDto.getMessage())
