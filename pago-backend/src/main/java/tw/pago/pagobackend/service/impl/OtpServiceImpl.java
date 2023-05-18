@@ -1,16 +1,11 @@
 package tw.pago.pagobackend.service.impl;
 
-import java.sql.Timestamp;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.AllArgsConstructor;
 import tw.pago.pagobackend.dao.OtpDao;
 import tw.pago.pagobackend.dto.SmsRequestDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
@@ -35,6 +30,7 @@ public class OtpServiceImpl implements OtpService {
     @Transactional
     @Override
     public Otp requestOtp(String phone) {
+        String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
         String internationalPhoneNumber = "+886" + phone.substring(1);
         Otp existingOtp = otpDao.getOtpByPhone(internationalPhoneNumber);
         if (existingOtp != null) {
@@ -62,6 +58,7 @@ public class OtpServiceImpl implements OtpService {
         SmsRequestDto smsRequestDto = SmsRequestDto.builder()
             .internationalPhoneNumber(internationalPhoneNumber)
             .message(message)
+            .recipientUserId(currentLoginUserId)
             .build();
         smsService.sendSms(smsRequestDto);
 
