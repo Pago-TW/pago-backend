@@ -73,4 +73,23 @@ public class BankAccountDaoImpl implements BankAccountDao {
       return null;
     }
   }
+
+  @Override
+  public List<BankAccount> getBankAccountListByUserId(String userId) {
+    String sql = "SELECT bank_account_id, user_id, legal_name, birth_date, "
+        + "identity_number, residential_address, zip_code,bank_code, branch_code, "
+        + "account_holder_name, account_number, is_default, create_date, update_date "
+        + "FROM bank_account "
+        + "WHERE user_id = :userId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userId", userId);
+
+
+    List<BankAccount> bankAccountList = namedParameterJdbcTemplate.query(sql, map, new BankAccountRowMapper());
+
+
+    return bankAccountList;
+  }
+
 }

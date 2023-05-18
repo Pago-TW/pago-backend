@@ -14,6 +14,8 @@ public interface FinanceService {
 
   BankAccountResponseDto getBankAccountResponseDtoByBankAccount(BankAccount bankAccount);
 
+  List<BankAccount> getBankAccountListByUserId(String userId);
+
   List<Bank> getBankList();
 
   List<BankBranch> getBankBranchListByAdministrativeDivisionAndBankCode(String administrativeDivision, String bankCode);

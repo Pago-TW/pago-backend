@@ -78,6 +78,11 @@ public class FinanceServiceImpl implements FinanceService {
   }
 
   @Override
+  public List<BankAccount> getBankAccountListByUserId(String userId) {
+    return bankAccountDao.getBankAccountListByUserId(userId);
+  }
+
+  @Override
   public List<Bank> getBankList() {
     return bankDao.getBankList();
   }
