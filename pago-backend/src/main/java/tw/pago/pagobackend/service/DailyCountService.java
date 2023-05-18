@@ -10,4 +10,8 @@ public interface DailyCountService {
 
   void createDailyCount(CreateDailyCountRequestDto createDailyCountRequestDto);
 
+  boolean isReachedDailySmsLimit(String userId);
+
+  boolean isReachedDailyEmailLimit(String userId);
+
 }

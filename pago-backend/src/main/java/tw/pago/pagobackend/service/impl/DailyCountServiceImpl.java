@@ -15,6 +15,9 @@ import tw.pago.pagobackend.util.UuidGenerator;
 @AllArgsConstructor
 public class DailyCountServiceImpl implements DailyCountService {
 
+  private static final Integer MAX_DAILY_SMS = 10;
+  private static final Integer MAX_DAILY_EMAIL = 50;
+
   private final DailyCountDao dailyCountDao;
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final UuidGenerator uuidGenerator;
@@ -69,5 +72,31 @@ public class DailyCountServiceImpl implements DailyCountService {
     createDailyCountRequestDto.setDailyCountId(dailyCountId);
 
     dailyCountDao.createDailyCount(createDailyCountRequestDto);
+  }
+
+  @Override
+  public boolean isReachedDailySmsLimit(String userId) {
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
+
+    DailyCount dailyCount = dailyCountDao.getDailyCountByUserIdAndCreateDate(userId, today);
+    if (dailyCount == null) {
+      return false;
+    }
+
+    return dailyCount.getSmsCount() > MAX_DAILY_SMS;
+  }
+
+  @Override
+  public boolean isReachedDailyEmailLimit(String userId) {
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
+
+    DailyCount dailyCount = dailyCountDao.getDailyCountByUserIdAndCreateDate(userId, today);
+    if (dailyCount == null) {
+      return false;
+    }
+
+    return dailyCount.getEmailCount() > MAX_DAILY_EMAIL;
   }
 }
