@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.controller;
 
+import java.sql.Timestamp;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -165,6 +166,7 @@ public class GlobalExceptionHandler {
         errorDetails.put("status", HttpStatus.TOO_MANY_REQUESTS.value());
         errorDetails.put("error", "Too Many Requests");
         errorDetails.put("message", ex.getMessage());
+        errorDetails.put("otpCodeCreateDate", ex.getCreateDate());
 
         return new ResponseEntity<>(errorDetails, HttpStatus.TOO_MANY_REQUESTS);
     }

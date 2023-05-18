@@ -49,7 +49,7 @@ public class OtpServiceImpl implements OtpService {
             if (differenceInSeconds < cooldownInSeconds) {
                 System.out.println("It's been less than 3 minutes since the last reset request");
               // It's been less than 3 minutes since the last reset request
-              throw new TooManyRequestsException("You can request another SMS in " + (cooldownInSeconds - differenceInSeconds) + " seconds.");
+              throw new TooManyRequestsException("You can request another SNS in " + (cooldownInSeconds - differenceInSeconds) + " seconds.", latestResetDateTime);
             }
             otpDao.deleteOtpById(existingOtp.getOtpId());
         }
