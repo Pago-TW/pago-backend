@@ -194,7 +194,7 @@ public class AuthServiceImpl implements AuthService {
         .passwordResetTokenId(passwordResetTokenId)
         .userId(user.getUserId())
         .token(token)
-        .expiryDate(LocalDateTime.now().plusHours(24)) // Set token to expire in 24 hours
+        .expiryDate(LocalDateTime.now().plusHours(1))
         .build();
 
     authDao.createToken(passwordResetToken);
