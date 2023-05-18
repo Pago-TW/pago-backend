@@ -1,5 +1,8 @@
 package tw.pago.pagobackend.dao.impl;
 
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +29,12 @@ public class PhoneVerificationDaoImpl implements PhoneVerificationDao {
         "VALUES (:verificationId, :userId, :phone, :isPhoneVerified, :createDate)";
 
         Map<String, Object> map = new HashMap<>();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         map.put("verificationId", phoneVerificationDto.getVerificationId());
         map.put("userId", phoneVerificationDto.getUserId());
         map.put("phone", phoneVerificationDto.getPhone());
         map.put("isPhoneVerified", phoneVerificationDto.isPhoneVerified());
-        map.put("createDate", phoneVerificationDto.getCreateDate());
+        map.put("createDate", Timestamp.from(now.toInstant()));
 
         namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
         

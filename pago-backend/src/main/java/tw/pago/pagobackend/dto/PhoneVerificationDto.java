@@ -2,6 +2,7 @@ package tw.pago.pagobackend.dto;
 
 import java.time.LocalDateTime;
 
+import java.time.ZonedDateTime;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,5 +13,5 @@ public class PhoneVerificationDto {
     private String userId;
     private String phone;
     private boolean isPhoneVerified;
-    private LocalDateTime createDate;
+    private ZonedDateTime createDate;
 }

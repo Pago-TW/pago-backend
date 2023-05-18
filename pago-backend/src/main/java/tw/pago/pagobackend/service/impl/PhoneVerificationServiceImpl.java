@@ -2,6 +2,8 @@ package tw.pago.pagobackend.service.impl;
 
 import java.time.LocalDateTime;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -33,7 +35,6 @@ public class PhoneVerificationServiceImpl implements PhoneVerificationService {
             .userId(userId)
             .phone(phone)
             .isPhoneVerified(true)
-            .createDate(LocalDateTime.now())
             .build();
             
         phoneVerificationDao.createPhoneVerification(phoneVerificationDto);
