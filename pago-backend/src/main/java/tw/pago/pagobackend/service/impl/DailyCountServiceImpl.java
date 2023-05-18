@@ -21,9 +21,11 @@ public class DailyCountServiceImpl implements DailyCountService {
 
   @Override
   public void incrementSmsCount(String userId) {
-    ZonedDateTime today = ZonedDateTime.now(ZoneId.of("UTC"));
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
-    DailyCount dailyCount = dailyCountDao.getDailyCountByUserId(userId);
+
+    DailyCount dailyCount = dailyCountDao.getDailyCountByUserIdAndCreateDate(userId, today);
     if (dailyCount == null) {
       CreateDailyCountRequestDto createDailyCountRequestDto = new CreateDailyCountRequestDto();
       createDailyCountRequestDto.setUserId(currentLoginUserId);
@@ -32,6 +34,8 @@ public class DailyCountServiceImpl implements DailyCountService {
 
       createDailyCount(createDailyCountRequestDto);
 
+    } else {
+      dailyCountDao.getDailyCountByUserId(userId);
     }
 
   }

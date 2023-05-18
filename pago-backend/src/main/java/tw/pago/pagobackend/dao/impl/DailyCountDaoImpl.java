@@ -29,12 +29,13 @@ public class DailyCountDaoImpl implements DailyCountDao {
     Map<String, Object> map = new HashMap<>();
 
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    ZonedDateTime dateAtStartOfDay = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
 
     map.put("dailyCountId", createDailyCountRequestDto.getDailyCountId());
     map.put("userId", createDailyCountRequestDto.getUserId());
     map.put("smsCount", createDailyCountRequestDto.getSmsCount());
     map.put("emailCount", createDailyCountRequestDto.getEmailCount());
-    map.put("createDate", Timestamp.from(now.toInstant()));
+    map.put("createDate", Timestamp.from(dateAtStartOfDay.toInstant()));
     map.put("updateDate", Timestamp.from(now.toInstant()));
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
@@ -59,7 +60,27 @@ public class DailyCountDaoImpl implements DailyCountDao {
   }
 
   @Override
+  public DailyCount getDailyCountByUserIdAndCreateDate(String userId, ZonedDateTime createDate) {
+    String sql = "SELECT daily_count_id, user_id, sms_count, email_count, create_date, update_date "
+        + "FROM daily_count "
+        + "WHERE user_id = :userId AND DATE(create_date) = :createDate ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userId", userId);
+    map.put("createDate", createDate);
+
+    List<DailyCount> dailyCountList = namedParameterJdbcTemplate.query(sql, map, new DailyCountRowMapper());
+
+    if (dailyCountList.size() > 0) {
+      return dailyCountList.get(0);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
   public void updateSmsCount(String userId) {
+    
 
   }
 
