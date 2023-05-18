@@ -48,14 +48,15 @@ public class FinanceController {
   }
 
   @GetMapping("bank-accounts")
-  public ResponseEntity<?> getBankAccountList() {
+  public ResponseEntity<List<BankAccountResponseDto>> getBankAccountList() {
 
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     List<BankAccount> bankAccountList = financeService.getBankAccountListByUserId(currentLoginUserId);
+    List<BankAccountResponseDto> bankAccountResponseDtoList = financeService.getBankAccountResponseDtoListByBankAccountList(bankAccountList);
 
 
-    return ResponseEntity.status(HttpStatus.OK).body(bankAccountList);
+    return ResponseEntity.status(HttpStatus.OK).body(bankAccountResponseDtoList);
   }
 
 

@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -80,6 +81,16 @@ public class FinanceServiceImpl implements FinanceService {
   @Override
   public List<BankAccount> getBankAccountListByUserId(String userId) {
     return bankAccountDao.getBankAccountListByUserId(userId);
+  }
+
+  @Override
+  public List<BankAccountResponseDto> getBankAccountResponseDtoListByBankAccountList(
+      List<BankAccount> bankAccountList) {
+
+    List<BankAccountResponseDto> bankAccountResponseDtoList = bankAccountList.stream().map(bankAccount -> getBankAccountResponseDtoByBankAccount(bankAccount)).collect(
+        Collectors.toList());
+
+    return bankAccountResponseDtoList;
   }
 
   @Override
