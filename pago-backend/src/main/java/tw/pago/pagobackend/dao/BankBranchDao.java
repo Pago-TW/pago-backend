@@ -7,4 +7,6 @@ public interface BankBranchDao {
 
   List<BankBranch> getBankBranchListByAdministrativeDivisionAndBankCode(String administrativeDivision, String bankCode);
 
+  BankBranch getBankBranchByBranchCode(String branchCode);
+
 }
