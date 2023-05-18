@@ -35,13 +35,30 @@ public class DailyCountServiceImpl implements DailyCountService {
       createDailyCount(createDailyCountRequestDto);
 
     } else {
-      dailyCountDao.getDailyCountByUserId(userId);
+      dailyCountDao.incrementTodaySmsCount(userId, today);
     }
 
   }
 
   @Override
   public void incrementEmailCount(String userId) {
+
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    DailyCount dailyCount = dailyCountDao.getDailyCountByUserIdAndCreateDate(userId, today);
+    if (dailyCount == null) {
+      CreateDailyCountRequestDto createDailyCountRequestDto = new CreateDailyCountRequestDto();
+      createDailyCountRequestDto.setUserId(currentLoginUserId);
+      createDailyCountRequestDto.setSmsCount(0);
+      createDailyCountRequestDto.setEmailCount(1);
+
+      createDailyCount(createDailyCountRequestDto);
+
+    } else {
+      dailyCountDao.incrementTodayEmailCount(userId, today);
+    }
 
   }
 

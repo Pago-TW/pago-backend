@@ -79,13 +79,33 @@ public class DailyCountDaoImpl implements DailyCountDao {
   }
 
   @Override
-  public void updateSmsCount(String userId) {
-    
+  public void incrementTodaySmsCount(String userId, ZonedDateTime today) {
+    String sql = "UPDATE daily_count "
+        + "SET sms_count = sms_count + 1, update_date = :updateDate "
+        + "WHERE user_id = :userId AND DATE(create_date) = :today ";
+
+    Map<String, Object> map = new HashMap<>();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    map.put("updateDate", Timestamp.from(now.toInstant()));
+    map.put("userId", userId);
+    map.put("today", today);
+
+    namedParameterJdbcTemplate.update(sql, map);
 
   }
 
   @Override
-  public void updateEmailCount(String userId) {
+  public void incrementTodayEmailCount(String userId, ZonedDateTime today) {
+    String sql = "UPDATE daily_count "
+        + "SET email_count = email_count + 1, update_date = :updateDate "
+        + "WHERE user_id = :userId AND DATE(create_date) = :today ";
 
+    Map<String, Object> map = new HashMap<>();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    map.put("updateDate", Timestamp.from(now.toInstant()));
+    map.put("userId", userId);
+    map.put("today", today);
+
+    namedParameterJdbcTemplate.update(sql, map);
   }
 }

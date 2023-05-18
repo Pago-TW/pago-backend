@@ -12,8 +12,8 @@ public interface DailyCountDao {
 
   DailyCount getDailyCountByUserIdAndCreateDate(String userId, ZonedDateTime createDate);
 
-  void updateSmsCount(String userId);
+  void incrementTodaySmsCount(String userId, ZonedDateTime today);
 
-  void updateEmailCount(String userId);
+  void incrementTodayEmailCount(String userId, ZonedDateTime today);
 
 }
