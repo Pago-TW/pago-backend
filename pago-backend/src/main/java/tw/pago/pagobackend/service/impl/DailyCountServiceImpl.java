@@ -19,7 +19,6 @@ public class DailyCountServiceImpl implements DailyCountService {
   private static final Integer MAX_DAILY_EMAIL = 50;
 
   private final DailyCountDao dailyCountDao;
-  private final CurrentUserInfoProvider currentUserInfoProvider;
   private final UuidGenerator uuidGenerator;
 
   @Override
@@ -29,15 +28,12 @@ public class DailyCountServiceImpl implements DailyCountService {
     // Extract the date part and convert it back to ZonedDateTime at the start of the day
     ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
 
-    // Retrieve the ID of the currently logged-in user
-    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
-
     // Retrieve the DailyCount for the given user and today's date
     DailyCount dailyCount = dailyCountDao.getDailyCountByUserIdAndCreateDate(userId, today);
     if (dailyCount == null) {
       // If no DailyCount exists, create a new one with SMS count of 1
       CreateDailyCountRequestDto createDailyCountRequestDto = new CreateDailyCountRequestDto();
-      createDailyCountRequestDto.setUserId(currentLoginUserId);
+      createDailyCountRequestDto.setUserId(userId);
       createDailyCountRequestDto.setSmsCount(1);
       createDailyCountRequestDto.setEmailCount(0);
 
@@ -54,12 +50,11 @@ public class DailyCountServiceImpl implements DailyCountService {
 
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
     ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
-    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     DailyCount dailyCount = dailyCountDao.getDailyCountByUserIdAndCreateDate(userId, today);
     if (dailyCount == null) {
       CreateDailyCountRequestDto createDailyCountRequestDto = new CreateDailyCountRequestDto();
-      createDailyCountRequestDto.setUserId(currentLoginUserId);
+      createDailyCountRequestDto.setUserId(userId);
       createDailyCountRequestDto.setSmsCount(0);
       createDailyCountRequestDto.setEmailCount(1);
 
