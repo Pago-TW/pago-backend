@@ -13,7 +13,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.EmailRequestDto;
+import tw.pago.pagobackend.exception.TooManyRequestsException;
+import tw.pago.pagobackend.model.User;
+import tw.pago.pagobackend.service.DailyCountService;
 import tw.pago.pagobackend.service.SesEmailService;
 
 @Service
@@ -24,11 +28,20 @@ public class SesEmailServiceImpl implements SesEmailService {
 
     private final AmazonSimpleEmailService amazonSimpleEmailService;
     private final ResourceLoader resourceLoader;
+    private final DailyCountService dailyCountService;
+    private final UserDao userDao;
 
 
     @Override
     public void sendEmail(EmailRequestDto emailRequestDto) {
         try {
+            User recipient = userDao.getUserByEmail(emailRequestDto.getTo());
+            String recipientUserId = recipient.getUserId();
+
+            if (dailyCountService.isReachedDailyEmailLimit(recipientUserId)) {
+                throw new TooManyRequestsException("You have reached the daily Email limit. Please try again tomorrow");
+            }
+
             Resource resource = resourceLoader.getResource("classpath:templates/emailTemplate.html");
             String emailTemplate = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
@@ -49,6 +62,7 @@ public class SesEmailServiceImpl implements SesEmailService {
                 .withSource("\"" + FROM_NAME + "\" <" + FROM_EMAIL + ">");
 
             amazonSimpleEmailService.sendEmail(request);
+            dailyCountService.incrementEmailCount(recipientUserId);
         } catch (IOException e) {
             throw new RuntimeException("Error reading email template", e);
         }
