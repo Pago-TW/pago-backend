@@ -3,6 +3,7 @@ package tw.pago.pagobackend.dao.impl;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,8 +67,10 @@ public class DailyCountDaoImpl implements DailyCountDao {
         + "WHERE user_id = :userId AND DATE(create_date) = :createDate ";
 
     Map<String, Object> map = new HashMap<>();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    String createDateStr = createDate.format(formatter);
     map.put("userId", userId);
-    map.put("createDate", createDate);
+    map.put("createDate", createDateStr);
 
     List<DailyCount> dailyCountList = namedParameterJdbcTemplate.query(sql, map, new DailyCountRowMapper());
 
@@ -85,10 +88,12 @@ public class DailyCountDaoImpl implements DailyCountDao {
         + "WHERE user_id = :userId AND DATE(create_date) = :today ";
 
     Map<String, Object> map = new HashMap<>();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    String todayStr = today.format(formatter);
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
     map.put("updateDate", Timestamp.from(now.toInstant()));
     map.put("userId", userId);
-    map.put("today", today);
+    map.put("today", todayStr);
 
     namedParameterJdbcTemplate.update(sql, map);
 
@@ -101,10 +106,12 @@ public class DailyCountDaoImpl implements DailyCountDao {
         + "WHERE user_id = :userId AND DATE(create_date) = :today ";
 
     Map<String, Object> map = new HashMap<>();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    String todayStr = today.format(formatter);
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
     map.put("updateDate", Timestamp.from(now.toInstant()));
     map.put("userId", userId);
-    map.put("today", today);
+    map.put("today", todayStr);
 
     namedParameterJdbcTemplate.update(sql, map);
   }

@@ -24,12 +24,18 @@ public class DailyCountServiceImpl implements DailyCountService {
 
   @Override
   public void incrementSmsCount(String userId) {
+    // Get the current date and time in UTC
     ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    // Extract the date part and convert it back to ZonedDateTime at the start of the day
     ZonedDateTime today = now.toLocalDate().atStartOfDay(ZoneId.of("UTC"));
+
+    // Retrieve the ID of the currently logged-in user
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
+    // Retrieve the DailyCount for the given user and today's date
     DailyCount dailyCount = dailyCountDao.getDailyCountByUserIdAndCreateDate(userId, today);
     if (dailyCount == null) {
+      // If no DailyCount exists, create a new one with SMS count of 1
       CreateDailyCountRequestDto createDailyCountRequestDto = new CreateDailyCountRequestDto();
       createDailyCountRequestDto.setUserId(currentLoginUserId);
       createDailyCountRequestDto.setSmsCount(1);
@@ -38,9 +44,9 @@ public class DailyCountServiceImpl implements DailyCountService {
       createDailyCount(createDailyCountRequestDto);
 
     } else {
+      // If DailyCount already exists, increment the SMS count
       dailyCountDao.incrementTodaySmsCount(userId, today);
     }
-
   }
 
   @Override
@@ -84,7 +90,7 @@ public class DailyCountServiceImpl implements DailyCountService {
       return false;
     }
 
-    return dailyCount.getSmsCount() > MAX_DAILY_SMS;
+    return dailyCount.getSmsCount() >= MAX_DAILY_SMS;
   }
 
   @Override
@@ -97,6 +103,6 @@ public class DailyCountServiceImpl implements DailyCountService {
       return false;
     }
 
-    return dailyCount.getEmailCount() > MAX_DAILY_EMAIL;
+    return dailyCount.getEmailCount() >= MAX_DAILY_EMAIL;
   }
 }
