@@ -1,8 +1,12 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,8 +38,8 @@ public class OtpServiceImpl implements OtpService {
         String internationalPhoneNumber = "+886" + phone.substring(1);
         Otp existingOtp = otpDao.getOtpByPhone(internationalPhoneNumber);
         if (existingOtp != null) {
-            LocalDateTime latestResetDateTime = existingOtp.getCreateDate();
-            LocalDateTime currentDateTime = LocalDateTime.now();
+            ZonedDateTime latestResetDateTime = existingOtp.getCreateDate();
+            ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
         
             Duration duration = Duration.between(latestResetDateTime, currentDateTime);
             long differenceInSeconds = duration.getSeconds();
@@ -45,7 +49,7 @@ public class OtpServiceImpl implements OtpService {
             if (differenceInSeconds < cooldownInSeconds) {
                 System.out.println("It's been less than 3 minutes since the last reset request");
               // It's been less than 3 minutes since the last reset request
-              throw new TooManyRequestsException("You must wait at least 3 minutes between otp requests.");
+              throw new TooManyRequestsException("You can request another SMS in " + (cooldownInSeconds - differenceInSeconds) + " seconds.");
             }
             otpDao.deleteOtpById(existingOtp.getOtpId());
         }
@@ -71,12 +75,14 @@ public class OtpServiceImpl implements OtpService {
         String otpId = uuidGenerator.getUuid();
         String otpCode = String.valueOf(((int) (Math.random() * (1000000 - 100000))) + 100000);
 
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+
         return Otp.builder()
             .otpId(otpId)
             .internationalPhoneNumber(internationalPhoneNumber)
             .otpCode(otpCode)
-            .expiryDate(LocalDateTime.now().plusMinutes(15))
-            .createDate(LocalDateTime.now())
+            .expiryDate(now.plusMinutes(15))
+            .createDate(now)
             .build();
     }
 
@@ -94,7 +100,7 @@ public class OtpServiceImpl implements OtpService {
             return false;
         }
 
-        if (otp.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if (otp.getExpiryDate().isBefore(ZonedDateTime.now(ZoneId.of("UTC")))) {
             return false;
         }
 

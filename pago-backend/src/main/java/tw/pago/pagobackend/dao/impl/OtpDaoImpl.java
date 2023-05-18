@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.dao.impl;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +29,8 @@ public class OtpDaoImpl implements OtpDao {
         map.put("otpId", otp.getOtpId());
         map.put("international_phone_number", otp.getInternationalPhoneNumber());
         map.put("otp_code", otp.getOtpCode());
-        map.put("expiryDate", otp.getExpiryDate());
-        map.put("createDate", otp.getCreateDate());
+        map.put("expiryDate", Timestamp.from(otp.getExpiryDate().toInstant()));
+        map.put("createDate", Timestamp.from(otp.getCreateDate().toInstant()));
 
 
         namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
