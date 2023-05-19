@@ -39,6 +39,7 @@ import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.InvalidGoogleIdTokenException;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.security.model.AppProperties;
 import tw.pago.pagobackend.security.model.UserPrincipal;
@@ -305,7 +306,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     if (googleIdToken == null) {
-      throw new RuntimeException("無效的 Google ID Token");
+      throw new InvalidGoogleIdTokenException("無效的 Google ID Token");
     }
 
     Payload payload = googleIdToken.getPayload();

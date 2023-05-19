@@ -1,6 +1,8 @@
 package tw.pago.pagobackend.controller;
 
 import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +16,7 @@ import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
 import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
+import tw.pago.pagobackend.exception.InvalidGoogleIdTokenException;
 import tw.pago.pagobackend.exception.NotFoundException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.exception.TooManyRequestsException;
@@ -27,6 +30,18 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     // TODO check null pointer exception made by ecpay?
     // TODO add forbidden: 403
+    @ExceptionHandler(InvalidGoogleIdTokenException.class)
+    public ResponseEntity<?> handleRuntimeException(InvalidGoogleIdTokenException ex) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("timestamp", ZonedDateTime.now(ZoneId.of("UTC")));
+        errorDetails.put("status", HttpStatus.UNAUTHORIZED.value());
+        errorDetails.put("error", "Unauthorized");
+        errorDetails.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, Object> errorDetails = new HashMap<>();
