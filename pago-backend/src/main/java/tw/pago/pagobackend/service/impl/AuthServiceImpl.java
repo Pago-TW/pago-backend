@@ -2,7 +2,8 @@ package tw.pago.pagobackend.service.impl;
 
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import org.modelmapper.ModelMapper;
@@ -181,17 +182,19 @@ public class AuthServiceImpl implements AuthService {
 
     if (existingPasswordResetToken != null) {
 
-      LocalDateTime latestResetDateTime = existingPasswordResetToken.getCreateDate();
-      LocalDateTime currentDateTime = LocalDateTime.now();
+      ZonedDateTime latestResetDateTime = existingPasswordResetToken.getCreateDate();
+      ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
   
       Duration duration = Duration.between(latestResetDateTime, currentDateTime);
       long differenceInSeconds = duration.getSeconds();
       
       long cooldownInSeconds = 3 * 60; // 3 minutes in seconds
   
+      long secondsRemaining = cooldownInSeconds - differenceInSeconds;
+
       if (differenceInSeconds < cooldownInSeconds) {
         // It's been less than 3 minutes since the last reset request
-        throw new TooManyRequestsException("You must wait at least 3 minutes between password reset requests.");
+        throw new TooManyRequestsException("You can send another password reset request in " + secondsRemaining + " seconds.", latestResetDateTime, secondsRemaining);
       }
       // It's been more than 3 minutes, deleting existing token
       authDao.deletePasswordResetTokenById(existingPasswordResetToken.getPasswordResetTokenId());
@@ -204,14 +207,14 @@ public class AuthServiceImpl implements AuthService {
         .passwordResetTokenId(passwordResetTokenId)
         .userId(user.getUserId())
         .token(token)
-        .expiryDate(LocalDateTime.now().plusHours(1))
+        .expiryDate(ZonedDateTime.now().plusHours(1))
         .build();
 
     authDao.createToken(passwordResetToken);
 
     String passwordUrl = BASE_URL + "/auth/reset-password/" + token;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String passwordResetRequestCreateDate = formatter.format(LocalDateTime.now());
+    String passwordResetRequestCreateDate = formatter.format(ZonedDateTime.now());
     String contentTitle = "重設密碼";
     String recipientUserEmail = user.getEmail();
     String recipientUserId = user.getUserId();
@@ -254,7 +257,7 @@ public class AuthServiceImpl implements AuthService {
         throw new BadRequestException("Token not found");
     }
 
-    if (passwordResetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+    if (passwordResetToken.getExpiryDate().isBefore(ZonedDateTime.now())) {
         throw new NotFoundException("Token has expired");
     }
 
@@ -274,7 +277,7 @@ public class AuthServiceImpl implements AuthService {
     // Prepare email content
     String loginUrl = BASE_URL + "/auth/signin/";
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String passwordResetRequestCreateDate = formatter.format(LocalDateTime.now());
+    String passwordResetRequestCreateDate = formatter.format(ZonedDateTime.now());
     String contentTitle = "重設密碼成功";
     String recipientUserEmail = user.getEmail();
     String username = user.getFirstName();

@@ -1,6 +1,8 @@
 package tw.pago.pagobackend.dao.impl;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +28,12 @@ public class AuthDaoImpl implements AuthDao{
             + "VALUES (:passwordResetTokenId, :userId, :token, :expiryDate, :createDate)";
 
         Map<String, Object> map = new HashMap<>();
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         map.put("passwordResetTokenId", passwordResetToken.getPasswordResetTokenId());
         map.put("userId", passwordResetToken.getUserId());
         map.put("token", passwordResetToken.getToken());
-        map.put("expiryDate", passwordResetToken.getExpiryDate());
-        map.put("createDate", now);
+        map.put("expiryDate", Timestamp.from(passwordResetToken.getExpiryDate().toInstant()));
+        map.put("createDate", Timestamp.from(now.toInstant()));
 
         namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
     }
