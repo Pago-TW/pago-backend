@@ -45,6 +45,7 @@ import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
+import tw.pago.pagobackend.dto.MatchingShopperListDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
@@ -266,10 +267,11 @@ public class OrderController {
         .sort(sort)
         .build();
 
-    List<MatchingShopperResponseDto> matchingShopperList = orderService.getMatchingShopperList(order,
+    MatchingShopperListDto matchingShopperListDto = orderService.getMatchingShopperList(order,
         listQueryParametersDto);
 
-    Integer total = tripService.countMatchingShopper(listQueryParametersDto);
+    List<MatchingShopperResponseDto> matchingShopperList = matchingShopperListDto.getMatchingShopperResponseDtoList();
+    Integer total = matchingShopperListDto.getTotalMatchingShoppers();
 
     OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoByOrder(order);
 

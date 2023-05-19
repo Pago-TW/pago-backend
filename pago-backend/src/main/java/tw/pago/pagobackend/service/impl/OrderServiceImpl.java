@@ -30,7 +30,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,6 +59,7 @@ import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.MatchingShopperListDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
 import tw.pago.pagobackend.dto.OrderChosenShopperDto;
@@ -569,13 +569,16 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public List<MatchingShopperResponseDto> getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto) {
+  public MatchingShopperListDto getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto) {
+
 
     String orderId = order.getOrderId();
-    List<Trip> matchingTripList = tripDao.getMatchingTripListForOrder(listQueryParametersDto);
+    List<Trip> matchingTripListWithRowNumberSql = tripDao.getMatchingTripListWithRowNumberSqlForOrder(listQueryParametersDto);
     List<Bid> orderBidList = bidService.getBidListByOrderId(orderId);
     List<BidResponseDto> orderBidResponseDtoList = bidService.getBidResponseDtoByBidList(orderBidList);
     List<MatchingShopperResponseDto> matchingShopperResponseDtoList = new ArrayList<>();
+
+
 
 
 
@@ -584,11 +587,14 @@ public class OrderServiceImpl implements OrderService {
         .collect(Collectors.groupingBy(bidResponseDto -> bidResponseDto.getCreator().getUserId()));
 
     // Use a Map to collect all matching trips for each user
-    Map<String, List<Trip>> shopperIdToTripsMap = matchingTripList.stream()
+    Map<String, List<Trip>> shopperIdToTripsMap = matchingTripListWithRowNumberSql.stream()
         .collect(Collectors.groupingBy(Trip::getShopperId));
 
-    // Remove matching-shoppers who have placed a bid // TODO is this removing matching shopper
+    // Remove matching-shoppers who have placed a bid
     bidderIdToBidsMap.keySet().forEach(shopperIdToTripsMap::remove);
+
+    // Count matching-shoppers then minus bidder number
+    Integer totalMatchingShoppers = tripDao.countMatchingShopper(listQueryParametersDto) - bidderIdToBidsMap.size();
 
     for (Map.Entry<String, List<Trip>> entry : shopperIdToTripsMap.entrySet()) {
       String userId = entry.getKey();
@@ -609,7 +615,11 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    return matchingShopperResponseDtoList;
+    MatchingShopperListDto matchingShopperListDto = new MatchingShopperListDto();
+    matchingShopperListDto.setMatchingShopperResponseDtoList(matchingShopperResponseDtoList);
+    matchingShopperListDto.setTotalMatchingShoppers(totalMatchingShoppers);
+
+    return matchingShopperListDto;
   }
 
 
