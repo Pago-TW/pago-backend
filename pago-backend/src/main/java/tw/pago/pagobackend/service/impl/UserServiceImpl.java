@@ -1,8 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.util.List;
-import java.util.Optional;
-import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +16,6 @@ import tw.pago.pagobackend.constant.CompletionRatingEnum;
 import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
-import tw.pago.pagobackend.dao.PhoneVerificationDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
@@ -29,11 +26,11 @@ import tw.pago.pagobackend.dto.UserResponseDto;
 import tw.pago.pagobackend.dto.UserReviewDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
-import tw.pago.pagobackend.model.PhoneVerification;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.service.PhoneVerificationService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.service.UserService;
@@ -52,7 +49,7 @@ public class UserServiceImpl implements UserService {
   private final TripService tripService;
   private BidService bidService;
   private final CancellationRecordDao cancellationRecordDao;
-  private final PhoneVerificationDao phoneVerificationDao;
+  private final PhoneVerificationService phoneVerificationService;
 
   public UserServiceImpl(UuidGenerator uuidGenerator,
       UserDao userDao,
@@ -60,14 +57,15 @@ public class UserServiceImpl implements UserService {
       ReviewService reviewService,
       TripService tripService,
       CancellationRecordDao cancellationRecordDao,
-      PhoneVerificationDao phoneVerificationDao) {
+      PhoneVerificationService phoneVerificationService
+      ) {
     this.uuidGenerator = uuidGenerator;
     this.userDao = userDao;
     this.modelMapper = modelMapper;
     this.reviewService = reviewService;
     this.tripService = tripService;
     this.cancellationRecordDao = cancellationRecordDao;
-    this.phoneVerificationDao = phoneVerificationDao;
+    this.phoneVerificationService = phoneVerificationService;
   }
 
   @Autowired
@@ -120,9 +118,8 @@ public class UserServiceImpl implements UserService {
     User user = userDao.getUserById(userId);
 
     // Check is user has verified phone
-    PhoneVerification phoneVerification  = phoneVerificationDao.getPhoneVerificationByUserId(userId);
-    boolean isPhoneVerified = Optional.ofNullable(phoneVerification).map(PhoneVerification::isPhoneVerified).orElse(false);
-    user.setIsPhoneVerified(isPhoneVerified);
+    boolean isUserVerifiedPhone = phoneVerificationService.isUserVerifiedPhone(userId);
+    user.setIsPhoneVerified(isUserVerifiedPhone);
 
     return user;
   }
@@ -133,9 +130,9 @@ public class UserServiceImpl implements UserService {
     String userId = user.getUserId();
 
     // Check is user has verified phone
-    PhoneVerification phoneVerification  = phoneVerificationDao.getPhoneVerificationByUserId(userId);
-    boolean isPhoneVerified = Optional.ofNullable(phoneVerification).map(PhoneVerification::isPhoneVerified).orElse(false);
-    user.setIsPhoneVerified(isPhoneVerified);
+    boolean isUserVerifiedPhone = phoneVerificationService.isUserVerifiedPhone(userId);
+    user.setIsPhoneVerified(isUserVerifiedPhone);
+
     return user;
   }
 
@@ -164,11 +161,6 @@ public class UserServiceImpl implements UserService {
     // Get user completionRating
     CompletionRatingEnum completionRating = getUserCompletionRating(user);
     userResponseDto.setCompletionRating(completionRating);
-
-//    // Check login user is verified phone
-//    PhoneVerification phoneVerification = phoneVerificationDao.getPhoneVerificationByUserId(userId);
-//    userResponseDto.setIsPhoneVerified(phoneVerification != null);
-
 
     return userResponseDto;
   }
