@@ -42,10 +42,12 @@ public class OtpServiceImpl implements OtpService {
             
             long cooldownInSeconds = 3 * 60; // 3 minutes in seconds
         
+            long secondsRemaining = cooldownInSeconds - differenceInSeconds;
+
             if (differenceInSeconds < cooldownInSeconds) {
                 System.out.println("It's been less than 3 minutes since the last reset request");
               // It's been less than 3 minutes since the last reset request
-              throw new TooManyRequestsException("You can request another SNS in " + (cooldownInSeconds - differenceInSeconds) + " seconds.", latestResetDateTime);
+              throw new TooManyRequestsException("You can request another SNS in " + secondsRemaining + " seconds.", latestResetDateTime, secondsRemaining);
             }
             otpDao.deleteOtpById(existingOtp.getOtpId());
         }
