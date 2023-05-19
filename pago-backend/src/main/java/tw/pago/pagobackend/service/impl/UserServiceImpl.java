@@ -33,6 +33,7 @@ import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.PhoneVerificationService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.TripService;
+import tw.pago.pagobackend.service.UserPhoneVerificationService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
@@ -49,7 +50,7 @@ public class UserServiceImpl implements UserService {
   private final TripService tripService;
   private BidService bidService;
   private final CancellationRecordDao cancellationRecordDao;
-  private final PhoneVerificationService phoneVerificationService;
+  private final UserPhoneVerificationService userPhoneVerificationService;
 
   public UserServiceImpl(UuidGenerator uuidGenerator,
       UserDao userDao,
@@ -57,7 +58,7 @@ public class UserServiceImpl implements UserService {
       ReviewService reviewService,
       TripService tripService,
       CancellationRecordDao cancellationRecordDao,
-      PhoneVerificationService phoneVerificationService
+      UserPhoneVerificationService userPhoneVerificationService
       ) {
     this.uuidGenerator = uuidGenerator;
     this.userDao = userDao;
@@ -65,7 +66,8 @@ public class UserServiceImpl implements UserService {
     this.reviewService = reviewService;
     this.tripService = tripService;
     this.cancellationRecordDao = cancellationRecordDao;
-    this.phoneVerificationService = phoneVerificationService;
+    this.userPhoneVerificationService = userPhoneVerificationService;
+
   }
 
   @Autowired
@@ -118,7 +120,7 @@ public class UserServiceImpl implements UserService {
     User user = userDao.getUserById(userId);
 
     // Check is user has verified phone
-    boolean isUserVerifiedPhone = phoneVerificationService.isUserVerifiedPhone(userId);
+    boolean isUserVerifiedPhone = userPhoneVerificationService.isUserVerifiedPhone(userId);
     user.setIsPhoneVerified(isUserVerifiedPhone);
 
     return user;
@@ -130,7 +132,7 @@ public class UserServiceImpl implements UserService {
     String userId = user.getUserId();
 
     // Check is user has verified phone
-    boolean isUserVerifiedPhone = phoneVerificationService.isUserVerifiedPhone(userId);
+    boolean isUserVerifiedPhone = userPhoneVerificationService.isUserVerifiedPhone(userId);
     user.setIsPhoneVerified(isUserVerifiedPhone);
 
     return user;
