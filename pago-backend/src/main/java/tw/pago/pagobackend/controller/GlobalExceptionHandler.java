@@ -166,7 +166,8 @@ public class GlobalExceptionHandler {
         errorDetails.put("status", HttpStatus.TOO_MANY_REQUESTS.value());
         errorDetails.put("error", "Too Many Requests");
         errorDetails.put("message", ex.getMessage());
-        errorDetails.put("otpCodeCreateDate", ex.getCreateDate());
+        errorDetails.put("createDate", ex.getCreateDate());
+        errorDetails.put("secondsRemaining", ex.getSecondsRemaining());
 
         return new ResponseEntity<>(errorDetails, HttpStatus.TOO_MANY_REQUESTS);
     }
