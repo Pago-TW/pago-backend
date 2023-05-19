@@ -13,6 +13,8 @@ public interface UserService {
 
   User getUserById(String userId);
 
+  User getUserByEmail(String email);
+
   UserResponseDto getUserResponseDtoByUser(User user);
 
   User login(UserLoginRequestDto userLoginRequestDto);

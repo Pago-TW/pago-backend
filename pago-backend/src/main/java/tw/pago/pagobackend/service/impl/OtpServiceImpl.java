@@ -103,7 +103,7 @@ public class OtpServiceImpl implements OtpService {
 
         if (otp.getOtpCode().equals(otpCode) && otp.getInternationalPhoneNumber().equals(internationalPhoneNumber)) {
             otpDao.deleteOtpById(otp.getOtpId());
-            phoneVerificationService.verifyPhone(currentLoginUserId, phone);
+            phoneVerificationService.verifyPhone(currentLoginUserId, phone); // TODO 如果本身沒手機號碼，加號碼上去
             return true;
         } else {
             return false;

@@ -37,6 +37,7 @@ public class User {
 
   // For programing use;
   private String fullName;
+  private Boolean isPhoneVerified;
 
 
 

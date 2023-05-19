@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -116,7 +117,26 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User getUserById(String userId) {
-    return userDao.getUserById(userId);
+    User user = userDao.getUserById(userId);
+
+    // Check is user has verified phone
+    PhoneVerification phoneVerification  = phoneVerificationDao.getPhoneVerificationByUserId(userId);
+    boolean isPhoneVerified = Optional.ofNullable(phoneVerification).map(PhoneVerification::isPhoneVerified).orElse(false);
+    user.setIsPhoneVerified(isPhoneVerified);
+
+    return user;
+  }
+
+  @Override
+  public User getUserByEmail(String email) {
+    User user = userDao.getUserByEmail(email);
+    String userId = user.getUserId();
+
+    // Check is user has verified phone
+    PhoneVerification phoneVerification  = phoneVerificationDao.getPhoneVerificationByUserId(userId);
+    boolean isPhoneVerified = Optional.ofNullable(phoneVerification).map(PhoneVerification::isPhoneVerified).orElse(false);
+    user.setIsPhoneVerified(isPhoneVerified);
+    return user;
   }
 
   @Override
@@ -145,9 +165,9 @@ public class UserServiceImpl implements UserService {
     CompletionRatingEnum completionRating = getUserCompletionRating(user);
     userResponseDto.setCompletionRating(completionRating);
 
-    // Check login user is verified phone
-    PhoneVerification phoneVerification = phoneVerificationDao.getPhoneVerificationByUserId(userId);
-    userResponseDto.setIsPhoneVerified(phoneVerification != null);
+//    // Check login user is verified phone
+//    PhoneVerification phoneVerification = phoneVerificationDao.getPhoneVerificationByUserId(userId);
+//    userResponseDto.setIsPhoneVerified(phoneVerification != null);
 
 
     return userResponseDto;
