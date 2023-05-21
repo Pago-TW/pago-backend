@@ -54,6 +54,7 @@ public class UserDto {
 
   // For programing use;
   private String fullName;
+  private Boolean isPhoneVerified;
 
 
 

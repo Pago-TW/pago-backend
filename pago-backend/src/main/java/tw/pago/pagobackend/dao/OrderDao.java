@@ -43,7 +43,7 @@ public interface OrderDao {
 
   Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 
-
+  List<Order> searchOrders(String query);
 
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }

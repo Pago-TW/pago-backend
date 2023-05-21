@@ -45,6 +45,7 @@ import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
+import tw.pago.pagobackend.dto.MatchingShopperListDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
@@ -196,7 +197,7 @@ public class OrderController {
       @RequestParam(required = false) Boolean isPackagingRequired,
       @RequestParam(required = false) @Min(0) BigDecimal minTravelerFee,
       @RequestParam(required = false) @Min(1) BigDecimal maxTravelerFee,
-      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) Date  latestReceiveItemDate,
+      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE_TIME) Date  latestReceiveItemDate,
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "10") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
@@ -266,10 +267,11 @@ public class OrderController {
         .sort(sort)
         .build();
 
-    List<MatchingShopperResponseDto> matchingShopperList = orderService.getMatchingShopperList(order,
+    MatchingShopperListDto matchingShopperListDto = orderService.getMatchingShopperList(order,
         listQueryParametersDto);
 
-    Integer total = tripService.countMatchingShopper(listQueryParametersDto);
+    List<MatchingShopperResponseDto> matchingShopperList = matchingShopperListDto.getMatchingShopperResponseDtoList();
+    Integer total = matchingShopperListDto.getTotalMatchingShoppers();
 
     OrderResponseDto orderResponseDto = orderService.getOrderResponseDtoByOrder(order);
 

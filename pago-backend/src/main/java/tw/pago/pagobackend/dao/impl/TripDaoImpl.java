@@ -257,6 +257,37 @@ public class TripDaoImpl implements TripDao {
     return matchingTripList;
   }
 
+  @Override
+  public List<Trip> getMatchingTripListWithRowNumberSqlForOrder(ListQueryParametersDto listQueryParametersDto) {
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+        + "arrival_date, profit, create_date, update_date "
+        + "FROM ( "
+        + "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+        + "arrival_date, profit, create_date, update_date, "
+        + "ROW_NUMBER() OVER (PARTITION BY shopper_id ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort() + ") AS rn "
+        + "FROM trip "
+        + "WHERE 1=1 ";
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Filtering e.g. From, to, create_date
+    sql = addMatchingTripForOrderSql(sql, map, listQueryParametersDto);
+
+    sql += ") AS t WHERE rn = 1";
+
+    // Order by {column} & sort by {DESC/ASC}
+    sql = sql + " ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort();
+
+    // Pagination
+    sql = sql + " LIMIT :size OFFSET :startIndex ";
+    map.put("size", listQueryParametersDto.getSize());
+    map.put("startIndex", listQueryParametersDto.getStartIndex());
+
+    List<Trip> matchingTripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return matchingTripList;
+  }
+
 
   @Override
   public Integer countTrip(ListQueryParametersDto listQueryParametersDto) {
@@ -323,6 +354,22 @@ public class TripDaoImpl implements TripDao {
     Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
 
     return total;
+  }
+
+  @Override
+  public List<Trip> searchTrips(String query) {
+    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    + "arrival_date, profit, create_date, update_date "
+    + "FROM trip "
+    + "WHERE from_country LIKE :query OR from_city LIKE :query OR to_country LIKE :query OR to_city LIKE :query OR "
+    + "arrival_date LIKE :query";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("query", "%" + query + "%");
+
+    List<Trip> tripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return tripList;
   }
 
   private String addFilteringSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {

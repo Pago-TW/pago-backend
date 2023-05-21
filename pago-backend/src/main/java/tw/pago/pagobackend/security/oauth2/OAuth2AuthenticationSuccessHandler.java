@@ -6,13 +6,11 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.gson.JsonObject;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -38,13 +36,14 @@ import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.UserDao;
-import tw.pago.pagobackend.dto.JwtDto;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.InvalidGoogleIdTokenException;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.security.model.AppProperties;
 import tw.pago.pagobackend.security.model.UserPrincipal;
+import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.CookieUtil;
 import tw.pago.pagobackend.util.JwtTokenProvider;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -63,18 +62,21 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
   private AppProperties appProperties;
   private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
   private UserDao userDao;
+  private UserService userService;
   private UuidGenerator uuidGenerator;
 
 
   @Autowired
   public OAuth2AuthenticationSuccessHandler(JwtTokenProvider jwtTokenProvider, AppProperties appProperties,
       HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
-      UserDao userDao, UuidGenerator uuidGenerator) {
+      UserDao userDao, UuidGenerator uuidGenerator,
+      UserService userService) {
     this.jwtTokenProvider = jwtTokenProvider;
     this.appProperties = appProperties;
     this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
     this.userDao = userDao;
     this.uuidGenerator = uuidGenerator;
+    this.userService = userService;
   }
 
   @Override
@@ -189,7 +191,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     JsonObject json = new JsonObject();
     setJwtTokenToJsonObject(jwtToken, json);
-    user = userDao.getUserByEmail(userInfoMap.get("email").toString());
+    user = userService.getUserByEmail(userInfoMap.get("email").toString());
     setUserInfoToJsonObject(user, json);
 
     return json.toString();
@@ -304,7 +306,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     if (googleIdToken == null) {
-      throw new RuntimeException("無效的 Google ID Token");
+      throw new InvalidGoogleIdTokenException("無效的 Google ID Token");
     }
 
     Payload payload = googleIdToken.getPayload();
@@ -372,6 +374,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     userObject.addProperty("createDate", user.getCreateDate().toString());
     userObject.addProperty("updateDate", user.getUpdateDate().toString());
     userObject.addProperty("lastLogin", user.getLastLogin().toString());
+    userObject.addProperty("isPhoneVerified", user.getIsPhoneVerified());
     json.add("user", userObject);
 
     return json;

@@ -390,5 +390,9 @@ public class TripServiceImpl implements TripService {
     return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
   }
 
+  public List<Trip> searchTrips(String query) {
+    return tripDao.searchTrips(query);
+  }
+
 
 }

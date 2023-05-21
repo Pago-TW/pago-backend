@@ -1,6 +1,8 @@
 package tw.pago.pagobackend.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,9 +10,12 @@ import lombok.Data;
 @Data
 @Builder
 public class PasswordResetToken {
+    @JsonIgnore
     private String passwordResetTokenId;
+    @JsonIgnore
     private String userId;
+    @JsonIgnore
     private String token;
-    private LocalDateTime expiryDate;
-    private LocalDateTime createDate;
+    private ZonedDateTime expiryDate;
+    private ZonedDateTime createDate;
 }

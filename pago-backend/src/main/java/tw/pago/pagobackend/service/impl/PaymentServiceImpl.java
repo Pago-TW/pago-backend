@@ -57,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
     obj.setTotalAmount(orderTotalAmountWithChosenBid);
     obj.setTradeDesc("test Description");
     obj.setItemName("Pago Service, " + "No. " + serialNumber);
-    obj.setReturnURL("https://api.pago-app.me/api/v1/ecpay-checkout/callback");
+    obj.setReturnURL("https://2dba-2407-4b00-1c02-813f-21e2-1e00-211c-3633.ngrok-free.app/api/v1/ecpay-checkout/callback"); // TODO 記得改回 beanstalk
     obj.setNeedExtraPaidInfo("N");
     obj.setClientBackURL("https://pago-app.me/orders/" + orderId);
     String form = all.aioCheckOut(obj, null);

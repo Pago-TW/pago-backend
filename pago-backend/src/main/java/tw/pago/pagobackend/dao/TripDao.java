@@ -28,9 +28,13 @@ public interface TripDao {
 
     List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto);
 
+    List<Trip> getMatchingTripListWithRowNumberSqlForOrder(ListQueryParametersDto listQueryParametersDto);
+
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
 
     Integer countMatchingShopper(ListQueryParametersDto listQueryParametersDto);
+
+    List<Trip> searchTrips(String query);
 }

@@ -1,7 +1,10 @@
 package tw.pago.pagobackend.dao.impl;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -25,12 +28,12 @@ public class AuthDaoImpl implements AuthDao{
             + "VALUES (:passwordResetTokenId, :userId, :token, :expiryDate, :createDate)";
 
         Map<String, Object> map = new HashMap<>();
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         map.put("passwordResetTokenId", passwordResetToken.getPasswordResetTokenId());
         map.put("userId", passwordResetToken.getUserId());
         map.put("token", passwordResetToken.getToken());
-        map.put("expiryDate", passwordResetToken.getExpiryDate());
-        map.put("createDate", now);
+        map.put("expiryDate", Timestamp.from(passwordResetToken.getExpiryDate().toInstant()));
+        map.put("createDate", Timestamp.from(now.toInstant()));
 
         namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
     }
@@ -43,7 +46,30 @@ public class AuthDaoImpl implements AuthDao{
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
 
-        return namedParameterJdbcTemplate.queryForObject(sql, map, new PasswordResetTokenRowMapper());
+        List<PasswordResetToken> passwordResetTokenList = namedParameterJdbcTemplate.query(sql, map, new PasswordResetTokenRowMapper());
+
+        if (passwordResetTokenList.size() > 0) {
+            return passwordResetTokenList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public PasswordResetToken getPasswordResetTokenByUserId(String userId) {
+        String sql = "SELECT password_reset_token_id, user_id, token, expiry_date, create_date " +
+        "FROM password_reset_token WHERE user_id = :userId";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+
+        List<PasswordResetToken> passwordResetTokenList = namedParameterJdbcTemplate.query(sql, map, new PasswordResetTokenRowMapper());
+
+        if (passwordResetTokenList.size() > 0) {
+            return passwordResetTokenList.get(0);
+        } else {
+            return null;
+        }
     }
 
     @Override

@@ -1,7 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +30,10 @@ import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.OrderService;
+import tw.pago.pagobackend.service.PhoneVerificationService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.TripService;
+import tw.pago.pagobackend.service.UserPhoneVerificationService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
@@ -49,19 +50,24 @@ public class UserServiceImpl implements UserService {
   private final TripService tripService;
   private BidService bidService;
   private final CancellationRecordDao cancellationRecordDao;
+  private final UserPhoneVerificationService userPhoneVerificationService;
 
   public UserServiceImpl(UuidGenerator uuidGenerator,
       UserDao userDao,
       ModelMapper modelMapper,
       ReviewService reviewService,
       TripService tripService,
-      CancellationRecordDao cancellationRecordDao) {
+      CancellationRecordDao cancellationRecordDao,
+      UserPhoneVerificationService userPhoneVerificationService
+      ) {
     this.uuidGenerator = uuidGenerator;
     this.userDao = userDao;
     this.modelMapper = modelMapper;
     this.reviewService = reviewService;
     this.tripService = tripService;
     this.cancellationRecordDao = cancellationRecordDao;
+    this.userPhoneVerificationService = userPhoneVerificationService;
+
   }
 
   @Autowired
@@ -111,11 +117,30 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User getUserById(String userId) {
-    return userDao.getUserById(userId);
+    User user = userDao.getUserById(userId);
+
+    // Check is user has verified phone
+    boolean isUserVerifiedPhone = userPhoneVerificationService.isUserVerifiedPhone(userId);
+    user.setIsPhoneVerified(isUserVerifiedPhone);
+
+    return user;
+  }
+
+  @Override
+  public User getUserByEmail(String email) {
+    User user = userDao.getUserByEmail(email);
+    String userId = user.getUserId();
+
+    // Check is user has verified phone
+    boolean isUserVerifiedPhone = userPhoneVerificationService.isUserVerifiedPhone(userId);
+    user.setIsPhoneVerified(isUserVerifiedPhone);
+
+    return user;
   }
 
   @Override
   public UserResponseDto getUserResponseDtoByUser(User user) {
+    String userId = user.getUserId();
 
     UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
 
@@ -139,11 +164,11 @@ public class UserServiceImpl implements UserService {
     CompletionRatingEnum completionRating = getUserCompletionRating(user);
     userResponseDto.setCompletionRating(completionRating);
 
-
     return userResponseDto;
   }
 
   @Override
+  @Deprecated
   public User login(UserLoginRequestDto userLoginRequestDto) {
     User user = userDao.getUserByEmail(userLoginRequestDto.getEmail());
 
@@ -280,5 +305,9 @@ public class UserServiceImpl implements UserService {
     } else {
       return CompletionRatingEnum.POOR;
     }
+  }
+
+  public List<User> searchUsers(String query) {
+    return userDao.searchUsers(query);
   }
 }

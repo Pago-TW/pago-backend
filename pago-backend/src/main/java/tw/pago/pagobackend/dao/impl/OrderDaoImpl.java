@@ -388,6 +388,27 @@ public class OrderDaoImpl implements OrderDao {
     return total;
   }
 
+  @Override
+  public List<Order> searchOrders(String query) {
+    String sql = "SELECT om.order_id, om.order_item_id, om.serial_number, om.consumer_id, om.create_date, om.update_date, om.packaging, "
+        + "om.verification, om.destination_country, om.destination_city, om.traveler_fee, om.currency, om.platform_fee_percent, "
+        + "om.tariff_fee_percent, om.latest_receive_item_date, om.note, om.order_status , "
+        + "oi.name, oi.description, oi.quantity, oi.unit_price, oi.purchase_country, oi.purchase_city, "
+        + "oi.purchase_road "
+        + "FROM order_main AS om "
+        + "LEFT JOIN order_item AS oi "
+        + "ON om.order_item_id = oi.order_item_id "
+        + "WHERE om.destination_country LIKE :query OR om.destination_city LIKE :query OR om.order_status LIKE :query " +
+        "OR oi.name LIKE :query OR oi.description LIKE :query ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("query", "%" + query + "%");
+
+    List<Order> orderList = namedParameterJdbcTemplate.query(sql, map, new OrderWithOrderItemRowMapper());
+
+    return orderList;
+  }
+
   // @Override
   // public void updateOrder(UpdateOrderRequestDto updateOrderRequestDto) {
   //   String sql = "UPDATE order_main "

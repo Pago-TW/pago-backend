@@ -1,8 +1,9 @@
 package tw.pago.pagobackend.service.impl;
 
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import org.modelmapper.ModelMapper;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,11 +20,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.AuthDao;
+import tw.pago.pagobackend.dao.PhoneVerificationDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.JwtAuthenticationResponseDto;
@@ -36,9 +36,13 @@ import tw.pago.pagobackend.dto.UserDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
+import tw.pago.pagobackend.exception.NotFoundException;
+import tw.pago.pagobackend.exception.TooManyRequestsException;
 import tw.pago.pagobackend.model.PasswordResetToken;
+import tw.pago.pagobackend.model.PhoneVerification;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.AuthService;
+import tw.pago.pagobackend.service.OtpService;
 import tw.pago.pagobackend.service.SesEmailService;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.JwtTokenProvider;
@@ -68,12 +72,15 @@ public class AuthServiceImpl implements AuthService {
   private UuidGenerator uuidGenerator;
   @Autowired
   private SesEmailService sesEmailService;
+  @Autowired
+  private PhoneVerificationDao phoneVerificationDao;
 
   @Override
   public JwtAuthenticationResponseDto login(UserLoginRequestDto userLoginRequestDto) {
 
     // Retrieve the user by email
     User user = userDao.getUserByEmail(userLoginRequestDto.getEmail());
+    String userId = user.getUserId();
 
     // Authenticate the user with the given email and password
     Authentication authentication = authenticationManager.authenticate(
@@ -101,6 +108,10 @@ public class AuthServiceImpl implements AuthService {
 
     // Convert the user object to a user DTO
     UserDto userDto = modelMapper.map(user, UserDto.class);
+
+    // Check login user is verified phone
+    PhoneVerification phoneVerification = phoneVerificationDao.getPhoneVerificationByUserId(userId);
+    userDto.setIsPhoneVerified(phoneVerification != null);
 
     // Build the JWT authentication response DTO with the token and user DTO
     JwtAuthenticationResponseDto jwtAuthenticationResponseDto = JwtAuthenticationResponseDto.builder()
@@ -160,7 +171,33 @@ public class AuthServiceImpl implements AuthService {
   public PasswordResetToken requestPasswordReset(PasswordRequestDto passwordRequestDto) {
     User user = userDao.getUserByEmail(passwordRequestDto.getEmail());
     if (user == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"); // TODO 不能給 Google 登陸的用戶使用忘記密碼功能
+      throw new NotFoundException("User not found"); 
+    }
+
+    if (user.getAccount().endsWith("@gmail.com") && user.getPassword() == null) {
+      throw new BadRequestException("Google account cannot reset password");
+    }
+
+    PasswordResetToken existingPasswordResetToken = authDao.getPasswordResetTokenByUserId(user.getUserId());
+
+    if (existingPasswordResetToken != null) {
+
+      ZonedDateTime latestResetDateTime = existingPasswordResetToken.getCreateDate();
+      ZonedDateTime currentDateTime = ZonedDateTime.now(ZoneId.of("UTC"));
+  
+      Duration duration = Duration.between(latestResetDateTime, currentDateTime);
+      long differenceInSeconds = duration.getSeconds();
+      
+      long cooldownInSeconds = 3 * 60; // 3 minutes in seconds
+  
+      long secondsRemaining = cooldownInSeconds - differenceInSeconds;
+
+      if (differenceInSeconds < cooldownInSeconds) {
+        // It's been less than 3 minutes since the last reset request
+        throw new TooManyRequestsException("You can send another password reset request in " + secondsRemaining + " seconds.", latestResetDateTime, secondsRemaining);
+      }
+      // It's been more than 3 minutes, deleting existing token
+      authDao.deletePasswordResetTokenById(existingPasswordResetToken.getPasswordResetTokenId());
     }
 
     String token = uuidGenerator.getUuid();
@@ -170,21 +207,23 @@ public class AuthServiceImpl implements AuthService {
         .passwordResetTokenId(passwordResetTokenId)
         .userId(user.getUserId())
         .token(token)
-        .expiryDate(LocalDateTime.now().plusHours(24)) // Set token to expire in 24 hours
+        .expiryDate(ZonedDateTime.now().plusHours(1))
         .build();
 
     authDao.createToken(passwordResetToken);
 
     String passwordUrl = BASE_URL + "/auth/reset-password/" + token;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String passwordResetRequestCreateDate = formatter.format(LocalDateTime.now());
+    String passwordResetRequestCreateDate = formatter.format(ZonedDateTime.now());
     String contentTitle = "重設密碼";
     String recipientUserEmail = user.getEmail();
+    String recipientUserId = user.getUserId();
     String username = user.getFirstName();
     String emailBody = String.format("您已於 <b>%s</b> 提出重設密碼的請求，請點擊下方連結進行密碼重設。<br><br><p><a href=\"%s\">重設密碼連結</a></p>" +
     "<br><br>如果您並未申請重設密碼，請忽略此電子郵件", passwordResetRequestCreateDate, passwordUrl);
 
     EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setRecipientUserId(recipientUserId);
     emailRequest.setTo(recipientUserEmail);
     emailRequest.setSubject("【Pago " + contentTitle + "】");
     emailRequest.setBody(emailBody);
@@ -215,11 +254,11 @@ public class AuthServiceImpl implements AuthService {
     PasswordResetToken passwordResetToken = authDao.getPasswordResetTokenByToken(newPasswordDto.getToken());
 
     if (passwordResetToken == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Token not found");
+        throw new BadRequestException("Token not found");
     }
 
-    if (passwordResetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token has expired");
+    if (passwordResetToken.getExpiryDate().isBefore(ZonedDateTime.now())) {
+        throw new NotFoundException("Token has expired");
     }
 
     User user = userDao.getUserById(passwordResetToken.getUserId());
@@ -238,7 +277,7 @@ public class AuthServiceImpl implements AuthService {
     // Prepare email content
     String loginUrl = BASE_URL + "/auth/signin/";
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String passwordResetRequestCreateDate = formatter.format(LocalDateTime.now());
+    String passwordResetRequestCreateDate = formatter.format(ZonedDateTime.now());
     String contentTitle = "重設密碼成功";
     String recipientUserEmail = user.getEmail();
     String username = user.getFirstName();

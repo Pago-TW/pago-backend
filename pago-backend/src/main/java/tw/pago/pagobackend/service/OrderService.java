@@ -14,6 +14,7 @@ import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
 import tw.pago.pagobackend.dto.CreatePostponeRecordRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.MatchingShopperListDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
@@ -59,7 +60,7 @@ public interface OrderService {
 
   List<OrderResponseDto> getOrderResponseDtoListByOrderList(List<Order> orderList);
 
-  List<MatchingShopperResponseDto> getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto);
+  MatchingShopperListDto getMatchingShopperList(Order order, ListQueryParametersDto listQueryParametersDto);
 
   Integer countOrder(ListQueryParametersDto listQueryParametersDto);
 
@@ -99,5 +100,6 @@ public interface OrderService {
 
   void sendReplyCancelOrderEmail(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto, CancellationRecord cancellationRecord, String updatedOrderStatus);
   
+  List<Order> searchOrders(String query);
   // void updateOrder(UpdateOrderRequestDto updateOrderRequestDto);
 }
