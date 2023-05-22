@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.service;
 
+import tw.pago.pagobackend.dto.ChangePasswordRequestDto;
 import tw.pago.pagobackend.dto.JwtAuthenticationResponseDto;
 import tw.pago.pagobackend.dto.NewPasswordDto;
 import tw.pago.pagobackend.dto.PasswordRequestDto;
@@ -19,4 +20,6 @@ public interface AuthService {
   String fetchEmailFromToken(String token);
 
   void resetPassword(NewPasswordDto newPasswordDto);
+
+  void changePassword(User user, ChangePasswordRequestDto changePasswordRequestDto);
 }
