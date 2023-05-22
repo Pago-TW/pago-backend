@@ -39,7 +39,7 @@ public class UserController {
   public ResponseEntity<User> updateUser(@PathVariable String userId,
       @RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
 
-    
+
     // Update User
     updateUserRequestDto.setUserId(userId);
     userService.updateUser(updateUserRequestDto);
@@ -51,17 +51,28 @@ public class UserController {
   }
 
   @PatchMapping("/users/me")
-  public ResponseEntity<User> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
+  public ResponseEntity<?> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
     String userId = currentUserInfoProvider.getCurrentLoginUserId();
+    User user = userService.getUserById(userId);
+
+    // Permission Checking
+    if (updateUserRequestDto.getEmail() != null) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to change email");
+    }
+
+    if (user.getIsPhoneVerified() && updateUserRequestDto.getPhone() != null) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to change phone number if user have already finished phone verified");
+
+    }
 
     // Update User
     updateUserRequestDto.setUserId(userId);
     userService.updateUser(updateUserRequestDto);
 
     // Get User
-    User user = userService.getUserById(updateUserRequestDto.getUserId());
+    User updatedUser = userService.getUserById(updateUserRequestDto.getUserId());
 
-    return ResponseEntity.status(HttpStatus.OK).body(user);
+    return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
   }
 
   @GetMapping("/users/{userId}")
