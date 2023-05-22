@@ -101,7 +101,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/**/*.js")
         .permitAll()
         .antMatchers(
-            "/auth/**",
+            "/auth/login",
+            "/auth/register",
+            "/auth/request-password-reset",
+            "/auth/reset-password/**",
+            "/auth/fetch-email-from-token",
             "/oauth2/**",
             "/countries**",
             "/cities/**",
