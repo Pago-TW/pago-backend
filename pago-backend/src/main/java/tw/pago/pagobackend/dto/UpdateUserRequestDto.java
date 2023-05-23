@@ -13,6 +13,7 @@ import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.validation.NotBlankIfPresent;
 import tw.pago.pagobackend.validation.ValidPhone;
+import tw.pago.pagobackend.validation.ValidPhoneIfPresent;
 
 @Getter
 @Setter
@@ -27,7 +28,7 @@ public class UpdateUserRequestDto {
   private String firstName;
   @NotBlankIfPresent
   private String lastName;
-
+  @ValidPhoneIfPresent
   private String phone;
   private String email;
   private GenderEnum gender;
