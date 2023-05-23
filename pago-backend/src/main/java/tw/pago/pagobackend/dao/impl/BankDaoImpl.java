@@ -21,7 +21,7 @@ public class BankDaoImpl implements BankDao {
 
   @Override
   public List<Bank> getBankList() {
-    String sql = "SELECT bank_code, name "
+    String sql = "SELECT bank_code, name, bank_logo_url "
         + "FROM bank ";
 
     Map<String, Object> map = new HashMap<>();
@@ -33,7 +33,7 @@ public class BankDaoImpl implements BankDao {
 
   @Override
   public Bank getBankByBankCode(String bankCode) {
-    String sql = "SELECT bank_code, name "
+    String sql = "SELECT bank_code, name, bank_logo_url "
         + "FROM bank "
         + "WHERE bank_code = :bankCode";
 

@@ -8,4 +8,5 @@ import lombok.NoArgsConstructor;
 public class Bank {
   private String bankCode;
   private String name;
+  private String bankLogoUrl;
 }

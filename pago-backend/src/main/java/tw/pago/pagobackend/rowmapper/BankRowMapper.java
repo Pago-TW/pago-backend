@@ -13,6 +13,7 @@ public class BankRowMapper implements RowMapper<Bank> {
     Bank bank = new Bank();
     bank.setBankCode(resultSet.getString("bank_code"));
     bank.setName(resultSet.getString("name"));
+    bank.setBankLogoUrl(resultSet.getString("bank_logo_url"));
 
     return bank;
   }
