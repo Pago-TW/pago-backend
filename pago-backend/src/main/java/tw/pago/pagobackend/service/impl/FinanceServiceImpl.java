@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -49,9 +50,7 @@ public class FinanceServiceImpl implements FinanceService {
     String bankCode = bankAccount.getBankCode();
     String branchCode = bankAccount.getBranchCode();
     String zipCode = bankAccount.getZipCode();
-    String residentialAddress = bankAccount.getResidentialAddress();
     String districtChineseName = zipCodeUtil.getCityAndDistrictByZipCode(zipCode);
-    // if starts with district, replace district with district + "/"
 
     Bank bank = bankDao.getBankByBankCode(bankCode);
     String bankChineseName = bank.getName();
@@ -72,7 +71,7 @@ public class FinanceServiceImpl implements FinanceService {
     if (accountNumber.length() > 6) {
       String firstPart = accountNumber.substring(0, 4);
       String lastPart = accountNumber.substring(accountNumber.length() - 2);
-      String replacement = "*".repeat(accountNumber.length() - 6);
+      String replacement = String.join("", Collections.nCopies(accountNumber.length() - 6, "*"));
       String maskedAccountNumber = firstPart + replacement + lastPart;
       bankAccountResponseDto.setAccountNumber(maskedAccountNumber);
     } else {
@@ -82,7 +81,6 @@ public class FinanceServiceImpl implements FinanceService {
     bankAccountResponseDto.setBankName(bankChineseName);
     bankAccountResponseDto.setBankLogoUrl(bankLogoUrl);
     bankAccountResponseDto.setBranchName(bankBranchName);
-    bankAccountResponseDto.setResidentialAddress(residentialAddress);
     bankAccountResponseDto.setBranchAdministrativeDivision(branchAdministrativeDivision);
 
 

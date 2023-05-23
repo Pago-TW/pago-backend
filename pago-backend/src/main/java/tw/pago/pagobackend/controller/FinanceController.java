@@ -26,7 +26,7 @@ public class FinanceController {
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final FinanceService financeService;
 
-  @PostMapping("/bank-accounts")
+  @PostMapping("/bank-accounts") // TODO 檢查一下是否用戶近期有驗證手機過
   public ResponseEntity<BankAccount> createBankAccount(@RequestBody
       CreateBankAccountRequestDto createBankAccountRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
