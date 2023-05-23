@@ -41,6 +41,7 @@ import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.service.UserPhoneVerificationService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
+import tw.pago.pagobackend.validation.ValidPhone;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -207,9 +208,7 @@ public class UserServiceImpl implements UserService {
     // Get old data by id
     User oldUser = userDao.getUserById(updateUserRequestDto.getUserId());
 
-//    if (oldUser.getUserId() == null) {
-//      throw new UsernameNotFoundException("The User you want to update not found");
-//    }
+
 
     // Check frontend update data, or set old data
     updateUserRequestDto.fillEmptyFieldsWithOldData(oldUser);

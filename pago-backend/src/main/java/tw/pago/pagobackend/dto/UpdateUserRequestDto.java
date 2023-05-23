@@ -4,6 +4,7 @@ package tw.pago.pagobackend.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.Optional;
+import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +23,6 @@ public class UpdateUserRequestDto {
   private String password;
   private String firstName;
   private String lastName;
-  @ValidPhone
   private String phone;
   private String email;
   private GenderEnum gender;
