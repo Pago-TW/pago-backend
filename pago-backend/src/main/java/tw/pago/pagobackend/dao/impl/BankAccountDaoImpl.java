@@ -127,4 +127,16 @@ public class BankAccountDaoImpl implements BankAccountDao {
     namedParameterJdbcTemplate.update(sql, map);
   }
 
+  @Override
+  public void deleteBankAccount(String bankAccountId) {
+    String sql = "DELETE FROM bank_account "
+        + "WHERE bank_account_id = :bankAccountId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("bankAccountId", bankAccountId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+
+  }
+
 }

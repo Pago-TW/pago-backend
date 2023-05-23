@@ -142,4 +142,10 @@ public class FinanceServiceImpl implements FinanceService {
     bankAccountDao.updateBankAccountIsDefault(bankAccountId, true);
 
   }
+
+  @Override
+  public void deleteBankAccount(String bankAccountId) {
+
+    bankAccountDao.deleteBankAccount(bankAccountId);
+  }
 }

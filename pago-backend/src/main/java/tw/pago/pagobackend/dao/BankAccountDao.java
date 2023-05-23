@@ -15,4 +15,6 @@ public interface BankAccountDao {
 
   void updateBankAccountIsDefault(String bankAccountId, boolean isDefault);
 
+  void deleteBankAccount(String bankAccountId);
+
 }

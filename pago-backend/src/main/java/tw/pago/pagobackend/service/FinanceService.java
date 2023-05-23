@@ -24,4 +24,6 @@ public interface FinanceService {
 
   void changeDefaultBankAccount(String bankAccountId, String userId);
 
+  void deleteBankAccount(String bankAccountId);
+
 }
