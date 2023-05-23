@@ -78,6 +78,7 @@ public class FinanceServiceImpl implements FinanceService {
       bankAccountResponseDto.setAccountNumber(accountNumber);
     }
 
+    bankAccountResponseDto.setResidentialDistrict(districtChineseName);
     bankAccountResponseDto.setBankName(bankChineseName);
     bankAccountResponseDto.setBankLogoUrl(bankLogoUrl);
     bankAccountResponseDto.setBranchName(bankBranchName);

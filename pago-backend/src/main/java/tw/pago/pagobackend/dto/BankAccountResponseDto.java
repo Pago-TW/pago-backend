@@ -13,6 +13,7 @@ public class BankAccountResponseDto {
   private String legalName;
   private LocalDate birthDate;
   private String zipCode;
+  private String residentialDistrict;
   private String bankCode;
   private String bankName;
   private String bankLogoUrl;
