@@ -4,13 +4,16 @@ package tw.pago.pagobackend.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.Optional;
+import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.model.User;
+import tw.pago.pagobackend.validation.NotBlankIfPresent;
 import tw.pago.pagobackend.validation.ValidPhone;
+import tw.pago.pagobackend.validation.ValidPhoneIfPresent;
 
 @Getter
 @Setter
@@ -20,9 +23,12 @@ public class UpdateUserRequestDto {
   private String userId;
   private String account;
   private String password;
+
+  @NotBlankIfPresent
   private String firstName;
+  @NotBlankIfPresent
   private String lastName;
-  @ValidPhone
+  @ValidPhoneIfPresent
   private String phone;
   private String email;
   private GenderEnum gender;
@@ -30,8 +36,10 @@ public class UpdateUserRequestDto {
   private AccountStatusEnum accountStatus;
   private Date updateDate;
   private String aboutMe;
+
   private String country;
   private Date lastLogin;
+  @NotBlankIfPresent
   private String avatarUrl;
 
 

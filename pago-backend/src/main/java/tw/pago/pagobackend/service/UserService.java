@@ -2,6 +2,7 @@ package tw.pago.pagobackend.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
@@ -20,6 +21,8 @@ public interface UserService {
   User login(UserLoginRequestDto userLoginRequestDto);
 
   void updateUser(UpdateUserRequestDto updateUserRequestDto);
+
+  void updateUserAvatar(String userId, List<MultipartFile> files);
 
   void processOAuth2PostLogin(String userEmail);
 

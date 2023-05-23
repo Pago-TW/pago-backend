@@ -1,5 +1,6 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.net.URL;
 import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CompletionRatingEnum;
@@ -17,6 +19,7 @@ import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.CreateFileRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
@@ -24,11 +27,13 @@ import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
 import tw.pago.pagobackend.dto.UserResponseDto;
 import tw.pago.pagobackend.dto.UserReviewDto;
+import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
+import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.PhoneVerificationService;
 import tw.pago.pagobackend.service.ReviewService;
@@ -36,11 +41,13 @@ import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.service.UserPhoneVerificationService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
+import tw.pago.pagobackend.validation.ValidPhone;
 
 @Service
 public class UserServiceImpl implements UserService {
 
   private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+  private static final String OBJECT_TYPE = "USER";
 
   private final UuidGenerator uuidGenerator;
   private final UserDao userDao;
@@ -51,6 +58,7 @@ public class UserServiceImpl implements UserService {
   private BidService bidService;
   private final CancellationRecordDao cancellationRecordDao;
   private final UserPhoneVerificationService userPhoneVerificationService;
+  private final FileService fileService;
 
   public UserServiceImpl(UuidGenerator uuidGenerator,
       UserDao userDao,
@@ -58,7 +66,8 @@ public class UserServiceImpl implements UserService {
       ReviewService reviewService,
       TripService tripService,
       CancellationRecordDao cancellationRecordDao,
-      UserPhoneVerificationService userPhoneVerificationService
+      UserPhoneVerificationService userPhoneVerificationService,
+      FileService fileService
       ) {
     this.uuidGenerator = uuidGenerator;
     this.userDao = userDao;
@@ -67,6 +76,7 @@ public class UserServiceImpl implements UserService {
     this.tripService = tripService;
     this.cancellationRecordDao = cancellationRecordDao;
     this.userPhoneVerificationService = userPhoneVerificationService;
+    this.fileService = fileService;
 
   }
 
@@ -198,15 +208,40 @@ public class UserServiceImpl implements UserService {
     // Get old data by id
     User oldUser = userDao.getUserById(updateUserRequestDto.getUserId());
 
-//    if (oldUser.getUserId() == null) {
-//      throw new UsernameNotFoundException("The User you want to update not found");
-//    }
+
 
     // Check frontend update data, or set old data
     updateUserRequestDto.fillEmptyFieldsWithOldData(oldUser);
 
     // update user
     userDao.updateUser(updateUserRequestDto);
+  }
+
+  @Override
+  public void updateUserAvatar(String userId, List<MultipartFile> files) {
+    String avatarUrl = "";
+
+    // Upload avatar file
+    CreateFileRequestDto createFileRequestDto = new CreateFileRequestDto();
+    createFileRequestDto.setFileCreator(userId);
+    createFileRequestDto.setObjectId(userId);
+    createFileRequestDto.setObjectType(OBJECT_TYPE);
+    List<URL> fileUrls  = fileService.uploadFile(files, createFileRequestDto);
+
+    if (!fileUrls.isEmpty()) {
+      avatarUrl = fileUrls.get(0).toString();
+    } else {
+      throw new ResourceNotFoundException("Avatar url is empty");
+    }
+
+    // update user's avatarUrl
+    UpdateUserRequestDto updateUserRequestDto = UpdateUserRequestDto.builder()
+        .userId(userId)
+        .avatarUrl(avatarUrl)
+        .build();
+
+    updateUser(updateUserRequestDto);
+
   }
 
   @Override

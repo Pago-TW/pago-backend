@@ -26,6 +26,7 @@ import tw.pago.pagobackend.constant.UserAuthProviderEnum;
 import tw.pago.pagobackend.dao.AuthDao;
 import tw.pago.pagobackend.dao.PhoneVerificationDao;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.ChangePasswordRequestDto;
 import tw.pago.pagobackend.dto.EmailRequestDto;
 import tw.pago.pagobackend.dto.JwtAuthenticationResponseDto;
 import tw.pago.pagobackend.dto.JwtDto;
@@ -35,6 +36,7 @@ import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.UserDto;
 import tw.pago.pagobackend.dto.UserLoginRequestDto;
 import tw.pago.pagobackend.dto.UserRegisterRequestDto;
+import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.NotFoundException;
 import tw.pago.pagobackend.exception.TooManyRequestsException;
@@ -42,7 +44,6 @@ import tw.pago.pagobackend.model.PasswordResetToken;
 import tw.pago.pagobackend.model.PhoneVerification;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.AuthService;
-import tw.pago.pagobackend.service.OtpService;
 import tw.pago.pagobackend.service.SesEmailService;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.JwtTokenProvider;
@@ -294,5 +295,55 @@ public class AuthServiceImpl implements AuthService {
     // Send Email
     sesEmailService.sendEmail(emailRequest);
     System.out.println("......Email sent! (resetPassword successfully)");
+  }
+
+  @Override
+  public void changePassword(User currentLoginUser, ChangePasswordRequestDto changePasswordRequestDto) {
+    String currentLoginUserId = currentLoginUser.getUserId();
+    String oldPasswordFromUserObject = currentLoginUser.getPassword();
+    String oldPasswordFromDto = changePasswordRequestDto.getOldPassword();
+    String newPassword = changePasswordRequestDto.getNewPassword();
+    String confirmNewPassword = changePasswordRequestDto.getConfirmNewPassword();
+
+
+    if (!passwordEncoder.matches(oldPasswordFromDto, oldPasswordFromUserObject)) {
+      throw new AccessDeniedException("Old Password is not correct");
+    }
+
+    if (!newPassword.equals(confirmNewPassword)) {
+      throw new BadRequestException("New password and confirm new password do not match");
+    }
+
+    String hashedNewPassword = passwordEncoder.encode(newPassword);
+    UpdateUserRequestDto updateUserRequestDto = UpdateUserRequestDto.builder()
+        .password(hashedNewPassword)
+        .build();
+
+    String[] presentPropertyNames = EntityPropertyUtil.getPresentPropertyNames(updateUserRequestDto);
+    BeanUtils.copyProperties(currentLoginUser, updateUserRequestDto, presentPropertyNames);
+    userDao.updateUser(updateUserRequestDto);
+
+
+    // Prepare email content
+    String loginUrl = BASE_URL + "/auth/signin/";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String passwordResetRequestCreateDate = formatter.format(ZonedDateTime.now());
+    String contentTitle = "更改密碼成功";
+    String recipientUserEmail = currentLoginUser.getEmail();
+    String username = currentLoginUser.getFirstName();
+    String emailBody = String.format("您已於 <b>%s</b> 成功更改密碼，現在您可以使用新密碼登入。<br><br><b>若此操作非您本人，請立即聯繫客服:</b> pago.service.me@gmail.com。<br><br><p><a href=\"%s\">登入連結</a></p>"
+        , passwordResetRequestCreateDate, loginUrl);
+
+    EmailRequestDto emailRequest = new EmailRequestDto();
+    emailRequest.setRecipientUserId(currentLoginUserId);
+    emailRequest.setTo(recipientUserEmail);
+    emailRequest.setSubject("【Pago " + contentTitle + "】");
+    emailRequest.setBody(emailBody);
+    emailRequest.setContentTitle(contentTitle);
+    emailRequest.setRecipientName(username);
+
+    // Send Email
+    sesEmailService.sendEmail(emailRequest);
+    System.out.println("......Email sent! (changePassword successfully)");
   }
 }
