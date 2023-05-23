@@ -35,7 +35,6 @@ public class UpdateUserRequestDto {
   private String googleId;
   private AccountStatusEnum accountStatus;
   private Date updateDate;
-  @NotBlankIfPresent
   private String aboutMe;
 
   private String country;
