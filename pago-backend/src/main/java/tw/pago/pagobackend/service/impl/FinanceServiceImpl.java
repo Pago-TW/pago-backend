@@ -68,7 +68,16 @@ public class FinanceServiceImpl implements FinanceService {
 
     BankAccountResponseDto bankAccountResponseDto = modelMapper.map(bankAccount, BankAccountResponseDto.class);
 
-
+    // Hide bank account number with " * "
+    if (accountNumber.length() > 6) {
+      String firstPart = accountNumber.substring(0, 4);
+      String lastPart = accountNumber.substring(accountNumber.length() - 2);
+      String replacement = "*".repeat(accountNumber.length() - 6);
+      String maskedAccountNumber = firstPart + replacement + lastPart;
+      bankAccountResponseDto.setAccountNumber(maskedAccountNumber);
+    } else {
+      bankAccountResponseDto.setAccountNumber(accountNumber);
+    }
 
     bankAccountResponseDto.setBankName(bankChineseName);
     bankAccountResponseDto.setBankLogoUrl(bankLogoUrl);
