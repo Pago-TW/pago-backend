@@ -45,18 +45,17 @@ public class FinanceServiceImpl implements FinanceService {
 
   @Override
   public BankAccountResponseDto getBankAccountResponseDtoByBankAccount(BankAccount bankAccount) {
+    String accountNumber = bankAccount.getAccountNumber();
     String bankCode = bankAccount.getBankCode();
     String branchCode = bankAccount.getBranchCode();
     String zipCode = bankAccount.getZipCode();
     String residentialAddress = bankAccount.getResidentialAddress();
     String districtChineseName = zipCodeUtil.getCityAndDistrictByZipCode(zipCode);
     // if starts with district, replace district with district + "/"
-    if (residentialAddress.startsWith(districtChineseName)) {
-      residentialAddress = residentialAddress.replaceFirst(districtChineseName, districtChineseName + "/");
-    }
 
     Bank bank = bankDao.getBankByBankCode(bankCode);
     String bankChineseName = bank.getName();
+    String bankLogoUrl = bank.getBankLogoUrl();
 
     BankBranch bankBranch = bankBranchDao.getBankBranchByBranchCode(branchCode);
     String bankBranchName = bankBranch.getBranchName();
@@ -68,7 +67,11 @@ public class FinanceServiceImpl implements FinanceService {
     String branchAdministrativeDivision = bankBranch.getAdministrativeDivision();
 
     BankAccountResponseDto bankAccountResponseDto = modelMapper.map(bankAccount, BankAccountResponseDto.class);
+
+
+
     bankAccountResponseDto.setBankName(bankChineseName);
+    bankAccountResponseDto.setBankLogoUrl(bankLogoUrl);
     bankAccountResponseDto.setBranchName(bankBranchName);
     bankAccountResponseDto.setResidentialAddress(residentialAddress);
     bankAccountResponseDto.setBranchAdministrativeDivision(branchAdministrativeDivision);

@@ -17,6 +17,7 @@ public class BankAccountResponseDto {
   private String zipCode;
   private String bankCode;
   private String bankName;
+  private String bankLogoUrl;
   private String branchAdministrativeDivision;
   private String branchCode;
   private String branchName;
