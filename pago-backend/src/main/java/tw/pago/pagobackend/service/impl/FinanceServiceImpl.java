@@ -32,7 +32,13 @@ public class FinanceServiceImpl implements FinanceService {
   @Override
   public BankAccount createBankAccount(CreateBankAccountRequestDto createBankAccountRequestDto) {
     String bankAccountId = uuidGenerator.getUuid();
+    String userId = createBankAccountRequestDto.getUserId();
+
     createBankAccountRequestDto.setBankAccountId(bankAccountId);
+
+    // If user have not created any bankAccount, set isDefault = true
+    List<BankAccount> bankAccountList = bankAccountDao.getBankAccountListByUserId(userId);
+    createBankAccountRequestDto.setIsDefault(bankAccountList.isEmpty());
 
     bankAccountDao.createBankAccount(createBankAccountRequestDto);
     BankAccount bankAccount = getBankAccountById(bankAccountId);
