@@ -11,6 +11,7 @@ import lombok.Setter;
 import tw.pago.pagobackend.constant.AccountStatusEnum;
 import tw.pago.pagobackend.constant.GenderEnum;
 import tw.pago.pagobackend.model.User;
+import tw.pago.pagobackend.validation.NotBlankIfPresent;
 import tw.pago.pagobackend.validation.ValidPhone;
 
 @Getter
@@ -21,17 +22,24 @@ public class UpdateUserRequestDto {
   private String userId;
   private String account;
   private String password;
+
+  @NotBlankIfPresent
   private String firstName;
+  @NotBlankIfPresent
   private String lastName;
+
   private String phone;
   private String email;
   private GenderEnum gender;
   private String googleId;
   private AccountStatusEnum accountStatus;
   private Date updateDate;
+  @NotBlankIfPresent
   private String aboutMe;
+
   private String country;
   private Date lastLogin;
+  @NotBlankIfPresent
   private String avatarUrl;
 
 
