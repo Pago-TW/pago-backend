@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,5 +75,20 @@ public class FinanceController {
     List<BankBranch> bankBranchList = financeService.getBankBranchListByAdministrativeDivisionAndBankCode(administrativeDivision, bankCode);
 
     return ResponseEntity.status(HttpStatus.OK).body(bankBranchList);
+  }
+
+  @PatchMapping("/bank-accounts/{bankAccountId}/default")
+  public ResponseEntity<?> changeDefaultBankAccount(@PathVariable String bankAccountId) {
+
+    // Permission checking
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    BankAccount bankAccount = financeService.getBankAccountById(bankAccountId);
+    if (!bankAccount.getUserId().equals(currentLoginUserId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+    // Change default bank account
+    financeService.changeDefaultBankAccount(bankAccountId, currentLoginUserId);
+    return ResponseEntity.status(HttpStatus.OK).body("Change default bank account successfully");
   }
 }

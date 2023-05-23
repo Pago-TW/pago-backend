@@ -9,6 +9,10 @@ public interface BankAccountDao {
 
   BankAccount getBankAccountById(String bankAccountId);
 
+  BankAccount getUserDefaultBankAccount(String userId);
+
   List<BankAccount> getBankAccountListByUserId(String userId);
+
+  void updateBankAccountIsDefault(String bankAccountId, boolean isDefault);
 
 }

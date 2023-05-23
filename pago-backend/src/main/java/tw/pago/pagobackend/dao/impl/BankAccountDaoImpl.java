@@ -73,6 +73,28 @@ public class BankAccountDaoImpl implements BankAccountDao {
   }
 
   @Override
+  public BankAccount getUserDefaultBankAccount(String userId) {
+    String sql = "SELECT bank_account_id, user_id, legal_name, birth_date, "
+        + "zip_code, bank_code, branch_code, "
+        + "account_holder_name, account_number, is_default, create_date, update_date "
+        + "FROM bank_account "
+        + "WHERE user_id = :userId AND is_default = :isDefault ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userId", userId);
+    map.put("isDefault", true);
+
+
+    List<BankAccount> bankAccountList = namedParameterJdbcTemplate.query(sql, map, new BankAccountRowMapper());
+
+    if (bankAccountList.size() > 0) {
+      return bankAccountList.get(0);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
   public List<BankAccount> getBankAccountListByUserId(String userId) {
     String sql = "SELECT bank_account_id, user_id, legal_name, birth_date, "
         + "zip_code,bank_code, branch_code, "
@@ -88,6 +110,21 @@ public class BankAccountDaoImpl implements BankAccountDao {
 
 
     return bankAccountList;
+  }
+
+  @Override
+  public void updateBankAccountIsDefault(String bankAccountId, boolean isDefault) {
+    String sql = "UPDATE bank_account "
+        + "SET is_Default = :isDefault, update_date = :updateDate "
+        + "WHERE bank_account_id = :bankAccountId ";
+
+    Map<String, Object> map = new HashMap<>();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    map.put("isDefault", isDefault);
+    map.put("updateDate", Timestamp.from(now.toInstant()));
+    map.put("bankAccountId", bankAccountId);
+
+    namedParameterJdbcTemplate.update(sql, map);
   }
 
 }
