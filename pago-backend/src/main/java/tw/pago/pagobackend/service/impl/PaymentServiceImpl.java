@@ -68,7 +68,7 @@ public class PaymentServiceImpl implements PaymentService {
     obj.setTotalAmount(orderTotalAmountWithChosenBid);
     obj.setTradeDesc("test Description");
     obj.setItemName("Pago Service, " + "No. " + serialNumber);
-    obj.setReturnURL(BASE_URL + "/api/v1/ecpay-checkout/callback");
+    obj.setReturnURL("https://api.pago-app.me/api/v1/ecpay-checkout/callback");
     obj.setNeedExtraPaidInfo("N");
     obj.setClientBackURL(BASE_URL + "/orders/" + orderId);
     String form = all.aioCheckOut(obj, null);
