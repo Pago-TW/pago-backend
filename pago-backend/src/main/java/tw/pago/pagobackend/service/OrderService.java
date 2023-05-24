@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CancellationRecordResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -81,6 +82,8 @@ public interface OrderService {
   CancellationRecord getCancellationRecordById(String cancellationRecordId);
 
   CancellationRecord getCancellationRecordByOrderId(String orderId);
+
+  CancellationRecordResponseDto getCancellationRecordResponseDtoByCancellationRecord(CancellationRecord cancellationRecord);
 
   PostponeRecord requestPostponeOrder(Order order, CreatePostponeRecordRequestDto createPostponeRecordRequestDto);
 

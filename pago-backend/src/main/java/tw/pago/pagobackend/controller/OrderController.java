@@ -39,6 +39,7 @@ import tw.pago.pagobackend.constant.CountryCode;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CancellationRecordResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -360,11 +361,12 @@ public class OrderController {
   }
 
   @GetMapping("/orders/{orderId}/cancellation-record")
-  public ResponseEntity<?> getCancellationRecord(@PathVariable String orderId) {
+  public ResponseEntity<CancellationRecordResponseDto> getCancellationRecord(@PathVariable String orderId) {
 
     CancellationRecord cancellationRecord = orderService.getCancellationRecordByOrderId(orderId);
+    CancellationRecordResponseDto cancellationRecordResponseDto = orderService.getCancellationRecordResponseDtoByCancellationRecord(cancellationRecord);
 
-    return ResponseEntity.status(HttpStatus.OK).body(cancellationRecord);
+    return ResponseEntity.status(HttpStatus.OK).body(cancellationRecordResponseDto);
   }
 
   @PatchMapping("/orders/{orderId}/cancellation-record")

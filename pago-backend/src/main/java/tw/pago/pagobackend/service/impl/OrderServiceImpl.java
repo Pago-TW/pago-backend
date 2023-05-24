@@ -50,6 +50,7 @@ import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CancellationRecordResponseDto;
 import tw.pago.pagobackend.dto.ConsumerDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
@@ -1010,6 +1011,22 @@ public class OrderServiceImpl implements OrderService {
   public CancellationRecord getCancellationRecordByOrderId(String orderId) {
     CancellationRecord cancellationRecord = cancellationRecordDao.getCancellationRecordByOrderId(orderId);
     return cancellationRecord;
+  }
+
+  @Override
+  public CancellationRecordResponseDto getCancellationRecordResponseDtoByCancellationRecord(
+      CancellationRecord cancellationRecord) {
+
+    if (cancellationRecord == null) {
+      throw new ResourceNotFoundException("Cancellation Record not found");
+    }
+
+    String cancelReasonDescription = cancellationRecord.getCancelReason().getDescription();
+
+    CancellationRecordResponseDto cancellationRecordResponseDto = modelMapper.map(cancellationRecord, CancellationRecordResponseDto.class);
+    cancellationRecordResponseDto.setCancelReason(cancelReasonDescription);
+
+    return cancellationRecordResponseDto;
   }
 
   @Override
