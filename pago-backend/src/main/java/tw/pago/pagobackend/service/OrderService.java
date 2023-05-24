@@ -18,6 +18,7 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MatchingShopperListDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.PostponeRecordResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
@@ -87,9 +88,11 @@ public interface OrderService {
 
   PostponeRecord requestPostponeOrder(Order order, CreatePostponeRecordRequestDto createPostponeRecordRequestDto);
 
-  void replyPostponeOrder(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto);
-
   PostponeRecord getPostponeRecordByOrderId(String orderId);
+
+  PostponeRecordResponseDto getPostponeRecordResponseDtoByPostponeRecord(PostponeRecord postponeRecord);
+
+  void replyPostponeOrder(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto);
 
   void replyCancelOrder(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
 

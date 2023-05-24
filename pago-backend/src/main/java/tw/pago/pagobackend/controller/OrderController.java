@@ -49,6 +49,7 @@ import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.MatchingShopperListDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.PostponeRecordResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdatePostponeRecordRequestDto;
@@ -399,10 +400,11 @@ public class OrderController {
   }
 
   @GetMapping("/orders/{orderId}/postpone-record")
-  public ResponseEntity<?> getPostponeRecord(@PathVariable String orderId) {
+  public ResponseEntity<PostponeRecordResponseDto> getPostponeRecord(@PathVariable String orderId) {
     PostponeRecord postponeRecord = orderService.getPostponeRecordByOrderId(orderId);
+    PostponeRecordResponseDto postponeRecordResponseDto = orderService.getPostponeRecordResponseDtoByPostponeRecord(postponeRecord);
 
-    return ResponseEntity.status(HttpStatus.OK).body(postponeRecord);
+    return ResponseEntity.status(HttpStatus.OK).body(postponeRecordResponseDto);
   }
 
   @PostMapping("/orders/{orderId}/postpone-record")

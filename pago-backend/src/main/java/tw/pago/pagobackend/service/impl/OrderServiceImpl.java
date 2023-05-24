@@ -66,6 +66,7 @@ import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
 import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.PostponeRecordResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
@@ -1198,6 +1199,21 @@ public class OrderServiceImpl implements OrderService {
   public PostponeRecord getPostponeRecordByOrderId(String orderId) {
     PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(orderId);
     return postponeRecord;
+  }
+
+  @Override
+  public PostponeRecordResponseDto getPostponeRecordResponseDtoByPostponeRecord(
+      PostponeRecord postponeRecord) {
+    if (postponeRecord == null) {
+      throw new ResourceNotFoundException("Postpone record not found");
+    }
+
+    String postponeReasonDescription = postponeRecord.getPostponeReason().getDescription();
+
+    PostponeRecordResponseDto postponeRecordResponseDto = modelMapper.map(postponeRecord, PostponeRecordResponseDto.class);
+    postponeRecordResponseDto.setPostponeReason(postponeReasonDescription);
+
+    return postponeRecordResponseDto;
   }
 
   @Override
