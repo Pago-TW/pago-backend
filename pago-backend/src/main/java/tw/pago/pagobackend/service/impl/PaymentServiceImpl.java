@@ -4,7 +4,7 @@ import ecpay.payment.integration.AllInOne;
 import ecpay.payment.integration.domain.AioCheckOutALL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import tw.pago.pagobackend.dao.PaymentDao;
@@ -20,14 +20,25 @@ import tw.pago.pagobackend.service.PaymentService;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Service
-@AllArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
+  @Value("${base.url}")
+  private String BASE_URL;
 
   private final UuidGenerator uuidGenerator;
   private final PaymentDao paymentDao;
-  private final @Lazy BidService bidService;
+  private final BidService bidService;
   private final OrderService orderService;
+
+  public PaymentServiceImpl(UuidGenerator uuidGenerator,
+      PaymentDao paymentDao,
+      @Lazy BidService bidService,
+      OrderService orderService) {
+    this.uuidGenerator = uuidGenerator;
+    this.paymentDao = paymentDao;
+    this.bidService = bidService;
+    this.orderService = orderService;
+  }
 
 
   @Override
@@ -57,9 +68,9 @@ public class PaymentServiceImpl implements PaymentService {
     obj.setTotalAmount(orderTotalAmountWithChosenBid);
     obj.setTradeDesc("test Description");
     obj.setItemName("Pago Service, " + "No. " + serialNumber);
-    obj.setReturnURL("https://2dba-2407-4b00-1c02-813f-21e2-1e00-211c-3633.ngrok-free.app/api/v1/ecpay-checkout/callback"); // TODO 記得改回 beanstalk
+    obj.setReturnURL(BASE_URL + "/api/v1/ecpay-checkout/callback");
     obj.setNeedExtraPaidInfo("N");
-    obj.setClientBackURL("https://pago-app.me/orders/" + orderId);
+    obj.setClientBackURL(BASE_URL + "/orders/" + orderId);
     String form = all.aioCheckOut(obj, null);
 
 
