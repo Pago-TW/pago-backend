@@ -12,11 +12,11 @@ public class BankAccountResponseDto {
   private String userId;
   private String legalName;
   private LocalDate birthDate;
-  private String identityNumber;
-  private String residentialAddress;
   private String zipCode;
+  private String residentialDistrict;
   private String bankCode;
   private String bankName;
+  private String bankLogoUrl;
   private String branchAdministrativeDivision;
   private String branchCode;
   private String branchName;

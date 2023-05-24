@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CancellationRecordResponseDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
 import tw.pago.pagobackend.dto.CreateOrderRequestDto;
@@ -17,6 +18,7 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.MatchingShopperListDto;
 import tw.pago.pagobackend.dto.MatchingShopperResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.PostponeRecordResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 // import tw.pago.pagobackend.dto.UpdateOrderRequestDto;
@@ -82,11 +84,15 @@ public interface OrderService {
 
   CancellationRecord getCancellationRecordByOrderId(String orderId);
 
+  CancellationRecordResponseDto getCancellationRecordResponseDtoByCancellationRecord(CancellationRecord cancellationRecord);
+
   PostponeRecord requestPostponeOrder(Order order, CreatePostponeRecordRequestDto createPostponeRecordRequestDto);
 
-  void replyPostponeOrder(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto);
-
   PostponeRecord getPostponeRecordByOrderId(String orderId);
+
+  PostponeRecordResponseDto getPostponeRecordResponseDtoByPostponeRecord(PostponeRecord postponeRecord);
+
+  void replyPostponeOrder(Order order, UpdatePostponeRecordRequestDto updatePostponeRecordRequestDto);
 
   void replyCancelOrder(Order order, UpdateCancellationRecordRequestDto updateCancellationRecordRequestDto);
 

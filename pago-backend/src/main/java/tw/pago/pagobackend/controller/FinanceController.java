@@ -2,10 +2,14 @@ package tw.pago.pagobackend.controller;
 
 
 import java.util.List;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,14 +25,15 @@ import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @AllArgsConstructor
 @RestController
+@Validated
 public class FinanceController {
 
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final FinanceService financeService;
 
-  @PostMapping("/bank-accounts")
+  @PostMapping("/bank-accounts") // TODO 檢查一下是否用戶近期有驗證手機過
   public ResponseEntity<BankAccount> createBankAccount(@RequestBody
-      CreateBankAccountRequestDto createBankAccountRequestDto) {
+      @Valid CreateBankAccountRequestDto createBankAccountRequestDto) {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     createBankAccountRequestDto.setUserId(currentLoginUserId);
@@ -74,5 +79,38 @@ public class FinanceController {
     List<BankBranch> bankBranchList = financeService.getBankBranchListByAdministrativeDivisionAndBankCode(administrativeDivision, bankCode);
 
     return ResponseEntity.status(HttpStatus.OK).body(bankBranchList);
+  }
+
+  @PatchMapping("/bank-accounts/{bankAccountId}/default")
+  public ResponseEntity<?> changeDefaultBankAccount(@PathVariable String bankAccountId) {
+
+    // Permission checking
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    BankAccount bankAccount = financeService.getBankAccountById(bankAccountId);
+    if (!bankAccount.getUserId().equals(currentLoginUserId)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+    // Change default bank account
+    financeService.changeDefaultBankAccount(bankAccountId, currentLoginUserId);
+    return ResponseEntity.status(HttpStatus.OK).body("Change default bank account successfully");
+  }
+
+
+  @DeleteMapping("/bank-accounts/{bankAccountId}")
+  public ResponseEntity<?> deleteBankAccount(@PathVariable String bankAccountId) {
+    // Permission checking
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+    BankAccount bankAccount = financeService.getBankAccountById(bankAccountId);
+    String bankAccountCreatorId = bankAccount.getUserId();
+    boolean isDefault = bankAccount.getIsDefault();
+
+    if (!bankAccountCreatorId.equals(currentLoginUserId) || isDefault) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+    financeService.deleteBankAccount(bankAccountId);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

@@ -50,6 +50,7 @@ import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountRequestDto;
 import tw.pago.pagobackend.dto.CalculateOrderAmountResponseDto;
+import tw.pago.pagobackend.dto.CancellationRecordResponseDto;
 import tw.pago.pagobackend.dto.ConsumerDto;
 import tw.pago.pagobackend.dto.CreateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.CreateFavoriteOrderRequestDto;
@@ -65,6 +66,7 @@ import tw.pago.pagobackend.dto.MatchingTripForOrderDto;
 import tw.pago.pagobackend.dto.OrderChosenShopperDto;
 import tw.pago.pagobackend.dto.OrderItemDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.PostponeRecordResponseDto;
 import tw.pago.pagobackend.dto.UpdateCancellationRecordRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderAndOrderItemRequestDto;
 import tw.pago.pagobackend.dto.UpdateOrderItemDto;
@@ -1013,6 +1015,22 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
+  public CancellationRecordResponseDto getCancellationRecordResponseDtoByCancellationRecord(
+      CancellationRecord cancellationRecord) {
+
+    if (cancellationRecord == null) {
+      throw new ResourceNotFoundException("Cancellation Record not found");
+    }
+
+    String cancelReasonDescription = cancellationRecord.getCancelReason().getDescription();
+
+    CancellationRecordResponseDto cancellationRecordResponseDto = modelMapper.map(cancellationRecord, CancellationRecordResponseDto.class);
+    cancellationRecordResponseDto.setCancelReason(cancelReasonDescription);
+
+    return cancellationRecordResponseDto;
+  }
+
+  @Override
   @Transactional
   public PostponeRecord requestPostponeOrder(Order order,
       CreatePostponeRecordRequestDto createPostponeRecordRequestDto) {
@@ -1181,6 +1199,21 @@ public class OrderServiceImpl implements OrderService {
   public PostponeRecord getPostponeRecordByOrderId(String orderId) {
     PostponeRecord postponeRecord = postponeRecordDao.getPostponeRecordByOrderId(orderId);
     return postponeRecord;
+  }
+
+  @Override
+  public PostponeRecordResponseDto getPostponeRecordResponseDtoByPostponeRecord(
+      PostponeRecord postponeRecord) {
+    if (postponeRecord == null) {
+      throw new ResourceNotFoundException("Postpone record not found");
+    }
+
+    String postponeReasonDescription = postponeRecord.getPostponeReason().getDescription();
+
+    PostponeRecordResponseDto postponeRecordResponseDto = modelMapper.map(postponeRecord, PostponeRecordResponseDto.class);
+    postponeRecordResponseDto.setPostponeReason(postponeReasonDescription);
+
+    return postponeRecordResponseDto;
   }
 
   @Override

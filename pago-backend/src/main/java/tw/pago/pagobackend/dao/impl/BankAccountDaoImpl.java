@@ -24,10 +24,10 @@ public class BankAccountDaoImpl implements BankAccountDao {
   @Override
   public void createBankAccount(CreateBankAccountRequestDto createBankAccountRequestDto) {
     String sql = "INSERT INTO bank_account (bank_account_id, user_id, legal_name, birth_date, "
-        + "identity_number, residential_address, zip_code, bank_code, branch_code, "
+        + "zip_code, bank_code, branch_code, "
         + "account_holder_name, account_number, is_default, create_date, update_date) "
-        + "VALUES (:bankAccountId, :userId, :legalName, :birthDate, :identityNumber, "
-        + ":residentialAddress, :zipCode, :bankCode, :branchCode, :accountHolderName, "
+        + "VALUES (:bankAccountId, :userId, :legalName, :birthDate, "
+        + ":zipCode, :bankCode, :branchCode, :accountHolderName, "
         + ":accountNumber, :isDefault, :createDate, :updateDate )";
 
     Map<String, Object> map = new HashMap<>();
@@ -38,8 +38,6 @@ public class BankAccountDaoImpl implements BankAccountDao {
     map.put("userId", createBankAccountRequestDto.getUserId());
     map.put("legalName", createBankAccountRequestDto.getLegalName());
     map.put("birthDate", createBankAccountRequestDto.getBirthDate());
-    map.put("identityNumber", createBankAccountRequestDto.getIdentityNumber());
-    map.put("residentialAddress", createBankAccountRequestDto.getResidentialAddress());
     map.put("zipCode", createBankAccountRequestDto.getZipCode());
     map.put("bankCode", createBankAccountRequestDto.getBankCode());
     map.put("branchCode", createBankAccountRequestDto.getBranchCode());
@@ -56,7 +54,7 @@ public class BankAccountDaoImpl implements BankAccountDao {
   @Override
   public BankAccount getBankAccountById(String bankAccountId) {
     String sql = "SELECT bank_account_id, user_id, legal_name, birth_date, "
-        + "identity_number, residential_address, zip_code,bank_code, branch_code, "
+        + "zip_code, bank_code, branch_code, "
         + "account_holder_name, account_number, is_default, create_date, update_date "
         + "FROM bank_account "
         + "WHERE bank_account_id = :bankAccountId ";
@@ -75,9 +73,31 @@ public class BankAccountDaoImpl implements BankAccountDao {
   }
 
   @Override
+  public BankAccount getUserDefaultBankAccount(String userId) {
+    String sql = "SELECT bank_account_id, user_id, legal_name, birth_date, "
+        + "zip_code, bank_code, branch_code, "
+        + "account_holder_name, account_number, is_default, create_date, update_date "
+        + "FROM bank_account "
+        + "WHERE user_id = :userId AND is_default = :isDefault ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userId", userId);
+    map.put("isDefault", true);
+
+
+    List<BankAccount> bankAccountList = namedParameterJdbcTemplate.query(sql, map, new BankAccountRowMapper());
+
+    if (bankAccountList.size() > 0) {
+      return bankAccountList.get(0);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
   public List<BankAccount> getBankAccountListByUserId(String userId) {
     String sql = "SELECT bank_account_id, user_id, legal_name, birth_date, "
-        + "identity_number, residential_address, zip_code,bank_code, branch_code, "
+        + "zip_code,bank_code, branch_code, "
         + "account_holder_name, account_number, is_default, create_date, update_date "
         + "FROM bank_account "
         + "WHERE user_id = :userId ";
@@ -90,6 +110,33 @@ public class BankAccountDaoImpl implements BankAccountDao {
 
 
     return bankAccountList;
+  }
+
+  @Override
+  public void updateBankAccountIsDefault(String bankAccountId, boolean isDefault) {
+    String sql = "UPDATE bank_account "
+        + "SET is_Default = :isDefault, update_date = :updateDate "
+        + "WHERE bank_account_id = :bankAccountId ";
+
+    Map<String, Object> map = new HashMap<>();
+    ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+    map.put("isDefault", isDefault);
+    map.put("updateDate", Timestamp.from(now.toInstant()));
+    map.put("bankAccountId", bankAccountId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
+
+  @Override
+  public void deleteBankAccount(String bankAccountId) {
+    String sql = "DELETE FROM bank_account "
+        + "WHERE bank_account_id = :bankAccountId";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("bankAccountId", bankAccountId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+
   }
 
 }

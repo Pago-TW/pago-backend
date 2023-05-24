@@ -22,4 +22,8 @@ public interface FinanceService {
 
   List<BankBranch> getBankBranchListByAdministrativeDivisionAndBankCode(String administrativeDivision, String bankCode);
 
+  void changeDefaultBankAccount(String bankAccountId, String userId);
+
+  void deleteBankAccount(String bankAccountId);
+
 }
