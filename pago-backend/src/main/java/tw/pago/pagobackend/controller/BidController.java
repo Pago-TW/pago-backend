@@ -1,12 +1,11 @@
 package tw.pago.pagobackend.controller;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -40,7 +39,9 @@ import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 @RestController
 @Validated
 @AllArgsConstructor
+@Slf4j
 public class BidController {
+  private static final String NO_PERMISSION_MESSAGE = "You have no permission";
 
   private final BidService bidService;
   private final CurrentUserInfoProvider currentUserInfoProvider;
@@ -64,13 +65,13 @@ public class BidController {
 
     // Check if the arrival city in the trip matches the destination city in the order
     Trip trip = tripService.getTripById(createBidRequestDto.getTripId());
-    System.out.println("trip.getToCity(): " + trip.getToCity());
-    System.out.println("order.getDestinationCity(): " + order.getDestinationCity());
+    log.info("trip.getToCity(): " + trip.getToCity());
+    log.info("order.getDestinationCity(): " + order.getDestinationCity());
     if (!trip.getToCity().equals(order.getDestinationCity())) {
-      System.out.println("Does not match");
+      log.info("Does not match");
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The arrival city of the trip must match the destination city of the order");
     }
-    System.out.println("Matches");
+    log.info("Matches");
     
     createBidRequestDto.setOrderId(orderId);
     // Call the createOrUpdateBid service method to either create a new bid or update an existing one.
@@ -118,26 +119,25 @@ public class BidController {
 
 
   @DeleteMapping("/bids/{bidId}")
-  public ResponseEntity<?> deleteBidById(@PathVariable String bidId) {
+  public ResponseEntity<String> deleteBidById(@PathVariable String bidId) {
 
     BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
     String bidCreatorId = bidResponseDto.getCreator().getUserId();
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     if (!bidCreatorId.equals(currentLoginUserId)) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(NO_PERMISSION_MESSAGE);
     }
 
 
     bidService.deleteBidById(bidId);
-    String s = UUID.randomUUID().toString().replaceAll("-", "");
-    System.out.println("UUID: " + s);
+
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @PatchMapping("/bids/{bidId}")
-  public ResponseEntity<?> updateBid(@PathVariable String bidId,
+  public ResponseEntity<Bid> updateBid(@PathVariable String bidId,
   @RequestBody @Valid UpdateBidRequestDto updateBidRequestDto) {
 
     BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
@@ -145,7 +145,7 @@ public class BidController {
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
     if (!bidCreatorId.equals(currentLoginUserId)) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
 
@@ -158,15 +158,14 @@ public class BidController {
 
   // Consumer chooses a bid
   @PatchMapping("/bids/{bidId}/choose")
-  public ResponseEntity<String> chooseBid(@PathVariable String bidId)
-      throws UnsupportedEncodingException {
+  public ResponseEntity<String> chooseBid(@PathVariable String bidId) {
     BidResponseDto bidResponseDto = bidService.getBidResponseById(bidId);
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
     Order order = orderService.getOrderById(bidResponseDto.getOrderId());
     String orderCreatorId = order.getConsumerId();
 
     if (!orderCreatorId.equals(currentLoginUserId)) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(NO_PERMISSION_MESSAGE);
     }
 
     if (!order.getOrderStatus().equals(OrderStatusEnum.REQUESTED)) {
@@ -182,10 +181,6 @@ public class BidController {
 
     return ResponseEntity.status(HttpStatus.OK).body(aioCheckoutALLForm);
 
-
-    // for testing
-    // bidService.chooseBid(order.getOrderId(), bidId);
-    // return ResponseEntity.status(HttpStatus.OK).body("Choose bid successfully");
   }
 
 
