@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
@@ -62,13 +63,24 @@ public class TripController {
 
   @PostMapping("/trips") // TODO 抵達時間不該在今天以前，不合理
                         // TODO 先不要做 ^
-  public ResponseEntity<Trip> createTrip(@RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
+  public ResponseEntity<Trip> createTrip(@RequestBody @Valid CreateTripRequestDto createTripRequestDto) {
 
     String tripId = tripService.createTrip(currentUserInfoProvider.getCurrentLoginUserId(), createTripRequestDto);
     Trip trip = tripService.getTripById(tripId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(trip);
 
+  }
+
+  @PostMapping("/trips/batch")
+  public ResponseEntity<?> batchCreateTrip(@RequestBody @Valid BatchCreateTripRequestDto batchCreateTripRequestDto) {
+
+    batchCreateTripRequestDto.setShopperId(currentUserInfoProvider.getCurrentLoginUserId());
+
+    tripService.batchCreateTrip(batchCreateTripRequestDto);
+
+
+    return ResponseEntity.status(HttpStatus.CREATED).body("create success");
   }
 
   @PatchMapping("/users/{userId}/trips/{tripId}")

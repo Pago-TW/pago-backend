@@ -103,6 +103,30 @@ public class TripDaoImpl implements TripDao {
     return tripId;
   }
 
+  @Override
+  public void createTrip(CreateTripRequestDto createTripRequestDto) {
+    String sql =
+        "INSERT INTO trip (trip_id, shopper_id, trip_collection_id, from_country, to_country, from_city, to_city, arrival_date, create_date, update_date) "
+            + "VALUES (:tripId, :shopperId, :tripCollectionId, :fromCountry, :toCountry, :fromCity, :toCity, :arrivalDate, :createDate, :updateDate)";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("tripId", createTripRequestDto.getTripId());
+    map.put("shopperId", createTripRequestDto.getShopperId());
+    map.put("tripCollectionId", createTripRequestDto.getTripCollectionId());
+    map.put("fromCountry", createTripRequestDto.getFromCountry().name());
+    map.put("toCountry", createTripRequestDto.getToCountry().name());
+    map.put("fromCity", createTripRequestDto.getFromCity().name());
+    map.put("toCity", createTripRequestDto.getToCity().name());
+    map.put("arrivalDate", createTripRequestDto.getArrivalDate());
+    Date now = new Date();
+    map.put("createDate", now);
+    map.put("updateDate", now);
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
+
+  }
+
 
   @Override
   public void updateTrip(Trip trip, UpdateTripRequestDto updateTripRequestDto) {

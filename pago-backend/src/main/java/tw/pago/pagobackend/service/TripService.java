@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import java.util.List;
 import tw.pago.pagobackend.constant.TripStatusEnum;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
@@ -23,6 +24,10 @@ public interface TripService {
     // public List<Trip> findAll() throws SQLException;
 
     String createTrip(String userId, CreateTripRequestDto createTripRequestDto);
+
+    void createTrip(CreateTripRequestDto createTripRequestDto);
+
+    void batchCreateTrip(BatchCreateTripRequestDto batchCreateTripRequestDto);
 
     void updateTrip(Trip trip, UpdateTripRequestDto updateTripRequestDto);
 

@@ -23,8 +23,13 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dao.OrderDao;
+import tw.pago.pagobackend.dao.TripCollectionDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto.Departure;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto.Stop;
+import tw.pago.pagobackend.dto.CreateTripCollectionRequestDto;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
@@ -53,6 +58,7 @@ public class TripServiceImpl implements TripService {
   private final OrderDao orderDao;
   private final OrderService orderService;
   private final UserDao userDao;
+  private final TripCollectionDao tripCollectionDao;
 
   @Override
   public Trip getTripById(String tripId) {
@@ -116,12 +122,65 @@ public class TripServiceImpl implements TripService {
 
   @Override
   public String createTrip(String userId, CreateTripRequestDto createTripRequestDto) {
-    if(isDuplicateTrip(userId, createTripRequestDto)) {
+    if (isDuplicateTrip(userId, createTripRequestDto)) {
       throw new ConflictException("A trip with the same details already exist!");
     }
     String tripUuid = uuidGenerator.getUuid();
     createTripRequestDto.setTripId(tripUuid);
     return tripDao.createTrip(userId, createTripRequestDto);
+  }
+
+  @Override
+  public void createTrip(CreateTripRequestDto createTripRequestDto) {
+    if (isDuplicateTrip(createTripRequestDto.getShopperId(), createTripRequestDto)) {
+      throw new ConflictException("A trip with the same details already exist!");
+    }
+    String tripId = uuidGenerator.getUuid();
+    createTripRequestDto.setTripId(tripId);
+    tripDao.createTrip(createTripRequestDto);
+  }
+
+  @Override
+  @Transactional
+  public void batchCreateTrip(BatchCreateTripRequestDto batchCreateTripRequestDto) {
+    String tripCollectionId = uuidGenerator.getUuid();
+    String firstTripId = uuidGenerator.getUuid();
+
+
+    // Create Trip Collection for new trips
+    CreateTripCollectionRequestDto createTripCollectionRequestDto = new CreateTripCollectionRequestDto();
+    createTripCollectionRequestDto.setTripCollectionId(tripCollectionId);
+    createTripCollectionRequestDto.setTripCollectionName(batchCreateTripRequestDto.getTripCollectionName());
+    tripCollectionDao.createTripCollection(createTripCollectionRequestDto);
+
+
+    // Create First trip, departure City -> stops.get(0)
+    Departure departure = batchCreateTripRequestDto.getDeparture();
+    Stop firstStop = batchCreateTripRequestDto.getStops().get(0); // The arrival city of first trip
+    CreateTripRequestDto createTripRequestDto = new CreateTripRequestDto();
+    createTripRequestDto.setShopperId(batchCreateTripRequestDto.getShopperId());
+    createTripRequestDto.setTripId(firstTripId);
+    createTripRequestDto.setTripCollectionId(tripCollectionId);
+    createTripRequestDto.setFromCountry(departure.getCountry());
+    createTripRequestDto.setFromCity(departure.getCity());
+    createTripRequestDto.setToCountry(firstStop.getCountry());
+    createTripRequestDto.setToCity(firstStop.getCity());
+    createTripRequestDto.setArrivalDate(firstStop.getArrivalDate());
+    createTrip(createTripRequestDto);
+
+    for (int i = 0; i < batchCreateTripRequestDto.getStops().size() - 1; i++) {
+      Stop departureStop = batchCreateTripRequestDto.getStops().get(i);
+      Stop nextStop = batchCreateTripRequestDto.getStops().get(i+1);
+      String tripId = uuidGenerator.getUuid();
+
+      createTripRequestDto.setTripId(tripId);
+      createTripRequestDto.setFromCountry(departureStop.getCountry());
+      createTripRequestDto.setFromCity(departure.getCity());
+      createTripRequestDto.setToCountry(nextStop.getCountry());
+      createTripRequestDto.setToCity(nextStop.getCity());
+      createTripRequestDto.setArrivalDate(nextStop.getArrivalDate());
+      createTrip(createTripRequestDto);
+    }
   }
 
   @Override

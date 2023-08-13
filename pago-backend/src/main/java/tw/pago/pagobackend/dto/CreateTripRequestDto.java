@@ -13,6 +13,8 @@ import tw.pago.pagobackend.constant.CountryCode;
 public class CreateTripRequestDto {
 
   private String tripId;
+  private String shopperId;
+  private String tripCollectionId;
 
   @NotNull
   private CountryCode fromCountry;
