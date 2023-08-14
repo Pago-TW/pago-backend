@@ -25,6 +25,7 @@ public class BidResponseDto {
   private Date updateDate;
   private Date latestDeliveryDate;
   private BidStatusEnum bidStatus;
+  private String bidComment;
 
 
 

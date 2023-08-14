@@ -26,8 +26,8 @@ public class BidDaoImpl implements BidDao {
 
   @Override
   public void createBid(CreateBidRequestDto createBidRequestDto) {
-    String sql = "INSERT INTO bid (bid_id, order_id, trip_id, bid_amount, currency, create_date, update_date,latest_delivery_date, bid_status) "
-        + "VALUES (:bidId, :orderId, :tripId, :bidAmount, :currency, :createDate, :updateDate,:latestDeliveryDate, :bidStatus)";
+    String sql = "INSERT INTO bid (bid_id, order_id, trip_id, bid_amount, currency, create_date, update_date,latest_delivery_date, bid_status, bid_comment) "
+        + "VALUES (:bidId, :orderId, :tripId, :bidAmount, :currency, :createDate, :updateDate,:latestDeliveryDate, :bidStatus, :bidComment)";
 
     Map<String, Object> map = new HashMap<>();
     map.put("bidId", createBidRequestDto.getBidId());
@@ -40,6 +40,7 @@ public class BidDaoImpl implements BidDao {
     map.put("updateDate", now);
     map.put("latestDeliveryDate", createBidRequestDto.getLatestDeliveryDate());
     map.put("bidStatus", createBidRequestDto.getBidStatus().toString());
+    map.put("bidComment", createBidRequestDto.getBidComment());
 
     namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map));
 
@@ -48,7 +49,7 @@ public class BidDaoImpl implements BidDao {
   @Override
   public Bid getBidById(String bidId) {
     String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
-        + "update_date,latest_delivery_date, bid_status "
+        + "update_date,latest_delivery_date, bid_status, bid_comment "
         + "FROM bid "
         + "WHERE bid_id = :bidId ";
 
@@ -69,7 +70,7 @@ public class BidDaoImpl implements BidDao {
   @Override
   public Bid getBidByOrderIdAndBidId(String orderId, String bidId) {
     String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
-        + "update_date,latest_delivery_date, bid_status "
+        + "update_date,latest_delivery_date, bid_status, bid_comment "
         + "FROM bid "
         + "WHERE order_id = :orderId "
         + "AND bid_id = :bidId";
@@ -91,7 +92,7 @@ public class BidDaoImpl implements BidDao {
   @Override
   public Bid getChosenBidByOrderId(String orderId) {
     String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
-        + "update_date,latest_delivery_date, bid_status "
+        + "update_date,latest_delivery_date, bid_status, bid_comment "
         + "FROM bid "
         + "WHERE order_id = :orderId "
         + "AND bid_status = :bidStatus";
@@ -113,7 +114,7 @@ public class BidDaoImpl implements BidDao {
   @Override
   public Bid getBidByShopperIdAndOrderId(String shopperId, String orderId) {
     String sql = "SELECT b.bid_id, b.order_id, b.trip_id, b.bid_amount, b.currency, b.create_date, "
-        + "b.update_date, b.latest_delivery_date, b.bid_status "
+        + "b.update_date, b.latest_delivery_date, b.bid_status, b.bid_comment "
         + "FROM bid AS b "
         + "JOIN trip AS t ON b.trip_id = t.trip_id "
         + "WHERE t.shopper_id = :shopperId "
@@ -171,7 +172,8 @@ public class BidDaoImpl implements BidDao {
   @Override
   public void updateBid(UpdateBidRequestDto updateBidRequestDto) {
     String sql = "UPDATE bid SET trip_id = :tripId, bid_amount = :bidAmount, "
-    + "currency = :currency, update_date = :updateDate, bid_status = :bidStatus, latest_delivery_date = :latestDeliveryDate "
+    + "currency = :currency, update_date = :updateDate, bid_status = :bidStatus, latest_delivery_date = :latestDeliveryDate, "
+    + "bid_comment = :bidComment "
     + "WHERE bid_id = :bidId";
 
     Map<String, Object> map = new HashMap<>();
@@ -183,6 +185,7 @@ public class BidDaoImpl implements BidDao {
     map.put("bidStatus", updateBidRequestDto.getBidStatus().name());
     map.put("bidId", updateBidRequestDto.getBidId());
     map.put("latestDeliveryDate", updateBidRequestDto.getLatestDeliveryDate());
+    map.put("bidComment", updateBidRequestDto.getBidComment());
 
     namedParameterJdbcTemplate.update(sql, map);
   }
@@ -205,7 +208,7 @@ public class BidDaoImpl implements BidDao {
   public List<Bid> getBidList(ListQueryParametersDto listQueryParametersDto) {
     String sql = "SELECT trip.shopper_id, "
         + "bid_id, order_id, bid.trip_id, bid_amount, currency, bid.create_date, "
-        + "bid.update_date, latest_delivery_date, bid_status "
+        + "bid.update_date, latest_delivery_date, bid_status, bid_comment "
         + "FROM bid  "
         + "LEFT JOIN trip  "
         + "ON bid.trip_id = trip.trip_id "
@@ -237,7 +240,7 @@ public class BidDaoImpl implements BidDao {
   @Override
   public List<Bid> getBidListByTripId(String tripId) {
     String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
-        + "update_date, latest_delivery_date, bid_status "
+        + "update_date, latest_delivery_date, bid_status, bid_comment "
         + "FROM bid "
         + "WHERE trip_id = :tripId ";
 
@@ -252,7 +255,7 @@ public class BidDaoImpl implements BidDao {
   @Override
   public List<Bid> getBidListByOrderId(String orderId) {
     String sql = "SELECT bid_id, order_id, trip_id, bid_amount, currency, create_date, "
-        + "update_date, latest_delivery_date, bid_status "
+        + "update_date, latest_delivery_date, bid_status, bid_comment "
         + "FROM bid "
         + "WHERE order_id = :orderId ";
 

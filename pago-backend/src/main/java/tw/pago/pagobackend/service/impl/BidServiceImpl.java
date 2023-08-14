@@ -110,6 +110,7 @@ public class BidServiceImpl implements BidService {
           .tripId(createBidRequestDto.getTripId())
           .currency(createBidRequestDto.getCurrency())
           .latestDeliveryDate(createBidRequestDto.getLatestDeliveryDate())
+          .bidComment(createBidRequestDto.getBidComment())
           .build();
 
       // Update the existing bid
