@@ -6,7 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
@@ -27,21 +27,22 @@ import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.TripCollectionResponseDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.TripCollection;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @RestController
 @Validated
+@AllArgsConstructor
 public class TripController {
 
-  @Autowired
-  private TripService tripService;
-  @Autowired
-  private CurrentUserInfoProvider currentUserInfoProvider;
+  private final TripService tripService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
 
   @GetMapping("/trips/{tripId}")
   public ResponseEntity<TripResponseDto> getTripById(@PathVariable String tripId) {
@@ -72,15 +73,14 @@ public class TripController {
 
   }
 
+
   @PostMapping("/trips/batch")
-  public ResponseEntity<?> batchCreateTrip(@RequestBody @Valid BatchCreateTripRequestDto batchCreateTripRequestDto) {
+  public ResponseEntity<TripCollection> batchCreateTrip(@RequestBody @Valid BatchCreateTripRequestDto batchCreateTripRequestDto) {
 
     batchCreateTripRequestDto.setShopperId(currentUserInfoProvider.getCurrentLoginUserId());
+    TripCollection tripCollection = tripService.batchCreateTrip(batchCreateTripRequestDto);
 
-    tripService.batchCreateTrip(batchCreateTripRequestDto);
-
-
-    return ResponseEntity.status(HttpStatus.CREATED).body("create success");
+    return ResponseEntity.status(HttpStatus.CREATED).body(tripCollection);
   }
 
   @PatchMapping("/users/{userId}/trips/{tripId}")
@@ -194,6 +194,40 @@ public class TripController {
         .build();
 
     return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoListResponseDto);
+  }
+
+
+  @GetMapping("/trip-collections")
+  public ResponseEntity<ListResponseDto<TripCollectionResponseDto>> getTripCollectionListByCreatorId(
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "create_date") String orderBy,
+      @RequestParam(defaultValue = "DESC") String sort) {
+
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    List<TripCollection> tripCollectionList = tripService.getTripCollectionListByCreatorId(currentLoginUserId);
+    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService.getTripCollectionResponseDtoListByTripCollectionList(tripCollectionList);
+
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .userId(currentLoginUserId)
+        .build();
+    int total = tripService.countTrip(listQueryParametersDto);
+
+    // Build the pagination response DTO
+    ListResponseDto<TripCollectionResponseDto> tripResponseDtoListResponseDto = ListResponseDto.<TripCollectionResponseDto>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .data(tripCollectionResponseDtoList)
+        .build();
+
+
+    
+
+    return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoListResponseDto);
+
   }
 
 

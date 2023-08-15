@@ -33,6 +33,7 @@ import tw.pago.pagobackend.dto.CreateTripCollectionRequestDto;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.TripCollectionResponseDto;
 import tw.pago.pagobackend.dto.TripDashboardDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
@@ -41,6 +42,7 @@ import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.TripCollection;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
@@ -71,6 +73,11 @@ public class TripServiceImpl implements TripService {
     trip.setProfit(totalProfit);
 
     return trip;
+  }
+
+  @Override
+  public TripCollection getTripCollectionById(String tripCollectionId) {
+    return tripCollectionDao.getTripCollectionById(tripCollectionId);
   }
 
   @Override
@@ -142,7 +149,7 @@ public class TripServiceImpl implements TripService {
 
   @Override
   @Transactional
-  public void batchCreateTrip(BatchCreateTripRequestDto batchCreateTripRequestDto) {
+  public TripCollection batchCreateTrip(BatchCreateTripRequestDto batchCreateTripRequestDto) {
     String tripCollectionId = uuidGenerator.getUuid();
     String firstTripId = uuidGenerator.getUuid();
 
@@ -151,7 +158,8 @@ public class TripServiceImpl implements TripService {
     CreateTripCollectionRequestDto createTripCollectionRequestDto = new CreateTripCollectionRequestDto();
     createTripCollectionRequestDto.setTripCollectionId(tripCollectionId);
     createTripCollectionRequestDto.setTripCollectionName(batchCreateTripRequestDto.getTripCollectionName());
-    tripCollectionDao.createTripCollection(createTripCollectionRequestDto);
+    createTripCollectionRequestDto.setCreatorId(batchCreateTripRequestDto.getShopperId());
+    createTripCollection(createTripCollectionRequestDto);
 
 
     // Create First trip, departure City -> stops.get(0)
@@ -181,6 +189,8 @@ public class TripServiceImpl implements TripService {
       createTripRequestDto.setArrivalDate(nextStop.getArrivalDate());
       createTrip(createTripRequestDto);
     }
+
+    return getTripCollectionById(tripCollectionId);
   }
 
   @Override
@@ -221,6 +231,11 @@ public class TripServiceImpl implements TripService {
 
   }
 
+  @Override
+  public void createTripCollection(CreateTripCollectionRequestDto createTripCollectionRequestDto) {
+    tripCollectionDao.createTripCollection(createTripCollectionRequestDto);
+  }
+
 
   @Override
   public List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto) {
@@ -232,6 +247,11 @@ public class TripServiceImpl implements TripService {
   @Override
   public List<Trip> getTripsByShopperId(String shopperId) {
     return tripDao.getTripsByShopperId(shopperId);
+  }
+
+  @Override
+  public List<Trip> getTripListByTripColletionId(String tripCollectionId) {
+    return tripDao.getTripListByTripColletionId(tripCollectionId);
   }
 
   @Override
@@ -268,6 +288,12 @@ public class TripServiceImpl implements TripService {
 
     List<Trip> tripList = tripDao.getTripListByTripStatus(tripStatus, listQueryParametersDto);
     return tripList;
+  }
+
+  @Override
+  public List<TripCollection> getTripCollectionListByCreatorId(String creatorId) {
+
+    return tripCollectionDao.getTripCollectionListByCreatorId(creatorId);
   }
 
 
@@ -312,6 +338,30 @@ public class TripServiceImpl implements TripService {
 
     return tripResponseDtoList;
   }
+
+  @Override
+  public List<TripCollectionResponseDto> getTripCollectionResponseDtoListByTripCollectionList(
+      List<TripCollection> tripCollectionList) {
+
+    return tripCollectionList.stream()
+        .map(this::getTripCollectionResponseDtoByTripCollection)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public TripCollectionResponseDto getTripCollectionResponseDtoByTripCollection(
+      TripCollection tripCollection) {
+    TripCollectionResponseDto tripCollectionResponseDto = new TripCollectionResponseDto();
+    tripCollectionResponseDto.setTripCollectionId(tripCollection.getTripCollectionId());
+    tripCollectionResponseDto.setTripCollectionName(tripCollection.getTripCollectionName());
+
+    List<Trip> tripList = getTripListByTripColletionId(tripCollection.getTripCollectionId());
+    List<TripResponseDto> tripResponseDtoList = getTripResponseDtoByTripList(tripList);
+    tripCollectionResponseDto.setTrips(tripResponseDtoList);
+
+    return tripCollectionResponseDto;
+  }
+
 
   @Override
   public Integer countTrip(ListQueryParametersDto listQueryParametersDto) {

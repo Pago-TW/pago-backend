@@ -1,12 +1,14 @@
 package tw.pago.pagobackend.dto;
 
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CreateTripCollectionRequestDto {
+public class TripCollectionResponseDto {
   private String tripCollectionId;
-  private String creatorId;
   private String tripCollectionName;
+  private List<TripResponseDto> trips;
+
 }

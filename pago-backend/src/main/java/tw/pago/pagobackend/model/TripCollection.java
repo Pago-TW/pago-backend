@@ -1,11 +1,11 @@
-package tw.pago.pagobackend.dto;
+package tw.pago.pagobackend.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CreateTripCollectionRequestDto {
+public class TripCollection {
   private String tripCollectionId;
   private String creatorId;
   private String tripCollectionName;

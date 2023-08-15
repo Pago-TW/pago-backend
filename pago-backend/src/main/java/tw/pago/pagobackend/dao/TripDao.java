@@ -32,6 +32,8 @@ public interface TripDao {
 
     List<Trip> getMatchingTripListWithRowNumberSqlForOrder(ListQueryParametersDto listQueryParametersDto);
 
+    List<Trip> getTripListByTripColletionId(String tripCollectionId);
+
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);
