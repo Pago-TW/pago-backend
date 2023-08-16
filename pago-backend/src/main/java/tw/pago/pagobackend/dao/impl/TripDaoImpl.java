@@ -438,7 +438,7 @@ public class TripDaoImpl implements TripDao {
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
 
-    return  sql;
+    return sql;
   }
 
   private String addMatchingTripForOrderSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {

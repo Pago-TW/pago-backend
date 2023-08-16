@@ -198,7 +198,7 @@ public class TripController {
 
 
   @GetMapping("/trip-collections")
-  public ResponseEntity<ListResponseDto<TripCollectionResponseDto>> getTripCollectionListByCreatorId(
+  public ResponseEntity<ListResponseDto<TripCollectionResponseDto>> getTripCollectionList(
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
@@ -206,14 +206,19 @@ public class TripController {
 
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
-    List<TripCollection> tripCollectionList = tripService.getTripCollectionListByCreatorId(currentLoginUserId);
-    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService.getTripCollectionResponseDtoListByTripCollectionList(tripCollectionList);
 
 
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .userId(currentLoginUserId)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
         .build();
-    int total = tripService.countTrip(listQueryParametersDto);
+
+    List<TripCollection> tripCollectionList = tripService.getTripCollectionList(listQueryParametersDto);
+    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService.getTripCollectionResponseDtoListByTripCollectionList(tripCollectionList);
+    int total = tripService.countTripCollection(listQueryParametersDto);
 
     // Build the pagination response DTO
     ListResponseDto<TripCollectionResponseDto> tripResponseDtoListResponseDto = ListResponseDto.<TripCollectionResponseDto>builder()

@@ -291,6 +291,11 @@ public class TripServiceImpl implements TripService {
   }
 
   @Override
+  public List<TripCollection> getTripCollectionList(ListQueryParametersDto listQueryParametersDto) {
+    return tripCollectionDao.getTripCollectionList(listQueryParametersDto);
+  }
+
+  @Override
   public List<TripCollection> getTripCollectionListByCreatorId(String creatorId) {
 
     return tripCollectionDao.getTripCollectionListByCreatorId(creatorId);
@@ -351,12 +356,15 @@ public class TripServiceImpl implements TripService {
   @Override
   public TripCollectionResponseDto getTripCollectionResponseDtoByTripCollection(
       TripCollection tripCollection) {
-    TripCollectionResponseDto tripCollectionResponseDto = new TripCollectionResponseDto();
-    tripCollectionResponseDto.setTripCollectionId(tripCollection.getTripCollectionId());
-    tripCollectionResponseDto.setTripCollectionName(tripCollection.getTripCollectionName());
 
     List<Trip> tripList = getTripListByTripColletionId(tripCollection.getTripCollectionId());
     List<TripResponseDto> tripResponseDtoList = getTripResponseDtoByTripList(tripList);
+
+    TripCollectionResponseDto tripCollectionResponseDto = new TripCollectionResponseDto();
+    tripCollectionResponseDto.setTripCollectionId(tripCollection.getTripCollectionId());
+    tripCollectionResponseDto.setTripCollectionName(tripCollection.getTripCollectionName());
+    tripCollectionResponseDto.setCreateDate(tripCollection.getCreateDate());
+    tripCollectionResponseDto.setUpdateDate(tripCollection.getUpdateDate());
     tripCollectionResponseDto.setTrips(tripResponseDtoList);
 
     return tripCollectionResponseDto;
@@ -375,6 +383,11 @@ public class TripServiceImpl implements TripService {
 
     Integer total = tripDao.countTrip(tripStatus, listQueryParametersDto);
     return total;
+  }
+
+  @Override
+  public Integer countTripCollection(ListQueryParametersDto listQueryParametersDto) {
+    return tripCollectionDao.countTripCollection(listQueryParametersDto);
   }
 
   @Override
