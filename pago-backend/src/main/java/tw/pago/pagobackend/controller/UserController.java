@@ -5,7 +5,6 @@ import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -60,9 +59,8 @@ public class UserController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to change email");
     }
 
-    if (user.getIsPhoneVerified() && updateUserRequestDto.getPhone() != null) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to change phone number if user have already finished phone verified");
-
+    if (Boolean.TRUE.equals(user.getIsPhoneVerified() && updateUserRequestDto.getPhone() != null) && (!updateUserRequestDto.getPhone().equals(user.getPhone()))) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to change phone number if user have already finished phone verified");
     }
 
     // Update User
