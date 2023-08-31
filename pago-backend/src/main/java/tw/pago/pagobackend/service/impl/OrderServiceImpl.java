@@ -41,9 +41,11 @@ import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PostponeReasonCategoryEnum;
+import tw.pago.pagobackend.constant.TransactionTypeEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.PostponeRecordDao;
+import tw.pago.pagobackend.dao.TransactionDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.BidCreatorDto;
@@ -119,6 +121,7 @@ public class OrderServiceImpl implements OrderService {
   private CancellationRecordDao cancellationRecordDao;
   private PostponeRecordDao postponeRecordDao;
   private NotificationService notificationService;
+  private TransactionDao transactionDao;
 
   @Autowired
   public OrderServiceImpl(OrderDao orderDao,
@@ -130,7 +133,8 @@ public class OrderServiceImpl implements OrderService {
       UserDao userDao,
       ModelMapper modelMapper,
       CancellationRecordDao cancellationRecordDao,
-      PostponeRecordDao postponeRecordDao, NotificationService notificationService
+      PostponeRecordDao postponeRecordDao, NotificationService notificationService, 
+      TransactionDao transactionDao
       ) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
@@ -143,6 +147,7 @@ public class OrderServiceImpl implements OrderService {
     this.cancellationRecordDao = cancellationRecordDao;
     this.postponeRecordDao = postponeRecordDao;
     this.notificationService = notificationService;
+    this.transactionDao = transactionDao;
   }
 
   @Autowired
@@ -379,6 +384,14 @@ public class OrderServiceImpl implements OrderService {
     if (!orderFileUrls.isEmpty()) {
       orderFileUrl = String.valueOf(orderFileUrls.get(0));
     }
+    BigDecimal oldOrderTotalAmount = oldOrder.getTotalAmount();
+    BigDecimal oldOrderTravelerFee = oldOrder.getTravelerFee();
+
+    Bid bid = bidService.getChosenBidByOrderId(orderId);
+    String tripId = bid.getTripId();
+    Trip trip = tripDao.getTripById(tripId);
+    String shopperId = trip.getShopperId();
+
 
 
     // Check if the order status has been modified
@@ -417,6 +430,20 @@ public class OrderServiceImpl implements OrderService {
     } else {
       // Only update order status if the order status is not REQUESTED
       orderDao.updateOrderStatusByOrderId(orderId, newOrderStatus);
+
+      if (newOrderStatus.equals(OrderStatusEnum.FINISHED)) {
+
+        // traveler gains traveler fee
+        // transaction type: INCOME
+        transactionDao.createTransactionRecord(orderId, TransactionTypeEnum.INCOME, oldOrderTravelerFee, shopperId);
+      
+      } else if (newOrderStatus.equals(OrderStatusEnum.CANCELLED)) {
+
+        // consumer is refunded the order total amount
+        // transaction type: REFUND
+        transactionDao.createTransactionRecord(orderId, TransactionTypeEnum.REFUND, oldOrderTotalAmount, consumerId);
+      
+      }
     }
 
 
