@@ -1,10 +1,8 @@
 package tw.pago.pagobackend.security.config;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
@@ -101,6 +99,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/**/*.js")
         .permitAll()
         .antMatchers(
+            "/Voyager",
+            "/vendor/**",
+            "/graphql",
+            "/graphiql",
             "/auth/login",
             "/auth/register",
             "/auth/request-password-reset",
