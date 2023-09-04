@@ -61,7 +61,6 @@ public class TripServiceImpl implements TripService {
   private final OrderService orderService;
   private final UserDao userDao;
   private final TripCollectionDao tripCollectionDao;
-
   @Override
   public Trip getTripById(String tripId) {
     Trip trip = tripDao.getTripById(tripId);
@@ -360,9 +359,12 @@ public class TripServiceImpl implements TripService {
     List<Trip> tripList = getTripListByTripColletionId(tripCollection.getTripCollectionId());
     List<TripResponseDto> tripResponseDtoList = getTripResponseDtoByTripList(tripList);
 
+    TripStatusEnum tripCollectionStatus = getTripCollectionStatusBasedOnEachTripStatus(tripResponseDtoList);
+
     TripCollectionResponseDto tripCollectionResponseDto = new TripCollectionResponseDto();
     tripCollectionResponseDto.setTripCollectionId(tripCollection.getTripCollectionId());
     tripCollectionResponseDto.setTripCollectionName(tripCollection.getTripCollectionName());
+    tripCollectionResponseDto.setTripCollectionStatus(tripCollectionStatus);
     tripCollectionResponseDto.setCreateDate(tripCollection.getCreateDate());
     tripCollectionResponseDto.setUpdateDate(tripCollection.getUpdateDate());
     tripCollectionResponseDto.setTrips(tripResponseDtoList);
@@ -516,5 +518,19 @@ public class TripServiceImpl implements TripService {
     return tripDao.searchTrips(query);
   }
 
+
+  private TripStatusEnum getTripCollectionStatusBasedOnEachTripStatus(List<TripResponseDto> tripResponseDtoList) {
+
+
+    // Check if any trip is ONGOING
+    if (tripResponseDtoList.stream().anyMatch(tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.ONGOING))) {
+      return TripStatusEnum.ONGOING;
+    } else if (tripResponseDtoList.stream().allMatch(tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.UPCOMING))) {
+      // Check if all trips are UPCOMING
+      return TripStatusEnum.UPCOMING;
+    }
+
+    return TripStatusEnum.PAST;
+  }
 
 }
