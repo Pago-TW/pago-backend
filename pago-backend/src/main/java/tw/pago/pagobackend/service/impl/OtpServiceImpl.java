@@ -12,7 +12,7 @@ import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.TooManyRequestsException;
 import tw.pago.pagobackend.model.Otp;
 import tw.pago.pagobackend.service.OtpService;
-import tw.pago.pagobackend.service.PhoneVerificationService;
+// import tw.pago.pagobackend.service.PhoneVerificationService; // TODO remove after testing
 import tw.pago.pagobackend.service.SmsService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -23,7 +23,7 @@ public class OtpServiceImpl implements OtpService {
 
     private final UuidGenerator uuidGenerator;
     private final SmsService smsService;
-    private final PhoneVerificationService phoneVerificationService;
+    // private final PhoneVerificationService phoneVerificationService; // TODO remove after testing
     private final CurrentUserInfoProvider currentUserInfoProvider;
     private final OtpDao otpDao;
 
@@ -91,7 +91,7 @@ public class OtpServiceImpl implements OtpService {
         String phone = validatePhoneRequestDto.getPhone();
         String internationalPhoneNumber = "+886" + phone.substring(1);
         String otpCode = validatePhoneRequestDto.getOtpCode();
-        String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+        // String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId(); // TODO remove after testing
 
         Otp otp = otpDao.getOtpByOtpCode(otpCode);
 
@@ -105,7 +105,7 @@ public class OtpServiceImpl implements OtpService {
 
         if (otp.getOtpCode().equals(otpCode) && otp.getInternationalPhoneNumber().equals(internationalPhoneNumber)) {
             otpDao.deleteOtpById(otp.getOtpId());
-            phoneVerificationService.verifyPhone(currentLoginUserId, phone); // TODO 如果本身沒手機號碼，加號碼上去
+            // phoneVerificationService.verifyPhone(currentLoginUserId, phone); // TODO 如果本身沒手機號碼，加號碼上去 // TODO remove after testing
             return true;
         } else {
             return false;

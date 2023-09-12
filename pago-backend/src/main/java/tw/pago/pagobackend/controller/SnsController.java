@@ -25,12 +25,12 @@ public class SnsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(otp);
     }
 
-    @PostMapping("/otp/validate")
-    public ResponseEntity<?> validateOtp(@RequestBody ValidatePhoneRequestDto validatePhoneRequestDto) {
-        boolean isValid = otpService.validateOtp(validatePhoneRequestDto);
+    // @PostMapping("/otp/validate") //TODO remove after confirmation
+    // public ResponseEntity<?> validateOtp(@RequestBody ValidatePhoneRequestDto validatePhoneRequestDto) {
+    //     boolean isValid = otpService.validateOtp(validatePhoneRequestDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(isValid);
-    }
+    //     return ResponseEntity.status(HttpStatus.OK).body(isValid);
+    // }
 
     
 }
