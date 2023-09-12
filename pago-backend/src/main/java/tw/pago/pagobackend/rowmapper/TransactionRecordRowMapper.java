@@ -12,12 +12,13 @@ public class TransactionRecordRowMapper implements RowMapper<TransactionRecord> 
     
     @Override
     public TransactionRecord mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-        TransactionRecord transactionRecord = TransactionRecord.builder()
+        return TransactionRecord.builder()
             .transactionId(resultSet.getString("transaction_id"))
             .userId(resultSet.getString("user_id"))
             .transactionAmount(resultSet.getInt("transaction_amount"))
             .transactionType(TransactionTypeEnum.valueOf(resultSet.getString("transaction_type")))
             .transactionDate(resultSet.getTimestamp("transaction_date"))
+            .transactionStatus(resultSet.getString("transaction_status"))
             .bankAccountId(resultSet.getString("bank_account_id"))
             .accountNumber(resultSet.getString("account_number"))
             .bankName(resultSet.getString("name"))
@@ -26,7 +27,5 @@ public class TransactionRecordRowMapper implements RowMapper<TransactionRecord> 
             .orderName(resultSet.getString("order_item_name"))
             .cancelReason(resultSet.getString("cancel_reason"))
             .build();
-
-        return transactionRecord;
     }
 }

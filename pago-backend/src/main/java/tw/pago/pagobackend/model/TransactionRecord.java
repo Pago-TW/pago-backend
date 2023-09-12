@@ -14,6 +14,7 @@ public class TransactionRecord {
     private Integer transactionAmount;
     private TransactionTypeEnum transactionType;
     private Date transactionDate;
+    private String transactionStatus;
 
     // withdraw
     private String bankAccountId; // bank_account table: get bank_code and accountNumber by id
