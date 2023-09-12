@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import tw.pago.pagobackend.constant.ActionTypeEnum;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
@@ -91,13 +89,13 @@ import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.NotificationService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
+import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrencyUtil;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Service
-@AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
   @Value("${base.url}")
@@ -114,6 +112,7 @@ public class OrderServiceImpl implements OrderService {
   private FileService fileService;
   private SesEmailService sesEmailService;
   private CurrentUserInfoProvider currentUserInfoProvider;
+  private TripService tripService;
   private TripDao tripDao;
   private UserDao userDao;
   private ModelMapper modelMapper;
@@ -129,18 +128,20 @@ public class OrderServiceImpl implements OrderService {
       FileService fileService,
       SesEmailService sesEmailService,
       CurrentUserInfoProvider currentUserInfoProvider,
+      @Lazy TripService tripService,
       TripDao tripDao,
       UserDao userDao,
       ModelMapper modelMapper,
       CancellationRecordDao cancellationRecordDao,
-      PostponeRecordDao postponeRecordDao, NotificationService notificationService, 
+      PostponeRecordDao postponeRecordDao, NotificationService notificationService,
       TransactionDao transactionDao
-      ) {
+  ) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
     this.fileService = fileService;
     this.sesEmailService = sesEmailService;
     this.currentUserInfoProvider = currentUserInfoProvider;
+    this.tripService = tripService;
     this.tripDao = tripDao;
     this.userDao = userDao;
     this.modelMapper = modelMapper;
@@ -218,6 +219,7 @@ public class OrderServiceImpl implements OrderService {
     consumerDto.setUserId(consumerId);
     consumerDto.setFullName(consumer.getFullName());
     consumerDto.setAvatarUrl(consumer.getAvatarUrl());
+    consumerDto.setTraveling(tripService.isUserTraveling(consumerId));
     order.setConsumer(consumerDto);
 
 
@@ -1350,6 +1352,7 @@ public class OrderServiceImpl implements OrderService {
         .toLocalDate();
 
     orderChosenShopperDto.setLatestDeliveryDate(latestDeliveryLocalDate);
+    orderChosenShopperDto.setTraveling(tripService.isUserTraveling(shopper.getUserId()));
 
     return orderChosenShopperDto;
 
