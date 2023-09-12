@@ -15,6 +15,7 @@ import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
+import tw.pago.pagobackend.exception.UnprocessableEntityException;
 import tw.pago.pagobackend.exception.InvalidDeliveryDateException;
 import tw.pago.pagobackend.exception.InvalidGoogleIdTokenException;
 import tw.pago.pagobackend.exception.NotFoundException;
@@ -185,5 +186,16 @@ public class GlobalExceptionHandler {
         errorDetails.put("secondsRemaining", ex.getSecondsRemaining());
 
         return new ResponseEntity<>(errorDetails, HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ResponseEntity<?> handleUnprocessableEntityException(UnprocessableEntityException ex) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("timestamp", ZonedDateTime.now(ZoneId.of("UTC")));
+        errorDetails.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        errorDetails.put("error", "Unprocessable Entity");
+        errorDetails.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }
