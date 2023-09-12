@@ -3,18 +3,13 @@ package tw.pago.pagobackend.assembler;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import tw.pago.pagobackend.constant.ReviewTypeEnum;
 import tw.pago.pagobackend.dto.BidCreatorDto;
 import tw.pago.pagobackend.dto.BidCreatorReviewDto;
 import tw.pago.pagobackend.dto.BidResponseDto;
 import tw.pago.pagobackend.dto.BidTripDto;
-import tw.pago.pagobackend.dto.ReviewRatingResultDto;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Trip;
 import tw.pago.pagobackend.model.User;
-import tw.pago.pagobackend.service.ReviewService;
-import tw.pago.pagobackend.service.TripService;
-import tw.pago.pagobackend.service.UserService;
 
 @Component
 public class BidAssembler implements Assembler<Bid, BidResponseDto> {
@@ -60,7 +55,7 @@ public class BidAssembler implements Assembler<Bid, BidResponseDto> {
   }
 
 
-  public BidResponseDto assemble(Bid bid, Trip bidRelatedTrip, User creator, BidCreatorReviewDto bidCreatorReviewDto) {
+  public BidResponseDto assemble(Bid bid, Trip bidRelatedTrip, User creator, BidCreatorReviewDto bidCreatorReviewDto, boolean isBidCreatorTraveling) {
 
     // Covert all data to DTO
     BidCreatorDto bidCreatorDto = modelMapper.map(creator, BidCreatorDto.class);
@@ -70,6 +65,7 @@ public class BidAssembler implements Assembler<Bid, BidResponseDto> {
     // Set related data to ResponseDTO
     bidResponseDto.setCreator(bidCreatorDto);
     bidResponseDto.getCreator().setReview(bidCreatorReviewDto);
+    bidResponseDto.getCreator().setTraveling(isBidCreatorTraveling);
     bidResponseDto.setTrip(bidTripDto);
 
     return bidResponseDto;

@@ -76,4 +76,6 @@ public interface TripService {
     Integer countMatchingOrderForTrip(ListQueryParametersDto listQueryParametersDto, Trip trip);
 
     List<Trip> searchTrips(String query);
+
+    boolean isUserTraveling(String userId);
 }

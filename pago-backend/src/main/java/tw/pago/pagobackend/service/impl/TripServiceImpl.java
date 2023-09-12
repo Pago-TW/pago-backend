@@ -518,6 +518,15 @@ public class TripServiceImpl implements TripService {
     return tripDao.searchTrips(query);
   }
 
+  @Override
+  public boolean isUserTraveling(String userId) {
+    List<Trip> tripList = tripDao.getTripsByShopperId(userId);
+    List<TripResponseDto> tripResponseDtoList = getTripResponseDtoByTripList(tripList);
+
+    return tripResponseDtoList.stream().anyMatch(
+        tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.ONGOING));
+  }
+
 
   private TripStatusEnum getTripCollectionStatusBasedOnEachTripStatus(List<TripResponseDto> tripResponseDtoList) {
 
