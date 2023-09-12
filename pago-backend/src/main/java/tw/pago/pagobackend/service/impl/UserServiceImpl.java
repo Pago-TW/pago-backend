@@ -35,13 +35,11 @@ import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.BidService;
 import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.OrderService;
-import tw.pago.pagobackend.service.PhoneVerificationService;
 import tw.pago.pagobackend.service.ReviewService;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.service.UserPhoneVerificationService;
 import tw.pago.pagobackend.service.UserService;
 import tw.pago.pagobackend.util.UuidGenerator;
-import tw.pago.pagobackend.validation.ValidPhone;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -173,6 +171,9 @@ public class UserServiceImpl implements UserService {
     // Get user completionRating
     CompletionRatingEnum completionRating = getUserCompletionRating(user);
     userResponseDto.setCompletionRating(completionRating);
+
+    // Set isTraveling
+    userResponseDto.setTraveling(tripService.isUserTraveling(userId));
 
     return userResponseDto;
   }

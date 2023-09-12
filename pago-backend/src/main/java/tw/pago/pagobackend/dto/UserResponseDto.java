@@ -1,6 +1,6 @@
 package tw.pago.pagobackend.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +35,8 @@ public class UserResponseDto {
   // For programing use;
   private String fullName;
   private Boolean isPhoneVerified;
+  @JsonProperty("isTraveling")
+  private boolean isTraveling;
   private CompletionRatingEnum completionRating;
 
 
