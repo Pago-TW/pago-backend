@@ -120,6 +120,21 @@ public class TripCollectionDaoImpl implements TripCollectionDao {
       map.put("creatorId", listQueryParametersDto.getUserId());
     }
 
+
+    if (listQueryParametersDto.getSearch() != null && !listQueryParametersDto.getSearch().isBlank()) {
+      sql = sql + " AND ("
+          + "trip_collection_name LIKE :search "
+          + "OR trip_collection_id IN ("
+          + "SELECT trip_collection_id FROM trip WHERE "
+          + "from_country LIKE :search "
+          + "OR from_city LIKE :search "
+          + "OR to_country LIKE :search "
+          + "OR to_city LIKE :search"
+          + ")) ";
+      map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
+    }
+
+
     return sql;
   }
 }

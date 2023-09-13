@@ -63,10 +63,12 @@ public class TripController {
 //  }
 
   @PostMapping("/trips") // TODO 抵達時間不該在今天以前，不合理
-                        // TODO 先不要做 ^
-  public ResponseEntity<Trip> createTrip(@RequestBody @Valid CreateTripRequestDto createTripRequestDto) {
+  // TODO 先不要做 ^
+  public ResponseEntity<Trip> createTrip(
+      @RequestBody @Valid CreateTripRequestDto createTripRequestDto) {
 
-    String tripId = tripService.createTrip(currentUserInfoProvider.getCurrentLoginUserId(), createTripRequestDto);
+    String tripId = tripService.createTrip(currentUserInfoProvider.getCurrentLoginUserId(),
+        createTripRequestDto);
     Trip trip = tripService.getTripById(tripId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(trip);
@@ -75,7 +77,8 @@ public class TripController {
 
 
   @PostMapping("/trips/batch")
-  public ResponseEntity<TripCollection> batchCreateTrip(@RequestBody @Valid BatchCreateTripRequestDto batchCreateTripRequestDto) {
+  public ResponseEntity<TripCollection> batchCreateTrip(
+      @RequestBody @Valid BatchCreateTripRequestDto batchCreateTripRequestDto) {
 
     batchCreateTripRequestDto.setShopperId(currentUserInfoProvider.getCurrentLoginUserId());
     TripCollection tripCollection = tripService.batchCreateTrip(batchCreateTripRequestDto);
@@ -87,7 +90,6 @@ public class TripController {
   public ResponseEntity<Trip> updateTrip(@PathVariable String userId,
       @PathVariable String tripId,
       @RequestBody @Valid UpdateTripRequestDto updateTripRequestDto) {
-
 
     // Check if the Trip to be updated exists
     Trip trip = tripService.getTripById(tripId);
@@ -149,8 +151,10 @@ public class TripController {
           .sort(sort)
           .build();
 
-      List<Trip> tripList = tripService.getMatchingTripListByOrderId(orderId, listQueryParametersDto);
-      List<TripResponseDto> tripResponseDtoList = tripService.getTripResponseDtoByTripList(tripList);
+      List<Trip> tripList = tripService.getMatchingTripListByOrderId(orderId,
+          listQueryParametersDto);
+      List<TripResponseDto> tripResponseDtoList = tripService.getTripResponseDtoByTripList(
+          tripList);
 
       return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoList);
     }
@@ -202,22 +206,24 @@ public class TripController {
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
       @RequestParam(defaultValue = "create_date") String orderBy,
-      @RequestParam(defaultValue = "DESC") String sort) {
+      @RequestParam(defaultValue = "DESC") String sort,
+      @RequestParam(required = false) String search) {
 
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
 
-
-
     ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
         .userId(currentLoginUserId)
+        .search(search)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)
         .sort(sort)
         .build();
 
-    List<TripCollection> tripCollectionList = tripService.getTripCollectionList(listQueryParametersDto);
-    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService.getTripCollectionResponseDtoListByTripCollectionList(tripCollectionList);
+    List<TripCollection> tripCollectionList = tripService.getTripCollectionList(
+        listQueryParametersDto);
+    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService.getTripCollectionResponseDtoListByTripCollectionList(
+        tripCollectionList);
     int total = tripService.countTripCollection(listQueryParametersDto);
 
     // Build the pagination response DTO
@@ -228,13 +234,9 @@ public class TripController {
         .data(tripCollectionResponseDtoList)
         .build();
 
-
-    
-
     return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoListResponseDto);
 
   }
-
 
 
   @GetMapping("/trips/{tripId}/matching-orders")
@@ -259,7 +261,8 @@ public class TripController {
 
     Trip trip = tripService.getTripById(tripId);
 
-    List<OrderResponseDto> matchingOrderResponseDtoListForTrip = tripService.getMatchingOrderResponseDtoListForTrip(listQueryParametersDto, trip);
+    List<OrderResponseDto> matchingOrderResponseDtoListForTrip = tripService.getMatchingOrderResponseDtoListForTrip(
+        listQueryParametersDto, trip);
 
     Integer total = tripService.countMatchingOrderForTrip(listQueryParametersDto, trip);
 
