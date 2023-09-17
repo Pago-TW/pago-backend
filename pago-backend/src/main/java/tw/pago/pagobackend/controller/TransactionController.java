@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
+import tw.pago.pagobackend.dto.TransactionWithdrawRequestDto;
+import tw.pago.pagobackend.dto.TransactionWithdrawValidationDto;
 import tw.pago.pagobackend.model.Otp;
 import tw.pago.pagobackend.model.TransactionRecord;
 import tw.pago.pagobackend.service.TransactionService;
@@ -49,13 +51,15 @@ public class TransactionController {
     }
 
     @PostMapping("/wallet/withdraw")
-    public ResponseEntity<?> requestWithdraw(@RequestBody Integer withdrawalAmount) {
+    public ResponseEntity<?> requestWithdraw(@RequestBody TransactionWithdrawRequestDto transactionWithdrawRequestDto) {
+        Integer withdrawalAmount = transactionWithdrawRequestDto.getWithdrawalAmount();
         Otp otp = transactionService.requestWithdraw(withdrawalAmount);
         return ResponseEntity.status(HttpStatus.CREATED).body(otp);
     }
 
     @PostMapping("/wallet/withdraw/validate")
-    public ResponseEntity<?> validateWithdraw(@RequestBody String otpCode) {
+    public ResponseEntity<?> validateWithdraw(@RequestBody TransactionWithdrawValidationDto transactionWithdrawValidationDto) {
+        String otpCode = transactionWithdrawValidationDto.getOtpCode();
         boolean isValid = transactionService.validateWithdraw(otpCode);
         return ResponseEntity.status(HttpStatus.OK).body(isValid);
     }
