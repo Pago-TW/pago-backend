@@ -77,7 +77,7 @@ public class TransactionServiceImpl implements TransactionService {
         boolean isValid = otpService.validateOtp(validatePhoneRequestDto);
 
         if (!isValid) {
-            return false;
+            throw new BadRequestException("Invalid OTP or OTP expired");
         }
 
         PendingWithdrawal pendingWithdrawal = transactionDao.getPendingWithdrawalByUserId(userId);
