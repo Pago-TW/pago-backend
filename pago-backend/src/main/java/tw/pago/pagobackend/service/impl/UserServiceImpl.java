@@ -346,4 +346,8 @@ public class UserServiceImpl implements UserService {
   public List<User> searchUsers(String query) {
     return userDao.searchUsers(query);
   }
+
+  public boolean isPhoneAlreadyRegistered(String phone) {
+    return userDao.isPhoneAlreadyRegistered(phone);
+  }
 }

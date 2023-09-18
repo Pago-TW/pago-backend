@@ -27,4 +27,6 @@ public interface UserService {
   void processOAuth2PostLogin(String userEmail);
 
   List<User> searchUsers(String query);
+
+  boolean isPhoneAlreadyRegistered(String phone);
 }
