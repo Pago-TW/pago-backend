@@ -171,4 +171,14 @@ public class UserDaoImpl implements UserDao {
     
     return namedParameterJdbcTemplate.query(sql, map, new UserRowMapper());
   }
+
+  @Override
+  public boolean isPhoneAlreadyRegistered(String phone) {
+      String sql = "SELECT COUNT(*) FROM `user` WHERE `phone` = :phone";
+
+      Map<String, Object> map = new HashMap<>();
+      map.put("phone", phone);
+      Integer count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+      return count != null && count > 0;
+  }
 }

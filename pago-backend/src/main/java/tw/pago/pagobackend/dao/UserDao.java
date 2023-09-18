@@ -18,4 +18,6 @@ public interface UserDao {
   void updateUser(UpdateUserRequestDto updateUserRequestDto);
 
   List<User> searchUsers(String query);
+
+  boolean isPhoneAlreadyRegistered(String phone);
 }
