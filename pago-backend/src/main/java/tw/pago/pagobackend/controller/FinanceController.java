@@ -17,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.BankAccountResponseDto;
 import tw.pago.pagobackend.dto.CreateBankAccountRequestDto;
+import tw.pago.pagobackend.dto.OtpValidationDto;
+import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.model.Bank;
 import tw.pago.pagobackend.model.BankAccount;
 import tw.pago.pagobackend.model.BankBranch;
+import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.FinanceService;
+import tw.pago.pagobackend.service.OtpService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @AllArgsConstructor
@@ -30,6 +34,7 @@ public class FinanceController {
 
   private final CurrentUserInfoProvider currentUserInfoProvider;
   private final FinanceService financeService;
+  private final OtpService otpService;
 
   @PostMapping("/bank-accounts") // TODO 檢查一下是否用戶近期有驗證手機過
   public ResponseEntity<BankAccount> createBankAccount(@RequestBody
@@ -82,13 +87,26 @@ public class FinanceController {
   }
 
   @PatchMapping("/bank-accounts/{bankAccountId}/default")
-  public ResponseEntity<?> changeDefaultBankAccount(@PathVariable String bankAccountId) {
+  public ResponseEntity<?> changeDefaultBankAccount(@PathVariable String bankAccountId, @RequestBody OtpValidationDto otpValidationDto) {
 
     // Permission checking
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
     BankAccount bankAccount = financeService.getBankAccountById(bankAccountId);
     if (!bankAccount.getUserId().equals(currentLoginUserId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
+    }
+
+    // Otp validation
+    User user = currentUserInfoProvider.getCurrentLoginUser();
+    String phone = user.getPhone();
+    String otpCode = otpValidationDto.getOtpCode();
+    ValidatePhoneRequestDto validatePhoneRequestDto = new ValidatePhoneRequestDto();
+    validatePhoneRequestDto.setPhone(phone);
+    validatePhoneRequestDto.setOtpCode(otpCode);
+    boolean isOtpValid = otpService.validateOtp(validatePhoneRequestDto);
+
+    if (!isOtpValid) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid OTP or OTP expired");
     }
 
     // Change default bank account
