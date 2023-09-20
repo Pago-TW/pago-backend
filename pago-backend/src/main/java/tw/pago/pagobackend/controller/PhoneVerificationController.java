@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
+import tw.pago.pagobackend.dto.SnsRequestDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
+import tw.pago.pagobackend.model.Otp;
 import tw.pago.pagobackend.model.PhoneVerification;
+import tw.pago.pagobackend.service.OtpService;
 import tw.pago.pagobackend.service.PhoneVerificationService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
@@ -18,6 +21,7 @@ import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 public class PhoneVerificationController {
     private final CurrentUserInfoProvider currentUserInfoProvider;
     private final PhoneVerificationService phoneVerificationService;
+    private final OtpService otpService;
 
     @GetMapping("/phone-verification-status")
     public ResponseEntity<?> getPhoneVerificationStatus() {
@@ -28,6 +32,13 @@ public class PhoneVerificationController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(phoneVerification.isPhoneVerified());
+    }
+
+    @PostMapping("/phone/otp")
+    public ResponseEntity<?> sendSns(@RequestBody SnsRequestDto snsRequestDto) {
+        Otp otp = otpService.requestOtp(snsRequestDto.getPhone());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(otp);
     }
 
     @PostMapping("/phone/validate")
