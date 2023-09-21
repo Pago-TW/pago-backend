@@ -4,11 +4,9 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import lombok.AllArgsConstructor;
 import tw.pago.pagobackend.constant.TransactionStatusEnum;
 import tw.pago.pagobackend.constant.TransactionTypeEnum;
 import tw.pago.pagobackend.dao.TransactionDao;
@@ -16,6 +14,7 @@ import tw.pago.pagobackend.model.PendingWithdrawal;
 import tw.pago.pagobackend.model.TransactionRecord;
 import tw.pago.pagobackend.rowmapper.PendingWithdrawalRowMapper;
 import tw.pago.pagobackend.rowmapper.TransactionRecordRowMapper;
+import tw.pago.pagobackend.rowmapper.TransactionYearMonthRowMapper;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Component
@@ -84,7 +83,21 @@ public class TransactionDaoImpl implements TransactionDao {
         return namedParameterJdbcTemplate.query(sql, map, new TransactionRecordRowMapper());
     }
 
-    @Override
+  @Override
+  public List<String> getTransactionDistinctYearMonthByUserId(String userId) {
+    String sql = "SELECT DISTINCT DATE_FORMAT(transaction_date, '%Y-%m') as transaction_ym "
+        + "FROM transaction_record "
+        + "WHERE user_id = :userId "
+        + "ORDER BY transaction_ym DESC";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userId", userId);
+
+    return namedParameterJdbcTemplate.query(sql, map, new TransactionYearMonthRowMapper());
+  }
+
+
+  @Override
     public TransactionRecord getTransactionById(String userId, String transactionId) {
         String sql = "SELECT "
             + "tr.transaction_id, tr.user_id, tr.transaction_amount, tr.transaction_type, tr.transaction_date, tr.transaction_status, "

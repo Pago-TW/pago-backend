@@ -1,11 +1,20 @@
 package tw.pago.pagobackend.service.impl;
 
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import org.springframework.stereotype.Component;
-
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.TransactionDao;
+import tw.pago.pagobackend.dto.TransactionTabViewDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.UnprocessableEntityException;
@@ -43,6 +52,44 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionRecord getTransactionById(String userId, String transactionId) {
         return transactionDao.getTransactionById(userId, transactionId);
     }
+
+    @Override
+    public Map<Integer, List<TransactionTabViewDto>> getTransactionTabViewByUserId(String userId) {
+
+        Map<Integer, List<TransactionTabViewDto>> responseMap = new TreeMap<>(Collections.reverseOrder());
+        List<String> transactionDistinctYearMonth = transactionDao.getTransactionDistinctYearMonthByUserId(userId);
+
+        for (String ym : transactionDistinctYearMonth) {
+            // 解析年和月
+            int year = Integer.parseInt(ym.substring(0, 4));
+            int month = Integer.parseInt(ym.substring(5, 7));
+
+            // 建立 ZonedDateTime 物件
+            ZonedDateTime startDate = ZonedDateTime.of(year, month, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+            ZonedDateTime endDate = startDate.with(TemporalAdjusters.lastDayOfMonth())
+                .withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999999999);
+
+            // 檢查是否需要新建 List
+            if (!responseMap.containsKey(year)) {
+                responseMap.put(year, new ArrayList<>());
+            }
+
+            // 建立新的 TransactionTabViewDto
+            TransactionTabViewDto newTabView = new TransactionTabViewDto(
+                startDate,
+                endDate,
+                Month.of(month).getDisplayName(TextStyle.FULL, Locale.forLanguageTag("zh-TW"))
+            );
+
+            responseMap.get(year).add(newTabView);
+        }
+
+        return responseMap;
+    }
+
 
     @Override
     public Otp requestWithdraw(Integer withdrawalAmount) {

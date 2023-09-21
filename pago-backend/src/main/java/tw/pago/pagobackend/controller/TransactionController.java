@@ -1,7 +1,8 @@
 package tw.pago.pagobackend.controller;
 
 import java.util.List;
-
+import java.util.Map;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,8 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import lombok.AllArgsConstructor;
+import tw.pago.pagobackend.dto.TransactionTabViewDto;
 import tw.pago.pagobackend.dto.TransactionWithdrawRequestDto;
 import tw.pago.pagobackend.dto.OtpValidationDto;
 import tw.pago.pagobackend.model.Otp;
@@ -23,7 +23,6 @@ import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 public class TransactionController {
 
     private final CurrentUserInfoProvider currentUserInfoProvider;
-
     private final TransactionService transactionService;
 
     @GetMapping("/wallet/balance")
@@ -50,10 +49,19 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.OK).body(transactionRecord);
     }
 
+    @GetMapping("/wallet/transactions/tab-view")
+    public ResponseEntity<Map<Integer, List<TransactionTabViewDto>>> getTransactionTabView() {
+        String userId = currentUserInfoProvider.getCurrentLoginUserId();
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactionTabViewByUserId(userId));
+    }
+
     @PostMapping("/wallet/withdraw")
     public ResponseEntity<?> requestWithdraw(@RequestBody TransactionWithdrawRequestDto transactionWithdrawRequestDto) {
         Integer withdrawalAmount = transactionWithdrawRequestDto.getWithdrawalAmount();
         Otp otp = transactionService.requestWithdraw(withdrawalAmount);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(otp);
     }
 
@@ -63,5 +71,7 @@ public class TransactionController {
         boolean isValid = transactionService.validateWithdraw(otpCode);
         return ResponseEntity.status(HttpStatus.OK).body(isValid);
     }
+
+
 
 }

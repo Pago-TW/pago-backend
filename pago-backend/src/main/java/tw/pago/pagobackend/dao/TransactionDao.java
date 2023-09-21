@@ -2,7 +2,6 @@ package tw.pago.pagobackend.dao;
 
 import java.math.BigDecimal;
 import java.util.List;
-
 import tw.pago.pagobackend.constant.TransactionTypeEnum;
 import tw.pago.pagobackend.model.PendingWithdrawal;
 import tw.pago.pagobackend.model.TransactionRecord;
@@ -14,6 +13,8 @@ public interface TransactionDao {
     Integer getWalletBalance(String userId);
 
     List<TransactionRecord> getTransactionList(String userId);
+
+    List<String> getTransactionDistinctYearMonthByUserId(String userId);
 
     TransactionRecord getTransactionById(String userId, String transactionId);
 
