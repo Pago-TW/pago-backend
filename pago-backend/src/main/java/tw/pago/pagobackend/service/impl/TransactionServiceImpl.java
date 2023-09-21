@@ -7,6 +7,8 @@ import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,6 +16,8 @@ import java.util.TreeMap;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import tw.pago.pagobackend.dao.TransactionDao;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
+import tw.pago.pagobackend.dto.TransactionRecordListResponseDto;
 import tw.pago.pagobackend.dto.TransactionTabViewDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
@@ -44,9 +48,55 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionRecord> getTransactionList(String userId) {
-        return transactionDao.getTransactionList(userId);
+    public List<TransactionRecord> getTransactionRecordList(ListQueryParametersDto listQueryParametersDto) {
+
+
+                // 如果 startDate 和 endDate 都是 null，則設置 startDate 為 14 天前的日期
+        if (listQueryParametersDto.getStartDate() == null && listQueryParametersDto.getEndDate() == null) {
+            ZonedDateTime defaultStartDate = ZonedDateTime.now().minusDays(14);
+            ZonedDateTime defaultEndDate = ZonedDateTime.now();
+
+            listQueryParametersDto.setStartDate(defaultStartDate);
+            listQueryParametersDto.setEndDate(defaultEndDate);
+        }
+
+        // Check startDate and endDate is valid
+        if (listQueryParametersDto.getStartDate() != null && listQueryParametersDto.getEndDate() != null
+            && (listQueryParametersDto.getStartDate().isAfter(listQueryParametersDto.getEndDate()))) {
+                throw new BadRequestException("startDate must be earlier than endDate");
+        }
+
+
+        return transactionDao.getTransactionRecordList(listQueryParametersDto);
     }
+
+    @Override
+    public List<TransactionRecordListResponseDto> getTransactionRecordResponseDtoListByTransactionRecordList(
+        List<TransactionRecord> transactionRecordList) {
+
+        Map<String, TransactionRecordListResponseDto> map = new HashMap<>();
+
+        for (TransactionRecord transactionRecord : transactionRecordList) {
+            ZonedDateTime zonedDateTime = transactionRecord.getTransactionDate().toInstant().atZone(ZoneId.systemDefault());
+            int year = zonedDateTime.getYear();
+            int month = zonedDateTime.getMonthValue();
+
+            String key = year + "-" + month;
+
+            TransactionRecordListResponseDto dto = map.computeIfAbsent(key, k -> new TransactionRecordListResponseDto(year, month, new ArrayList<>()));
+
+            dto.getTransactions().add(transactionRecord);
+        }
+
+        List<TransactionRecordListResponseDto> sortedList = new ArrayList<>(map.values());
+        sortedList.sort(Comparator.comparing(TransactionRecordListResponseDto::getYear)
+            .thenComparing(TransactionRecordListResponseDto::getMonth)
+            .reversed());
+        return sortedList;
+
+
+    }
+
 
     @Override
     public TransactionRecord getTransactionById(String userId, String transactionId) {

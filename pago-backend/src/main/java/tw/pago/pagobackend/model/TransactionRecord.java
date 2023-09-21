@@ -1,7 +1,6 @@
 package tw.pago.pagobackend.model;
 
-import java.util.Date;
-
+import java.time.ZonedDateTime;
 import lombok.Builder;
 import lombok.Data;
 import tw.pago.pagobackend.constant.TransactionTypeEnum;
@@ -13,7 +12,7 @@ public class TransactionRecord {
     private String userId;
     private Integer transactionAmount;
     private TransactionTypeEnum transactionType;
-    private Date transactionDate;
+    private ZonedDateTime transactionDate;
     private String transactionStatus;
 
     // withdraw

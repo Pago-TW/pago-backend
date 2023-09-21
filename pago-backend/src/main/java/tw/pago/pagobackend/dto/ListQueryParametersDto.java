@@ -3,6 +3,7 @@ package tw.pago.pagobackend.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,4 +66,8 @@ public class ListQueryParametersDto {
 
   // Notification
   private NotificationTypeEnum notificationType;
+
+  // TransactionRecord
+  private ZonedDateTime startDate;
+  private ZonedDateTime endDate;
 }
