@@ -24,7 +24,6 @@ public class TransactionRecordResponseDto {
   @AllArgsConstructor
   public static class Detail {
     private Integer balance;
-    private String bankAccountId;
     private String accountNumber;
     private String bankName;
     private String orderSerialNumber;

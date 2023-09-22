@@ -4,7 +4,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tw.pago.pagobackend.model.TransactionRecord;
 
 @Data
 @NoArgsConstructor
@@ -12,5 +11,5 @@ import tw.pago.pagobackend.model.TransactionRecord;
 public class TransactionRecordListResponseDto {
   private int year;
   private int month;
-  private List<TransactionRecord> transactions;
+  private List<TransactionRecordResponseDto> transactions;
 }

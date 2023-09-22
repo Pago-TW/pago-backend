@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.TransactionStatusEnum;
 import tw.pago.pagobackend.constant.TransactionTypeEnum;
@@ -78,6 +79,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public List<TransactionRecordListResponseDto> getTransactionRecordResponseDtoListByTransactionRecordList(
         List<TransactionRecord> transactionRecordList) {
 
@@ -92,7 +94,10 @@ public class TransactionServiceImpl implements TransactionService {
 
             TransactionRecordListResponseDto dto = map.computeIfAbsent(key, k -> new TransactionRecordListResponseDto(year, month, new ArrayList<>()));
 
-            dto.getTransactions().add(transactionRecord);
+            // Converting TransactionRecord to TransactionRecordResponseDto
+            TransactionRecordResponseDto convertedDto = getTransactionRecordResponseDtoByTransactionRecord(transactionRecord);
+
+            dto.getTransactions().add(convertedDto);
         }
 
         List<TransactionRecordListResponseDto> sortedList = new ArrayList<>(map.values());
@@ -100,9 +105,8 @@ public class TransactionServiceImpl implements TransactionService {
             .thenComparing(TransactionRecordListResponseDto::getMonth)
             .reversed());
         return sortedList;
-
-
     }
+
 
 
     @Override
@@ -111,6 +115,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public TransactionRecordResponseDto getTransactionRecordResponseDtoByTransactionRecord(
         TransactionRecord transactionRecord) {
 
@@ -138,12 +143,26 @@ public class TransactionServiceImpl implements TransactionService {
 
 
         Detail detail = new Detail();
-        detail.setBalance(getBalanceAtTransaction(transactionRecord.getUserId(), transactionRecord));
-        detail.setBankAccountId(transactionRecord.getBankAccountId());
-        detail.setAccountNumber(transactionRecord.getAccountNumber());
+
+        // Hide bank account number with " * "
+        String accountNumber = transactionRecord.getAccountNumber();
+        if (accountNumber != null && accountNumber.length() > 6) {
+            String firstPart = accountNumber.substring(0, 4);
+            String lastPart = accountNumber.substring(accountNumber.length() - 2);
+            String replacement = String.join("", Collections.nCopies(accountNumber.length() - 6, "*"));
+            String maskedAccountNumber = firstPart + replacement + lastPart;
+            detail.setAccountNumber(maskedAccountNumber);
+        } else {
+            detail.setAccountNumber(null);
+        }
+
         detail.setBankName(transactionRecord.getBankName());
         detail.setOrderSerialNumber(transactionRecord.getOrderSerialNumber());
         detail.setOrderName(transactionRecord.getOrderName());
+        Integer balanceBeforeTransaction = getBalanceAtTransaction(transactionRecord.getUserId(), transactionRecord);
+        Integer balanceAfterTransaction = balanceBeforeTransaction + transactionRecord.getTransactionAmount();
+        detail.setBalance(balanceAfterTransaction);
+
 
         String cancelReason = transactionRecord.getCancelReason();
         if (cancelReason != null) {
@@ -163,7 +182,7 @@ public class TransactionServiceImpl implements TransactionService {
                     transactionRecordResponseDto.setTransactionDescription(transactionRecord.getOrderName());
                     break;
                 case FEE:
-                    transactionRecordResponseDto.setTransactionDescription(FEE.getDescription());
+                    transactionRecordResponseDto.setTransactionDescription("提領" + FEE.getDescription());
                     break;
                 default:
                     transactionRecordResponseDto.setTransactionDescription(null);
