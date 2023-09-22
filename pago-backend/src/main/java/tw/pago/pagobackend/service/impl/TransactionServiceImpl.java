@@ -1,5 +1,7 @@
 package tw.pago.pagobackend.service.impl;
 
+import static tw.pago.pagobackend.constant.TransactionTypeEnum.FEE;
+
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -15,9 +17,14 @@ import java.util.Map;
 import java.util.TreeMap;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
+import tw.pago.pagobackend.constant.TransactionStatusEnum;
+import tw.pago.pagobackend.constant.TransactionTypeEnum;
 import tw.pago.pagobackend.dao.TransactionDao;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.TransactionRecordListResponseDto;
+import tw.pago.pagobackend.dto.TransactionRecordResponseDto;
+import tw.pago.pagobackend.dto.TransactionRecordResponseDto.Detail;
 import tw.pago.pagobackend.dto.TransactionTabViewDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
@@ -102,6 +109,74 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionRecord getTransactionById(String userId, String transactionId) {
         return transactionDao.getTransactionById(userId, transactionId);
     }
+
+    @Override
+    public TransactionRecordResponseDto getTransactionRecordResponseDtoByTransactionRecord(
+        TransactionRecord transactionRecord) {
+
+        TransactionRecordResponseDto transactionRecordResponseDto = new TransactionRecordResponseDto();
+        transactionRecordResponseDto.setTransactionId(transactionRecord.getTransactionId());
+        transactionRecordResponseDto.setUserId(transactionRecord.getUserId());
+
+        String transactionType = transactionRecord.getTransactionType();
+        if (transactionType != null) {
+            transactionRecordResponseDto.setTransactionTitle(TransactionTypeEnum.valueOf(transactionType).getDescription());
+        } else {
+            transactionRecordResponseDto.setTransactionTitle(null);
+        }
+
+        transactionRecordResponseDto.setTransactionAmount(transactionRecord.getTransactionAmount());
+        transactionRecordResponseDto.setTransactionType(transactionType);
+        transactionRecordResponseDto.setTransactionDate(transactionRecord.getTransactionDate());
+
+        String transactionStatus = transactionRecord.getTransactionStatus();
+        if (transactionStatus != null) {
+            transactionRecordResponseDto.setTransactionStatus(TransactionStatusEnum.valueOf(transactionStatus).name());
+        } else {
+            transactionRecordResponseDto.setTransactionStatus(null);
+        }
+
+
+        Detail detail = new Detail();
+        detail.setBalance(getBalanceAtTransaction(transactionRecord.getUserId(), transactionRecord));
+        detail.setBankAccountId(transactionRecord.getBankAccountId());
+        detail.setAccountNumber(transactionRecord.getAccountNumber());
+        detail.setBankName(transactionRecord.getBankName());
+        detail.setOrderSerialNumber(transactionRecord.getOrderSerialNumber());
+        detail.setOrderName(transactionRecord.getOrderName());
+
+        String cancelReason = transactionRecord.getCancelReason();
+        if (cancelReason != null) {
+            detail.setCancelReason(CancelReasonCategoryEnum.valueOf(cancelReason).getDescription());
+        } else {
+            detail.setCancelReason(null);
+        }
+
+        if (transactionType != null) {
+            switch (TransactionTypeEnum.valueOf(transactionType)) {
+                case WITHDRAW:
+                    transactionRecordResponseDto.setTransactionDescription(
+                        TransactionStatusEnum.valueOf(transactionStatus).getDescription());
+                    break;
+                case INCOME:
+                case REFUND:
+                    transactionRecordResponseDto.setTransactionDescription(transactionRecord.getOrderName());
+                    break;
+                case FEE:
+                    transactionRecordResponseDto.setTransactionDescription(FEE.getDescription());
+                    break;
+                default:
+                    transactionRecordResponseDto.setTransactionDescription(null);
+                    break;
+            }
+        } else {
+            transactionRecordResponseDto.setTransactionDescription(null);
+        }
+
+        transactionRecordResponseDto.setDetail(detail);
+        return transactionRecordResponseDto;
+    }
+
 
     @Override
     public Map<Integer, List<TransactionTabViewDto>> getTransactionTabViewByUserId(String userId) {
@@ -190,5 +265,11 @@ public class TransactionServiceImpl implements TransactionService {
         transactionDao.applyTransactionFee(userId, -TRANSACTION_FEE);
 
         return true;
+    }
+
+
+    private Integer getBalanceAtTransaction(String userId, TransactionRecord transactionRecord) {
+
+        return transactionDao.getBalanceAtTransaction(userId, transactionRecord);
     }
 }

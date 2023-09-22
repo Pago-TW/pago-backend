@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OtpValidationDto;
 import tw.pago.pagobackend.dto.TransactionRecordListResponseDto;
+import tw.pago.pagobackend.dto.TransactionRecordResponseDto;
 import tw.pago.pagobackend.dto.TransactionTabViewDto;
 import tw.pago.pagobackend.dto.TransactionWithdrawRequestDto;
 import tw.pago.pagobackend.model.Otp;
@@ -57,11 +58,11 @@ public class TransactionController {
     }
 
     @GetMapping("/wallet/transactions/{transactionId}")
-    public ResponseEntity<?> getTransactionById(@PathVariable String transactionId) {
+    public ResponseEntity<TransactionRecordResponseDto> getTransactionById(@PathVariable String transactionId) {
         String userId = currentUserInfoProvider.getCurrentLoginUserId();
         TransactionRecord transactionRecord = transactionService.getTransactionById(userId, transactionId);
         
-        return ResponseEntity.status(HttpStatus.OK).body(transactionRecord);
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactionRecordResponseDtoByTransactionRecord(transactionRecord));
     }
 
     @GetMapping("/wallet/transactions/tab-view")

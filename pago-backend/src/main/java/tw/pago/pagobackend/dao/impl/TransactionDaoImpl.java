@@ -63,6 +63,37 @@ public class TransactionDaoImpl implements TransactionDao {
     }
   }
 
+
+  @Override
+  public Integer getBalanceAtTransaction(String userId, TransactionRecord transactionRecord) {
+
+    ZonedDateTime transactionDate = transactionRecord.getTransactionDate();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String formattedDate = transactionDate.format(formatter);
+
+
+    // Then, sum up all transactions that happened up to and including that time
+    String sql = "SELECT SUM(transaction_amount) "
+        + "FROM transaction_record "
+        + "WHERE user_id = :userId "
+        + "AND transaction_date <= :transactionDate ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("userId", userId);
+    map.put("transactionDate", formattedDate);
+
+    Integer balance = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+    if (balance == null) {
+      return 0;
+    } else {
+      return balance;
+    }
+  }
+
+
+
+
   @Override
   public List<TransactionRecord> getTransactionRecordList(
       ListQueryParametersDto listQueryParametersDto) {

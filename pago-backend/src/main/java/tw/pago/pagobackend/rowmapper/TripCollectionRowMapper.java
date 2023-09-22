@@ -16,7 +16,6 @@ public class TripCollectionRowMapper implements RowMapper<TripCollection> {
     tripCollection.setCreatorId(resultSet.getString("creator_id"));
     tripCollection.setCreateDate(resultSet.getTimestamp("create_date").toInstant().atZone(ZoneId.of("UTC")));
     tripCollection.setUpdateDate(resultSet.getTimestamp("update_date").toInstant().atZone(ZoneId.of("UTC")));
-
     return tripCollection;
   }
 }

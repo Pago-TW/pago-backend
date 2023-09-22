@@ -13,6 +13,8 @@ public interface TransactionDao {
 
     Integer getWalletBalance(String userId);
 
+    Integer getBalanceAtTransaction(String userId, TransactionRecord transactionRecord);
+
     List<TransactionRecord> getTransactionRecordList(ListQueryParametersDto listQueryParametersDto);
 
     List<String> getTransactionDistinctYearMonthByUserId(String userId);
