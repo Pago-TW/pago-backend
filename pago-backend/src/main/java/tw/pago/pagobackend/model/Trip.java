@@ -15,6 +15,7 @@ import tw.pago.pagobackend.constant.TripStatusEnum;
 public class Trip {
     private String tripId;
     private String shopperId;
+    private String tripCollectionId;
     private CountryCode fromCountry;
     private CityCode fromCity;
     private CountryCode toCountry;

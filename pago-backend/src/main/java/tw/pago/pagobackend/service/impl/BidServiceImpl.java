@@ -110,6 +110,7 @@ public class BidServiceImpl implements BidService {
           .tripId(createBidRequestDto.getTripId())
           .currency(createBidRequestDto.getCurrency())
           .latestDeliveryDate(createBidRequestDto.getLatestDeliveryDate())
+          .bidComment(createBidRequestDto.getBidComment())
           .build();
 
       // Update the existing bid
@@ -407,12 +408,12 @@ public class BidServiceImpl implements BidService {
     bidCreatorReviewDto.setAverageRating(reviewRatingResultDto.getAverageRating());
     bidCreatorReviewDto.setTotalReview(reviewRatingResultDto.getTotalReviews());
     bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+    boolean isBidCreatorTraveling = tripService.isUserTraveling(creator.getUserId());
+
 
 
     // Convert to ResponseDTO
-    BidResponseDto bidResponseDto = bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto);
-
-    return bidResponseDto;
+    return bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto, isBidCreatorTraveling);
   }
 
   @Override
@@ -430,12 +431,11 @@ public class BidServiceImpl implements BidService {
     bidCreatorReviewDto.setAverageRating(reviewRatingResultDto.getAverageRating());
     bidCreatorReviewDto.setTotalReview(reviewRatingResultDto.getTotalReviews());
     bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+    boolean isBidCreatorTraveling = tripService.isUserTraveling(creator.getUserId());
 
 
     // Convert to ResponseDTO
-    BidResponseDto bidResponseDto = bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto);
-
-    return bidResponseDto;
+    return bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto, isBidCreatorTraveling);
   }
 
   @Override
@@ -455,11 +455,10 @@ public class BidServiceImpl implements BidService {
     bidCreatorReviewDto.setAverageRating(reviewRatingResultDto.getAverageRating());
     bidCreatorReviewDto.setTotalReview(reviewRatingResultDto.getTotalReviews());
     bidCreatorReviewDto.setReviewType(ReviewTypeEnum.FOR_SHOPPER);
+    boolean isBidCreatorTraveling = tripService.isUserTraveling(creator.getUserId());
 
     // Convert to ResponseDTO
-    BidResponseDto bidResponseDto = bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto);
-
-    return bidResponseDto;
+    return bidAssembler.assemble(bid, trip, creator, bidCreatorReviewDto, isBidCreatorTraveling);
   }
 
 

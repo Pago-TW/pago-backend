@@ -54,6 +54,12 @@ public class FinanceServiceImpl implements FinanceService {
 
   @Override
   public BankAccountResponseDto getBankAccountResponseDtoByBankAccount(BankAccount bankAccount) {
+
+    if (bankAccount == null) {
+      throw new ResourceNotFoundException("Bank Account not found");
+    }
+
+
     String accountNumber = bankAccount.getAccountNumber();
     String bankCode = bankAccount.getBankCode();
     String branchCode = bankAccount.getBranchCode();

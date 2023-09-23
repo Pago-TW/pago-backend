@@ -14,6 +14,7 @@ public class TripRowMapper implements RowMapper<Trip> {
     Trip trip = Trip.builder()
         .tripId(resultSet.getString("trip_id"))
         .shopperId(resultSet.getString("shopper_id"))
+        .tripCollectionId(resultSet.getString("trip_collection_id"))
         .fromCountry(CountryCode.valueOf(resultSet.getString("from_country")))
         .fromCity(CityCode.valueOf(resultSet.getString("from_city")))
         .toCountry(CountryCode.valueOf(resultSet.getString("to_country")))

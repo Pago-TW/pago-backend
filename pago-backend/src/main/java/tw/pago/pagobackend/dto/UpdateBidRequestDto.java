@@ -20,6 +20,7 @@ public class UpdateBidRequestDto {
   private CurrencyEnum currency;
   private BidStatusEnum bidStatus;
   private Date latestDeliveryDate;
+  private String bidComment;
 
 
 

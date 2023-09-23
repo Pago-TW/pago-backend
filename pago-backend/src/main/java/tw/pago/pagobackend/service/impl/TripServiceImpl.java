@@ -23,11 +23,17 @@ import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;
 import tw.pago.pagobackend.dao.BidDao;
 import tw.pago.pagobackend.dao.OrderDao;
+import tw.pago.pagobackend.dao.TripCollectionDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto.Departure;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto.Stop;
+import tw.pago.pagobackend.dto.CreateTripCollectionRequestDto;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.TripCollectionResponseDto;
 import tw.pago.pagobackend.dto.TripDashboardDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
@@ -36,6 +42,7 @@ import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.TripCollection;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.TripService;
@@ -53,7 +60,7 @@ public class TripServiceImpl implements TripService {
   private final OrderDao orderDao;
   private final OrderService orderService;
   private final UserDao userDao;
-
+  private final TripCollectionDao tripCollectionDao;
   @Override
   public Trip getTripById(String tripId) {
     Trip trip = tripDao.getTripById(tripId);
@@ -65,6 +72,11 @@ public class TripServiceImpl implements TripService {
     trip.setProfit(totalProfit);
 
     return trip;
+  }
+
+  @Override
+  public TripCollection getTripCollectionById(String tripCollectionId) {
+    return tripCollectionDao.getTripCollectionById(tripCollectionId);
   }
 
   @Override
@@ -116,12 +128,68 @@ public class TripServiceImpl implements TripService {
 
   @Override
   public String createTrip(String userId, CreateTripRequestDto createTripRequestDto) {
-    if(isDuplicateTrip(userId, createTripRequestDto)) {
+    if (isDuplicateTrip(userId, createTripRequestDto)) {
       throw new ConflictException("A trip with the same details already exist!");
     }
     String tripUuid = uuidGenerator.getUuid();
     createTripRequestDto.setTripId(tripUuid);
     return tripDao.createTrip(userId, createTripRequestDto);
+  }
+
+  @Override
+  public void createTrip(CreateTripRequestDto createTripRequestDto) {
+    if (isDuplicateTrip(createTripRequestDto.getShopperId(), createTripRequestDto)) {
+      throw new ConflictException("A trip with the same details already exist!");
+    }
+    String tripId = uuidGenerator.getUuid();
+    createTripRequestDto.setTripId(tripId);
+    tripDao.createTrip(createTripRequestDto);
+  }
+
+  @Override
+  @Transactional
+  public TripCollection batchCreateTrip(BatchCreateTripRequestDto batchCreateTripRequestDto) {
+    String tripCollectionId = uuidGenerator.getUuid();
+    String firstTripId = uuidGenerator.getUuid();
+
+
+    // Create Trip Collection for new trips
+    CreateTripCollectionRequestDto createTripCollectionRequestDto = new CreateTripCollectionRequestDto();
+    createTripCollectionRequestDto.setTripCollectionId(tripCollectionId);
+    createTripCollectionRequestDto.setTripCollectionName(batchCreateTripRequestDto.getTripCollectionName());
+    createTripCollectionRequestDto.setCreatorId(batchCreateTripRequestDto.getShopperId());
+    createTripCollection(createTripCollectionRequestDto);
+
+
+    // Create First trip, departure City -> stops.get(0)
+    Departure departure = batchCreateTripRequestDto.getDeparture();
+    Stop firstStop = batchCreateTripRequestDto.getStops().get(0); // The arrival city of first trip
+    CreateTripRequestDto createTripRequestDto = new CreateTripRequestDto();
+    createTripRequestDto.setShopperId(batchCreateTripRequestDto.getShopperId());
+    createTripRequestDto.setTripId(firstTripId);
+    createTripRequestDto.setTripCollectionId(tripCollectionId);
+    createTripRequestDto.setFromCountry(departure.getCountry());
+    createTripRequestDto.setFromCity(departure.getCity());
+    createTripRequestDto.setToCountry(firstStop.getCountry());
+    createTripRequestDto.setToCity(firstStop.getCity());
+    createTripRequestDto.setArrivalDate(firstStop.getArrivalDate());
+    createTrip(createTripRequestDto);
+
+    for (int i = 0; i < batchCreateTripRequestDto.getStops().size() - 1; i++) {
+      Stop departureStop = batchCreateTripRequestDto.getStops().get(i);
+      Stop nextStop = batchCreateTripRequestDto.getStops().get(i+1);
+      String tripId = uuidGenerator.getUuid();
+
+      createTripRequestDto.setTripId(tripId);
+      createTripRequestDto.setFromCountry(departureStop.getCountry());
+      createTripRequestDto.setFromCity(departure.getCity());
+      createTripRequestDto.setToCountry(nextStop.getCountry());
+      createTripRequestDto.setToCity(nextStop.getCity());
+      createTripRequestDto.setArrivalDate(nextStop.getArrivalDate());
+      createTrip(createTripRequestDto);
+    }
+
+    return getTripCollectionById(tripCollectionId);
   }
 
   @Override
@@ -162,6 +230,11 @@ public class TripServiceImpl implements TripService {
 
   }
 
+  @Override
+  public void createTripCollection(CreateTripCollectionRequestDto createTripCollectionRequestDto) {
+    tripCollectionDao.createTripCollection(createTripCollectionRequestDto);
+  }
+
 
   @Override
   public List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto) {
@@ -173,6 +246,11 @@ public class TripServiceImpl implements TripService {
   @Override
   public List<Trip> getTripsByShopperId(String shopperId) {
     return tripDao.getTripsByShopperId(shopperId);
+  }
+
+  @Override
+  public List<Trip> getTripListByTripColletionId(String tripCollectionId) {
+    return tripDao.getTripListByTripColletionId(tripCollectionId);
   }
 
   @Override
@@ -209,6 +287,17 @@ public class TripServiceImpl implements TripService {
 
     List<Trip> tripList = tripDao.getTripListByTripStatus(tripStatus, listQueryParametersDto);
     return tripList;
+  }
+
+  @Override
+  public List<TripCollection> getTripCollectionList(ListQueryParametersDto listQueryParametersDto) {
+    return tripCollectionDao.getTripCollectionList(listQueryParametersDto);
+  }
+
+  @Override
+  public List<TripCollection> getTripCollectionListByCreatorId(String creatorId) {
+
+    return tripCollectionDao.getTripCollectionListByCreatorId(creatorId);
   }
 
 
@@ -255,6 +344,36 @@ public class TripServiceImpl implements TripService {
   }
 
   @Override
+  public List<TripCollectionResponseDto> getTripCollectionResponseDtoListByTripCollectionList(
+      List<TripCollection> tripCollectionList) {
+
+    return tripCollectionList.stream()
+        .map(this::getTripCollectionResponseDtoByTripCollection)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public TripCollectionResponseDto getTripCollectionResponseDtoByTripCollection(
+      TripCollection tripCollection) {
+
+    List<Trip> tripList = getTripListByTripColletionId(tripCollection.getTripCollectionId());
+    List<TripResponseDto> tripResponseDtoList = getTripResponseDtoByTripList(tripList);
+
+    TripStatusEnum tripCollectionStatus = getTripCollectionStatusBasedOnEachTripStatus(tripResponseDtoList);
+
+    TripCollectionResponseDto tripCollectionResponseDto = new TripCollectionResponseDto();
+    tripCollectionResponseDto.setTripCollectionId(tripCollection.getTripCollectionId());
+    tripCollectionResponseDto.setTripCollectionName(tripCollection.getTripCollectionName());
+    tripCollectionResponseDto.setTripCollectionStatus(tripCollectionStatus);
+    tripCollectionResponseDto.setCreateDate(tripCollection.getCreateDate());
+    tripCollectionResponseDto.setUpdateDate(tripCollection.getUpdateDate());
+    tripCollectionResponseDto.setTrips(tripResponseDtoList);
+
+    return tripCollectionResponseDto;
+  }
+
+
+  @Override
   public Integer countTrip(ListQueryParametersDto listQueryParametersDto) {
     Integer total = tripDao.countTrip(listQueryParametersDto);
 
@@ -266,6 +385,11 @@ public class TripServiceImpl implements TripService {
 
     Integer total = tripDao.countTrip(tripStatus, listQueryParametersDto);
     return total;
+  }
+
+  @Override
+  public Integer countTripCollection(ListQueryParametersDto listQueryParametersDto) {
+    return tripCollectionDao.countTripCollection(listQueryParametersDto);
   }
 
   @Override
@@ -394,5 +518,28 @@ public class TripServiceImpl implements TripService {
     return tripDao.searchTrips(query);
   }
 
+  @Override
+  public boolean isUserTraveling(String userId) {
+    List<Trip> tripList = tripDao.getTripsByShopperId(userId);
+    List<TripResponseDto> tripResponseDtoList = getTripResponseDtoByTripList(tripList);
+
+    return tripResponseDtoList.stream().anyMatch(
+        tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.ONGOING));
+  }
+
+
+  private TripStatusEnum getTripCollectionStatusBasedOnEachTripStatus(List<TripResponseDto> tripResponseDtoList) {
+
+
+    // Check if any trip is ONGOING
+    if (tripResponseDtoList.stream().anyMatch(tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.ONGOING))) {
+      return TripStatusEnum.ONGOING;
+    } else if (tripResponseDtoList.stream().allMatch(tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.UPCOMING))) {
+      // Check if all trips are UPCOMING
+      return TripStatusEnum.UPCOMING;
+    }
+
+    return TripStatusEnum.PAST;
+  }
 
 }

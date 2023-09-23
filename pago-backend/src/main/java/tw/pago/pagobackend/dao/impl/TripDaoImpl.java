@@ -38,7 +38,7 @@ public class TripDaoImpl implements TripDao {
 
   @Override
   public Trip getTripById(String tripId) {
-    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, arrival_date, profit, create_date, update_date "
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, arrival_date, profit, create_date, update_date "
         + "FROM trip "
         + "WHERE trip_id = :tripId";
 
@@ -85,8 +85,8 @@ public class TripDaoImpl implements TripDao {
             + "VALUES (:tripId, :shopperId, :fromCountry, :toCountry, :fromCity, :toCity, :arrivalDate, :createDate, :updateDate)";
 
     Map<String, Object> map = new HashMap<>();
-    map.put("shopperId", userId);
     map.put("tripId", createTripRequestDto.getTripId());
+    map.put("shopperId", userId);
     map.put("fromCountry", createTripRequestDto.getFromCountry().name());
     map.put("toCountry", createTripRequestDto.getToCountry().name());
     map.put("fromCity", createTripRequestDto.getFromCity().name());
@@ -101,6 +101,30 @@ public class TripDaoImpl implements TripDao {
 
     String tripId = createTripRequestDto.getTripId();
     return tripId;
+  }
+
+  @Override
+  public void createTrip(CreateTripRequestDto createTripRequestDto) {
+    String sql =
+        "INSERT INTO trip (trip_id, shopper_id, trip_collection_id, from_country, to_country, from_city, to_city, arrival_date, create_date, update_date) "
+            + "VALUES (:tripId, :shopperId, :tripCollectionId, :fromCountry, :toCountry, :fromCity, :toCity, :arrivalDate, :createDate, :updateDate)";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("tripId", createTripRequestDto.getTripId());
+    map.put("shopperId", createTripRequestDto.getShopperId());
+    map.put("tripCollectionId", createTripRequestDto.getTripCollectionId());
+    map.put("fromCountry", createTripRequestDto.getFromCountry().name());
+    map.put("toCountry", createTripRequestDto.getToCountry().name());
+    map.put("fromCity", createTripRequestDto.getFromCity().name());
+    map.put("toCity", createTripRequestDto.getToCity().name());
+    map.put("arrivalDate", createTripRequestDto.getArrivalDate());
+    Date now = new Date();
+    map.put("createDate", now);
+    map.put("updateDate", now);
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
+
   }
 
 
@@ -142,7 +166,7 @@ public class TripDaoImpl implements TripDao {
 
   @Override
   public List<Trip> getTripList(ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
         + "FROM trip "
         + "WHERE 1=1 ";
@@ -168,7 +192,7 @@ public class TripDaoImpl implements TripDao {
 
   @Override
   public List<Trip> getTripsByShopperId(String shopperId) {
-    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
     + "arrival_date, profit, create_date, update_date "
     + "FROM trip "
     + "WHERE shopper_id = :shopperId ";
@@ -184,7 +208,7 @@ public class TripDaoImpl implements TripDao {
   @Override
   public List<Trip> getTripListByTripStatus(TripStatusEnum tripStatus,
       ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
         + "FROM trip "
         + "WHERE 1=1 ";
@@ -232,7 +256,7 @@ public class TripDaoImpl implements TripDao {
 
   @Override
   public List<Trip> getMatchingTripListForOrder(ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
         + "FROM trip "
         + "WHERE 1=1 ";
@@ -259,7 +283,7 @@ public class TripDaoImpl implements TripDao {
 
   @Override
   public List<Trip> getMatchingTripListWithRowNumberSqlForOrder(ListQueryParametersDto listQueryParametersDto) {
-    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
         + "FROM ( "
         + "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
@@ -286,6 +310,21 @@ public class TripDaoImpl implements TripDao {
     List<Trip> matchingTripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
 
     return matchingTripList;
+  }
+
+  @Override
+  public List<Trip> getTripListByTripColletionId(String tripCollectionId) {
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
+        + "arrival_date, profit, create_date, update_date "
+        + "FROM trip "
+        + "WHERE trip_collection_id = :tripCollectionId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("tripCollectionId", tripCollectionId);
+
+    List<Trip> tripList = namedParameterJdbcTemplate.query(sql, map, new TripRowMapper());
+
+    return tripList;
   }
 
 
@@ -358,7 +397,7 @@ public class TripDaoImpl implements TripDao {
 
   @Override
   public List<Trip> searchTrips(String query) {
-    String sql = "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+    String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
     + "arrival_date, profit, create_date, update_date "
     + "FROM trip "
     + "WHERE from_country LIKE :query OR from_city LIKE :query OR to_country LIKE :query OR to_city LIKE :query OR "
@@ -399,7 +438,7 @@ public class TripDaoImpl implements TripDao {
       map.put("search", "%" + listQueryParametersDto.getSearch() + "%");
     }
 
-    return  sql;
+    return sql;
   }
 
   private String addMatchingTripForOrderSql(String sql, Map<String, Object> map, ListQueryParametersDto listQueryParametersDto) {

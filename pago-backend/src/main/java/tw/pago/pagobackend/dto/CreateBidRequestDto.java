@@ -35,5 +35,7 @@ public class CreateBidRequestDto {
 
   private BidStatusEnum bidStatus;
 
+  private String bidComment;
+
 
 }

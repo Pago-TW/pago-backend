@@ -6,7 +6,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
@@ -22,25 +22,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.TripStatusEnum;
+import tw.pago.pagobackend.dto.BatchCreateTripRequestDto;
 import tw.pago.pagobackend.dto.CreateTripRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
 import tw.pago.pagobackend.dto.OrderResponseDto;
+import tw.pago.pagobackend.dto.TripCollectionResponseDto;
 import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.model.Trip;
+import tw.pago.pagobackend.model.TripCollection;
 import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 
 @RestController
 @Validated
+@AllArgsConstructor
 public class TripController {
 
-  @Autowired
-  private TripService tripService;
-  @Autowired
-  private CurrentUserInfoProvider currentUserInfoProvider;
+  private final TripService tripService;
+  private final CurrentUserInfoProvider currentUserInfoProvider;
 
   @GetMapping("/trips/{tripId}")
   public ResponseEntity<TripResponseDto> getTripById(@PathVariable String tripId) {
@@ -61,21 +63,33 @@ public class TripController {
 //  }
 
   @PostMapping("/trips") // TODO 抵達時間不該在今天以前，不合理
-                        // TODO 先不要做 ^
-  public ResponseEntity<Trip> createTrip(@RequestBody @Valid CreateTripRequestDto createTripRequestDto) throws SQLException {
+  // TODO 先不要做 ^
+  public ResponseEntity<Trip> createTrip(
+      @RequestBody @Valid CreateTripRequestDto createTripRequestDto) {
 
-    String tripId = tripService.createTrip(currentUserInfoProvider.getCurrentLoginUserId(), createTripRequestDto);
+    String tripId = tripService.createTrip(currentUserInfoProvider.getCurrentLoginUserId(),
+        createTripRequestDto);
     Trip trip = tripService.getTripById(tripId);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(trip);
 
   }
 
+
+  @PostMapping("/trips/batch")
+  public ResponseEntity<TripCollection> batchCreateTrip(
+      @RequestBody @Valid BatchCreateTripRequestDto batchCreateTripRequestDto) {
+
+    batchCreateTripRequestDto.setShopperId(currentUserInfoProvider.getCurrentLoginUserId());
+    TripCollection tripCollection = tripService.batchCreateTrip(batchCreateTripRequestDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(tripCollection);
+  }
+
   @PatchMapping("/users/{userId}/trips/{tripId}")
   public ResponseEntity<Trip> updateTrip(@PathVariable String userId,
       @PathVariable String tripId,
       @RequestBody @Valid UpdateTripRequestDto updateTripRequestDto) {
-
 
     // Check if the Trip to be updated exists
     Trip trip = tripService.getTripById(tripId);
@@ -137,8 +151,10 @@ public class TripController {
           .sort(sort)
           .build();
 
-      List<Trip> tripList = tripService.getMatchingTripListByOrderId(orderId, listQueryParametersDto);
-      List<TripResponseDto> tripResponseDtoList = tripService.getTripResponseDtoByTripList(tripList);
+      List<Trip> tripList = tripService.getMatchingTripListByOrderId(orderId,
+          listQueryParametersDto);
+      List<TripResponseDto> tripResponseDtoList = tripService.getTripResponseDtoByTripList(
+          tripList);
 
       return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoList);
     }
@@ -185,6 +201,43 @@ public class TripController {
   }
 
 
+  @GetMapping("/trip-collections")
+  public ResponseEntity<ListResponseDto<TripCollectionResponseDto>> getTripCollectionList(
+      @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
+      @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
+      @RequestParam(defaultValue = "create_date") String orderBy,
+      @RequestParam(defaultValue = "DESC") String sort,
+      @RequestParam(required = false) String search) {
+
+    String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
+
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .userId(currentLoginUserId)
+        .search(search)
+        .startIndex(startIndex)
+        .size(size)
+        .orderBy(orderBy)
+        .sort(sort)
+        .build();
+
+    List<TripCollection> tripCollectionList = tripService.getTripCollectionList(
+        listQueryParametersDto);
+    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService.getTripCollectionResponseDtoListByTripCollectionList(
+        tripCollectionList);
+    int total = tripService.countTripCollection(listQueryParametersDto);
+
+    // Build the pagination response DTO
+    ListResponseDto<TripCollectionResponseDto> tripResponseDtoListResponseDto = ListResponseDto.<TripCollectionResponseDto>builder()
+        .total(total)
+        .startIndex(startIndex)
+        .size(size)
+        .data(tripCollectionResponseDtoList)
+        .build();
+
+    return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoListResponseDto);
+
+  }
+
 
   @GetMapping("/trips/{tripId}/matching-orders")
   public ResponseEntity<ListResponseDto<OrderResponseDto>> getMatchingOrderListForTrip(
@@ -208,7 +261,8 @@ public class TripController {
 
     Trip trip = tripService.getTripById(tripId);
 
-    List<OrderResponseDto> matchingOrderResponseDtoListForTrip = tripService.getMatchingOrderResponseDtoListForTrip(listQueryParametersDto, trip);
+    List<OrderResponseDto> matchingOrderResponseDtoListForTrip = tripService.getMatchingOrderResponseDtoListForTrip(
+        listQueryParametersDto, trip);
 
     Integer total = tripService.countMatchingOrderForTrip(listQueryParametersDto, trip);
 

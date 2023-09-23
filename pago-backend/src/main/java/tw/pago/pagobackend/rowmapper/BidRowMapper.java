@@ -21,6 +21,7 @@ public class BidRowMapper implements RowMapper<Bid> {
         .updateDate(resultSet.getTimestamp("update_date"))
         .latestDeliveryDate(resultSet.getTimestamp("latest_delivery_date"))
         .bidStatus(BidStatusEnum.valueOf(resultSet.getString("bid_status")))
+        .bidComment(resultSet.getString("bid_comment"))
         .build();
 
     return bid;

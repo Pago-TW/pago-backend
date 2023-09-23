@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import tw.pago.pagobackend.constant.ActionTypeEnum;
 import tw.pago.pagobackend.constant.BidStatusEnum;
 import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
@@ -41,9 +39,11 @@ import tw.pago.pagobackend.constant.CurrencyEnum;
 import tw.pago.pagobackend.constant.NotificationTypeEnum;
 import tw.pago.pagobackend.constant.OrderStatusEnum;
 import tw.pago.pagobackend.constant.PostponeReasonCategoryEnum;
+import tw.pago.pagobackend.constant.TransactionTypeEnum;
 import tw.pago.pagobackend.dao.CancellationRecordDao;
 import tw.pago.pagobackend.dao.OrderDao;
 import tw.pago.pagobackend.dao.PostponeRecordDao;
+import tw.pago.pagobackend.dao.TransactionDao;
 import tw.pago.pagobackend.dao.TripDao;
 import tw.pago.pagobackend.dao.UserDao;
 import tw.pago.pagobackend.dto.BidCreatorDto;
@@ -89,13 +89,13 @@ import tw.pago.pagobackend.service.FileService;
 import tw.pago.pagobackend.service.NotificationService;
 import tw.pago.pagobackend.service.OrderService;
 import tw.pago.pagobackend.service.SesEmailService;
+import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrencyUtil;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Service
-@AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
   @Value("${base.url}")
@@ -112,6 +112,7 @@ public class OrderServiceImpl implements OrderService {
   private FileService fileService;
   private SesEmailService sesEmailService;
   private CurrentUserInfoProvider currentUserInfoProvider;
+  private TripService tripService;
   private TripDao tripDao;
   private UserDao userDao;
   private ModelMapper modelMapper;
@@ -119,6 +120,7 @@ public class OrderServiceImpl implements OrderService {
   private CancellationRecordDao cancellationRecordDao;
   private PostponeRecordDao postponeRecordDao;
   private NotificationService notificationService;
+  private TransactionDao transactionDao;
 
   @Autowired
   public OrderServiceImpl(OrderDao orderDao,
@@ -126,23 +128,27 @@ public class OrderServiceImpl implements OrderService {
       FileService fileService,
       SesEmailService sesEmailService,
       CurrentUserInfoProvider currentUserInfoProvider,
+      @Lazy TripService tripService,
       TripDao tripDao,
       UserDao userDao,
       ModelMapper modelMapper,
       CancellationRecordDao cancellationRecordDao,
-      PostponeRecordDao postponeRecordDao, NotificationService notificationService
-      ) {
+      PostponeRecordDao postponeRecordDao, NotificationService notificationService,
+      TransactionDao transactionDao
+  ) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
     this.fileService = fileService;
     this.sesEmailService = sesEmailService;
     this.currentUserInfoProvider = currentUserInfoProvider;
+    this.tripService = tripService;
     this.tripDao = tripDao;
     this.userDao = userDao;
     this.modelMapper = modelMapper;
     this.cancellationRecordDao = cancellationRecordDao;
     this.postponeRecordDao = postponeRecordDao;
     this.notificationService = notificationService;
+    this.transactionDao = transactionDao;
   }
 
   @Autowired
@@ -213,6 +219,7 @@ public class OrderServiceImpl implements OrderService {
     consumerDto.setUserId(consumerId);
     consumerDto.setFullName(consumer.getFullName());
     consumerDto.setAvatarUrl(consumer.getAvatarUrl());
+    consumerDto.setTraveling(tripService.isUserTraveling(consumerId));
     order.setConsumer(consumerDto);
 
 
@@ -379,6 +386,14 @@ public class OrderServiceImpl implements OrderService {
     if (!orderFileUrls.isEmpty()) {
       orderFileUrl = String.valueOf(orderFileUrls.get(0));
     }
+    BigDecimal oldOrderTotalAmount = oldOrder.getTotalAmount();
+    BigDecimal oldOrderTravelerFee = oldOrder.getTravelerFee();
+
+    Bid bid = bidService.getChosenBidByOrderId(orderId);
+    String tripId = bid.getTripId();
+    Trip trip = tripDao.getTripById(tripId);
+    String shopperId = trip.getShopperId();
+
 
 
     // Check if the order status has been modified
@@ -417,6 +432,20 @@ public class OrderServiceImpl implements OrderService {
     } else {
       // Only update order status if the order status is not REQUESTED
       orderDao.updateOrderStatusByOrderId(orderId, newOrderStatus);
+
+      if (newOrderStatus.equals(OrderStatusEnum.FINISHED)) {
+
+        // traveler gains traveler fee
+        // transaction type: INCOME
+        transactionDao.createTransactionRecord(orderId, TransactionTypeEnum.INCOME, oldOrderTravelerFee, shopperId);
+      
+      } else if (newOrderStatus.equals(OrderStatusEnum.CANCELLED)) {
+
+        // consumer is refunded the order total amount
+        // transaction type: REFUND
+        transactionDao.createTransactionRecord(orderId, TransactionTypeEnum.REFUND, oldOrderTotalAmount, consumerId);
+      
+      }
     }
 
 
@@ -1323,6 +1352,7 @@ public class OrderServiceImpl implements OrderService {
         .toLocalDate();
 
     orderChosenShopperDto.setLatestDeliveryDate(latestDeliveryLocalDate);
+    orderChosenShopperDto.setTraveling(tripService.isUserTraveling(shopper.getUserId()));
 
     return orderChosenShopperDto;
 
