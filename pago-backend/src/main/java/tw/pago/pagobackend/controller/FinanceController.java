@@ -87,7 +87,11 @@ public class FinanceController {
   }
 
   @PatchMapping("/bank-accounts/{bankAccountId}/default")
-  public ResponseEntity<?> changeDefaultBankAccount(@PathVariable String bankAccountId, @RequestBody OtpValidationDto otpValidationDto) {
+  public ResponseEntity<?> changeDefaultBankAccount(@PathVariable String bankAccountId, @RequestBody @Valid OtpValidationDto otpValidationDto) {
+
+    if (otpValidationDto.getOtpCode() == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP code is required");
+    }
 
     // Permission checking
     String currentLoginUserId = currentUserInfoProvider.getCurrentLoginUserId();
@@ -95,6 +99,7 @@ public class FinanceController {
     if (!bankAccount.getUserId().equals(currentLoginUserId)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no permission");
     }
+
 
     // Otp validation
     User user = currentUserInfoProvider.getCurrentLoginUser();
