@@ -1,15 +1,13 @@
 package tw.pago.pagobackend.service.impl;
 
-import org.springframework.stereotype.Service;
-
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.pago.pagobackend.dao.PhoneVerificationDao;
 import tw.pago.pagobackend.dto.PhoneVerificationDto;
 import tw.pago.pagobackend.dto.UpdateUserRequestDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
-import tw.pago.pagobackend.exception.ConflictException;
 import tw.pago.pagobackend.model.PhoneVerification;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.OtpService;
@@ -47,12 +45,12 @@ public class PhoneVerificationServiceImpl implements PhoneVerificationService {
         // Fetch the user that's being verified
         User verifier = userService.getUserById(userId);
         
-        boolean isPhoneAlreadyRegistered = userService.isPhoneAlreadyRegistered(phone);
-        
-        // If the phone number is already registered, throw an exception
-        if (isPhoneAlreadyRegistered) {
-            throw new ConflictException(phone + " is already registered");
-        }
+//        boolean isPhoneAlreadyRegistered = userService.isPhoneAlreadyRegistered(phone);
+//
+//        // If the phone number is already registered, throw an exception
+//        if (isPhoneAlreadyRegistered) {
+//            throw new ConflictException(phone + " is already registered");
+//        }
 
         // Generate a unique verification ID
         String verificationId = uuidGenerator.getUuid();
