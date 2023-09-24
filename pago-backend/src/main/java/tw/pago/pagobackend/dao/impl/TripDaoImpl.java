@@ -286,7 +286,7 @@ public class TripDaoImpl implements TripDao {
     String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
         + "FROM ( "
-        + "SELECT trip_id, shopper_id, from_country, from_city, to_country, to_city, "
+        + "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date, "
         + "ROW_NUMBER() OVER (PARTITION BY shopper_id ORDER BY " + listQueryParametersDto.getOrderBy() + " " + listQueryParametersDto.getSort() + ") AS rn "
         + "FROM trip "
