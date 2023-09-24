@@ -6,11 +6,10 @@ import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 import tw.pago.pagobackend.dao.TransactionDao;
+import tw.pago.pagobackend.dto.TransactionWithdrawRequestDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.UnprocessableEntityException;
-import tw.pago.pagobackend.model.Otp;
-import tw.pago.pagobackend.model.PendingWithdrawal;
 import tw.pago.pagobackend.model.TransactionRecord;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.OtpService;
@@ -45,13 +44,20 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Otp requestWithdraw(Integer withdrawalAmount) {
+    public void requestWithdraw(TransactionWithdrawRequestDto transactionWithdrawRequestDto) {
         User currentUser = currentUserInfoProvider.getCurrentLoginUser();
+        Integer withdrawalAmount = transactionWithdrawRequestDto.getWithdrawalAmount();
+        String otpCode = transactionWithdrawRequestDto.getOtpCode();
         String userId = currentUser.getUserId();
+        String phone = currentUser.getPhone();
+        ValidatePhoneRequestDto validatePhoneRequestDto = new ValidatePhoneRequestDto();
+        validatePhoneRequestDto.setPhone(phone);
+        validatePhoneRequestDto.setOtpCode(otpCode);
 
-        PendingWithdrawal pendingWithdrawal = transactionDao.getPendingWithdrawalByUserId(userId);
-        if (pendingWithdrawal != null) {
-            throw new BadRequestException("There is a pending withdrawal");
+        boolean isValid = otpService.validateOtp(validatePhoneRequestDto);
+
+        if (!isValid) {
+            throw new BadRequestException("Invalid OTP or OTP expired");
         }
 
         Integer currentBalance = transactionDao.getWalletBalance(userId);
@@ -59,39 +65,8 @@ public class TransactionServiceImpl implements TransactionService {
             throw new UnprocessableEntityException("Insufficient balance");
         }
 
-        String phone = currentUser.getPhone();
-        Otp otp = otpService.requestOtp(phone);
-        transactionDao.requestWithdraw(otp.getOtpId(), userId, withdrawalAmount);
-
-        return otp;
-    }
-
-    @Override
-    public boolean validateWithdraw(String otpCode) {
-        User currentUser = currentUserInfoProvider.getCurrentLoginUser();
-        String userId = currentUser.getUserId();
-        String phone = currentUser.getPhone();
-        ValidatePhoneRequestDto validatePhoneRequestDto = new ValidatePhoneRequestDto();
-        validatePhoneRequestDto.setPhone(phone);
-        validatePhoneRequestDto.setOtpCode(otpCode);
-        boolean isValid = otpService.validateOtp(validatePhoneRequestDto);
-
-        if (!isValid) {
-            throw new BadRequestException("Invalid OTP or OTP expired");
-        }
-
-        PendingWithdrawal pendingWithdrawal = transactionDao.getPendingWithdrawalByUserId(userId);
-
-        if (!pendingWithdrawal.getUserId().equals(userId)) {
-            throw new BadRequestException("Invalid user id");
-        }
-        transactionDao.deletePendingWithdrawalById(pendingWithdrawal.getPendingWithdrawalId());
-
-        Integer withdrawalAmount = -pendingWithdrawal.getWithdrawalAmount();
-
-        transactionDao.withdraw(userId, withdrawalAmount);
+        transactionDao.withdraw(userId, -withdrawalAmount);
         transactionDao.applyTransactionFee(userId, -TRANSACTION_FEE);
 
-        return true;
     }
 }
