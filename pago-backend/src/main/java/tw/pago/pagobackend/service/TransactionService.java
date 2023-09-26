@@ -6,7 +6,7 @@ import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.TransactionRecordListResponseDto;
 import tw.pago.pagobackend.dto.TransactionRecordResponseDto;
 import tw.pago.pagobackend.dto.TransactionTabViewDto;
-import tw.pago.pagobackend.model.Otp;
+import tw.pago.pagobackend.dto.TransactionWithdrawRequestDto;
 import tw.pago.pagobackend.model.TransactionRecord;
 
 public interface TransactionService {
@@ -22,7 +22,6 @@ public interface TransactionService {
 
     Map<Integer, List<TransactionTabViewDto>> getTransactionTabViewByUserId(String userId);
 
-    Otp requestWithdraw(Integer withdrawalAmount);
+    void requestWithdraw(TransactionWithdrawRequestDto transactionWithdrawRequestDto);
 
-    boolean validateWithdraw(String otpCode);
 }

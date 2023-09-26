@@ -12,7 +12,6 @@ import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.TooManyRequestsException;
 import tw.pago.pagobackend.model.Otp;
 import tw.pago.pagobackend.service.OtpService;
-// import tw.pago.pagobackend.service.PhoneVerificationService; // TODO remove after testing
 import tw.pago.pagobackend.service.SmsService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.UuidGenerator;
@@ -43,6 +42,7 @@ public class OtpServiceImpl implements OtpService {
             long cooldownInSeconds = 3 * 60; // 3 minutes in seconds
         
             long secondsRemaining = cooldownInSeconds - differenceInSeconds;
+
 
             if (differenceInSeconds < cooldownInSeconds) {
                 System.out.println("It's been less than 3 minutes since the last reset request");

@@ -7,4 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TransactionWithdrawRequestDto {
     private Integer withdrawalAmount;
+    private String bankAccountId;
+    private String otpCode;
 }

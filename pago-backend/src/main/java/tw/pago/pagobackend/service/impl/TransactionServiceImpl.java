@@ -22,6 +22,7 @@ import tw.pago.pagobackend.constant.CancelReasonCategoryEnum;
 import tw.pago.pagobackend.constant.TransactionStatusEnum;
 import tw.pago.pagobackend.constant.TransactionTypeEnum;
 import tw.pago.pagobackend.dao.TransactionDao;
+import tw.pago.pagobackend.dto.TransactionWithdrawRequestDto;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.TransactionRecordListResponseDto;
 import tw.pago.pagobackend.dto.TransactionRecordResponseDto;
@@ -30,8 +31,6 @@ import tw.pago.pagobackend.dto.TransactionTabViewDto;
 import tw.pago.pagobackend.dto.ValidatePhoneRequestDto;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.UnprocessableEntityException;
-import tw.pago.pagobackend.model.Otp;
-import tw.pago.pagobackend.model.PendingWithdrawal;
 import tw.pago.pagobackend.model.TransactionRecord;
 import tw.pago.pagobackend.model.User;
 import tw.pago.pagobackend.service.OtpService;
@@ -41,7 +40,7 @@ import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 @Component
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-    
+
     private final TransactionDao transactionDao;
 
     private final OtpService otpService;
@@ -58,8 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<TransactionRecord> getTransactionRecordList(ListQueryParametersDto listQueryParametersDto) {
 
-
-                // 如果 startDate 和 endDate 都是 null，則設置 startDate 為 14 天前的日期
+        // 如果 startDate 和 endDate 都是 null，則設置 startDate 為 14 天前的日期
         if (listQueryParametersDto.getStartDate() == null && listQueryParametersDto.getEndDate() == null) {
             ZonedDateTime defaultStartDate = ZonedDateTime.now().minusDays(14);
             ZonedDateTime defaultEndDate = ZonedDateTime.now();
@@ -70,10 +68,9 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Check startDate and endDate is valid
         if (listQueryParametersDto.getStartDate() != null && listQueryParametersDto.getEndDate() != null
-            && (listQueryParametersDto.getStartDate().isAfter(listQueryParametersDto.getEndDate()))) {
-                throw new BadRequestException("startDate must be earlier than endDate");
+                && (listQueryParametersDto.getStartDate().isAfter(listQueryParametersDto.getEndDate()))) {
+            throw new BadRequestException("startDate must be earlier than endDate");
         }
-
 
         return transactionDao.getTransactionRecordList(listQueryParametersDto);
     }
@@ -81,33 +78,34 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public List<TransactionRecordListResponseDto> getTransactionRecordResponseDtoListByTransactionRecordList(
-        List<TransactionRecord> transactionRecordList) {
+            List<TransactionRecord> transactionRecordList) {
 
         Map<String, TransactionRecordListResponseDto> map = new HashMap<>();
 
         for (TransactionRecord transactionRecord : transactionRecordList) {
-            ZonedDateTime zonedDateTime = transactionRecord.getTransactionDate().toInstant().atZone(ZoneId.systemDefault());
+            ZonedDateTime zonedDateTime = transactionRecord.getTransactionDate().toInstant()
+                    .atZone(ZoneId.systemDefault());
             int year = zonedDateTime.getYear();
             int month = zonedDateTime.getMonthValue();
 
             String key = year + "-" + month;
 
-            TransactionRecordListResponseDto dto = map.computeIfAbsent(key, k -> new TransactionRecordListResponseDto(year, month, new ArrayList<>()));
+            TransactionRecordListResponseDto dto = map.computeIfAbsent(key,
+                    k -> new TransactionRecordListResponseDto(year, month, new ArrayList<>()));
 
             // Converting TransactionRecord to TransactionRecordResponseDto
-            TransactionRecordResponseDto convertedDto = getTransactionRecordResponseDtoByTransactionRecord(transactionRecord);
+            TransactionRecordResponseDto convertedDto = getTransactionRecordResponseDtoByTransactionRecord(
+                    transactionRecord);
 
             dto.getTransactions().add(convertedDto);
         }
 
         List<TransactionRecordListResponseDto> sortedList = new ArrayList<>(map.values());
         sortedList.sort(Comparator.comparing(TransactionRecordListResponseDto::getYear)
-            .thenComparing(TransactionRecordListResponseDto::getMonth)
-            .reversed());
+                .thenComparing(TransactionRecordListResponseDto::getMonth)
+                .reversed());
         return sortedList;
     }
-
-
 
     @Override
     public TransactionRecord getTransactionById(String userId, String transactionId) {
@@ -117,7 +115,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public TransactionRecordResponseDto getTransactionRecordResponseDtoByTransactionRecord(
-        TransactionRecord transactionRecord) {
+            TransactionRecord transactionRecord) {
 
         TransactionRecordResponseDto transactionRecordResponseDto = new TransactionRecordResponseDto();
         transactionRecordResponseDto.setTransactionId(transactionRecord.getTransactionId());
@@ -125,7 +123,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         String transactionType = transactionRecord.getTransactionType();
         if (transactionType != null) {
-            transactionRecordResponseDto.setTransactionTitle(TransactionTypeEnum.valueOf(transactionType).getDescription());
+            transactionRecordResponseDto
+                    .setTransactionTitle(TransactionTypeEnum.valueOf(transactionType).getDescription());
         } else {
             transactionRecordResponseDto.setTransactionTitle(null);
         }
@@ -140,7 +139,6 @@ public class TransactionServiceImpl implements TransactionService {
         } else {
             transactionRecordResponseDto.setTransactionStatus(null);
         }
-
 
         Detail detail = new Detail();
 
@@ -163,7 +161,6 @@ public class TransactionServiceImpl implements TransactionService {
         Integer balanceAfterTransaction = balanceBeforeTransaction + transactionRecord.getTransactionAmount();
         detail.setBalance(balanceAfterTransaction);
 
-
         String cancelReason = transactionRecord.getCancelReason();
         if (cancelReason != null) {
             detail.setCancelReason(CancelReasonCategoryEnum.valueOf(cancelReason).getDescription());
@@ -175,7 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
             switch (TransactionTypeEnum.valueOf(transactionType)) {
                 case WITHDRAW:
                     transactionRecordResponseDto.setTransactionDescription(
-                        TransactionStatusEnum.valueOf(transactionStatus).getDescription());
+                            TransactionStatusEnum.valueOf(transactionStatus).getDescription());
                     break;
                 case INCOME:
                 case REFUND:
@@ -196,7 +193,6 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRecordResponseDto;
     }
 
-
     @Override
     public Map<Integer, List<TransactionTabViewDto>> getTransactionTabViewByUserId(String userId) {
 
@@ -211,10 +207,10 @@ public class TransactionServiceImpl implements TransactionService {
             // 建立 ZonedDateTime 物件
             ZonedDateTime startDate = ZonedDateTime.of(year, month, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
             ZonedDateTime endDate = startDate.with(TemporalAdjusters.lastDayOfMonth())
-                .withHour(23)
-                .withMinute(59)
-                .withSecond(59)
-                .withNano(999999999);
+                    .withHour(23)
+                    .withMinute(59)
+                    .withSecond(59)
+                    .withNano(999999999);
 
             // 檢查是否需要新建 List
             if (!responseMap.containsKey(year)) {
@@ -223,10 +219,9 @@ public class TransactionServiceImpl implements TransactionService {
 
             // 建立新的 TransactionTabViewDto
             TransactionTabViewDto newTabView = new TransactionTabViewDto(
-                startDate,
-                endDate,
-                Month.of(month).getDisplayName(TextStyle.FULL, Locale.forLanguageTag("zh-TW"))
-            );
+                    startDate,
+                    endDate,
+                    Month.of(month).getDisplayName(TextStyle.FULL, Locale.forLanguageTag("zh-TW")));
 
             responseMap.get(year).add(newTabView);
         }
@@ -234,15 +229,21 @@ public class TransactionServiceImpl implements TransactionService {
         return responseMap;
     }
 
-
     @Override
-    public Otp requestWithdraw(Integer withdrawalAmount) {
+    public void requestWithdraw(TransactionWithdrawRequestDto transactionWithdrawRequestDto) {
         User currentUser = currentUserInfoProvider.getCurrentLoginUser();
+        Integer withdrawalAmount = transactionWithdrawRequestDto.getWithdrawalAmount();
+        String otpCode = transactionWithdrawRequestDto.getOtpCode();
         String userId = currentUser.getUserId();
+        String phone = currentUser.getPhone();
+        ValidatePhoneRequestDto validatePhoneRequestDto = new ValidatePhoneRequestDto();
+        validatePhoneRequestDto.setPhone(phone);
+        validatePhoneRequestDto.setOtpCode(otpCode);
 
-        PendingWithdrawal pendingWithdrawal = transactionDao.getPendingWithdrawalByUserId(userId);
-        if (pendingWithdrawal != null) {
-            throw new BadRequestException("There is a pending withdrawal");
+        boolean isValid = otpService.validateOtp(validatePhoneRequestDto);
+
+        if (!isValid) {
+            throw new BadRequestException("Invalid OTP or OTP expired");
         }
 
         Integer currentBalance = transactionDao.getWalletBalance(userId);
@@ -250,45 +251,14 @@ public class TransactionServiceImpl implements TransactionService {
             throw new UnprocessableEntityException("Insufficient balance");
         }
 
-        String phone = currentUser.getPhone();
-        Otp otp = otpService.requestOtp(phone);
-        transactionDao.requestWithdraw(otp.getOtpId(), userId, withdrawalAmount);
-
-        return otp;
-    }
-
-    @Override
-    public boolean validateWithdraw(String otpCode) {
-        User currentUser = currentUserInfoProvider.getCurrentLoginUser();
-        String userId = currentUser.getUserId();
-        String phone = currentUser.getPhone();
-        ValidatePhoneRequestDto validatePhoneRequestDto = new ValidatePhoneRequestDto();
-        validatePhoneRequestDto.setPhone(phone);
-        validatePhoneRequestDto.setOtpCode(otpCode);
-        boolean isValid = otpService.validateOtp(validatePhoneRequestDto);
-
-        if (!isValid) {
-            throw new BadRequestException("Invalid OTP or OTP expired");
-        }
-
-        PendingWithdrawal pendingWithdrawal = transactionDao.getPendingWithdrawalByUserId(userId);
-
-        if (!pendingWithdrawal.getUserId().equals(userId)) {
-            throw new BadRequestException("Invalid user id");
-        }
-        transactionDao.deletePendingWithdrawalById(pendingWithdrawal.getPendingWithdrawalId());
-
-        Integer withdrawalAmount = -pendingWithdrawal.getWithdrawalAmount();
-
-        transactionDao.withdraw(userId, withdrawalAmount);
+        transactionDao.withdraw(userId, -withdrawalAmount);
         transactionDao.applyTransactionFee(userId, -TRANSACTION_FEE);
 
-        return true;
     }
-
 
     private Integer getBalanceAtTransaction(String userId, TransactionRecord transactionRecord) {
 
         return transactionDao.getBalanceAtTransaction(userId, transactionRecord);
     }
+
 }

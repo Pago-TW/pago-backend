@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tw.pago.pagobackend.dto.ListQueryParametersDto;
-import tw.pago.pagobackend.dto.OtpValidationDto;
 import tw.pago.pagobackend.dto.TransactionRecordListResponseDto;
 import tw.pago.pagobackend.dto.TransactionRecordResponseDto;
 import tw.pago.pagobackend.dto.TransactionTabViewDto;
 import tw.pago.pagobackend.dto.TransactionWithdrawRequestDto;
-import tw.pago.pagobackend.model.Otp;
 import tw.pago.pagobackend.model.TransactionRecord;
 import tw.pago.pagobackend.service.TransactionService;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
@@ -75,17 +73,8 @@ public class TransactionController {
 
     @PostMapping("/wallet/withdraw")
     public ResponseEntity<?> requestWithdraw(@RequestBody TransactionWithdrawRequestDto transactionWithdrawRequestDto) {
-        Integer withdrawalAmount = transactionWithdrawRequestDto.getWithdrawalAmount();
-        Otp otp = transactionService.requestWithdraw(withdrawalAmount);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(otp);
-    }
-
-    @PostMapping("/wallet/withdraw/validate")
-    public ResponseEntity<?> validateWithdraw(@RequestBody OtpValidationDto otpValidationDto) {
-        String otpCode = otpValidationDto.getOtpCode();
-        boolean isValid = transactionService.validateWithdraw(otpCode);
-        return ResponseEntity.status(HttpStatus.OK).body(isValid);
+        transactionService.requestWithdraw(transactionWithdrawRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 
