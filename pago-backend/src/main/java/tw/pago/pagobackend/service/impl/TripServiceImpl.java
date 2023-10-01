@@ -226,8 +226,23 @@ public class TripServiceImpl implements TripService {
       throw new AccessDeniedException("TripId: " + tripId + ",\nYou have matched at least one order, so you have no permission to delete this trip ");
     }
 
-    tripDao.delete(tripId);
+    String tripCollectionId = trip.getTripCollectionId();
+    List<Trip> tripList = tripDao.getTripListByTripColletionId(tripCollectionId);
 
+    // Check if there is an associated trip collection.
+    // If there is only one trip in the collection and the trip's id corresponds to the tripId,
+    // delete the collection.
+    if (tripList.size() == 1) {
+      Trip lastTripInList = tripList.get(0);
+      String lastTripId = lastTripInList.getTripId();
+      if (lastTripId.equals(tripId)) {
+        tripCollectionDao.deleteTripCollectionById(tripCollectionId);
+      }
+    }
+    else {
+      tripDao.delete(tripId);
+    }
+    
   }
 
   @Override

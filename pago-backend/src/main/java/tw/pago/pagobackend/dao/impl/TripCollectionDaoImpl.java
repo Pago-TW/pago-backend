@@ -137,4 +137,14 @@ public class TripCollectionDaoImpl implements TripCollectionDao {
 
     return sql;
   }
+
+  @Override
+  public void deleteTripCollectionById(String tripCollectionId) {
+    String sql = "DELETE FROM trip_collection WHERE trip_collection_id = :tripCollectionId ";
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("tripCollectionId", tripCollectionId);
+
+    namedParameterJdbcTemplate.update(sql, map);
+  }
 }

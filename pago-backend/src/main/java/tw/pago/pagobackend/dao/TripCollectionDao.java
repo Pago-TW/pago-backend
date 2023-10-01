@@ -16,4 +16,6 @@ public interface TripCollectionDao {
   List<TripCollection> getTripCollectionList(ListQueryParametersDto listQueryParametersDto);
 
   Integer countTripCollection(ListQueryParametersDto listQueryParametersDto);
+
+  void deleteTripCollectionById(String tripCollectionId);
 }
