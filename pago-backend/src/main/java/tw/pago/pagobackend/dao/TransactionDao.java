@@ -25,7 +25,7 @@ public interface TransactionDao {
 
     PendingWithdrawal getPendingWithdrawalByUserId(String userId);
 
-    void withdraw(String userId, Integer withdrawalAmount);
+    void withdraw(String userId, Integer withdrawalAmount, String bankAccountId);
 
     void deletePendingWithdrawalById(String pendingWithdrawalId);
 
