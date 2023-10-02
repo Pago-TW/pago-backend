@@ -372,8 +372,7 @@ public class OrderServiceImpl implements OrderService {
 
     // Check if order is null
     if (oldOrder == null) {
-      System.out.println("No such order");
-      return;
+      throw new ResourceNotFoundException("Order not found.");
     }
     
     String orderId = oldOrder.getOrderId();
