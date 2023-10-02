@@ -372,8 +372,7 @@ public class OrderServiceImpl implements OrderService {
 
     // Check if order is null
     if (oldOrder == null) {
-      System.out.println("No such order");
-      return;
+      throw new ResourceNotFoundException("Order not found.");
     }
     
     String orderId = oldOrder.getOrderId();
@@ -386,15 +385,6 @@ public class OrderServiceImpl implements OrderService {
     if (!orderFileUrls.isEmpty()) {
       orderFileUrl = String.valueOf(orderFileUrls.get(0));
     }
-    BigDecimal oldOrderTotalAmount = oldOrder.getTotalAmount();
-    BigDecimal oldOrderTravelerFee = oldOrder.getTravelerFee();
-
-    Bid bid = bidService.getChosenBidByOrderId(orderId);
-    String tripId = bid.getTripId();
-    Trip trip = tripDao.getTripById(tripId);
-    String shopperId = trip.getShopperId();
-
-
 
     // Check if the order status has been modified
     boolean orderStatusChanged = newOrderStatus != null && !Objects.equals(oldOrderStatus, updateOrderAndOrderItemRequestDto.getOrderStatus());
@@ -434,22 +424,28 @@ public class OrderServiceImpl implements OrderService {
       orderDao.updateOrderStatusByOrderId(orderId, newOrderStatus);
 
       if (newOrderStatus.equals(OrderStatusEnum.FINISHED)) {
-
         // traveler gains traveler fee
         // transaction type: INCOME
+
+        BigDecimal oldOrderTravelerFee = oldOrder.getTravelerFee();
+
+        Bid bid = bidService.getChosenBidByOrderId(orderId);
+        String tripId = bid.getTripId();
+        Trip trip = tripDao.getTripById(tripId);
+        String shopperId = trip.getShopperId();
+        
         transactionDao.createTransactionRecord(orderId, TransactionTypeEnum.INCOME, oldOrderTravelerFee, shopperId);
       
       } else if (newOrderStatus.equals(OrderStatusEnum.CANCELLED)) {
-
         // consumer is refunded the order total amount
         // transaction type: REFUND
+
+        BigDecimal oldOrderTotalAmount = oldOrder.getTotalAmount();
+        
         transactionDao.createTransactionRecord(orderId, TransactionTypeEnum.REFUND, oldOrderTotalAmount, consumerId);
       
       }
     }
-
-
-
 
     if (orderStatusChanged) {
       // Prepare Notification
@@ -467,8 +463,6 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-
-    
     // Send email notification if needed
     if (orderStatusChanged && sendStatusUpdateEmail) {
       sendOrderUpdateEmail(oldOrder, updateOrderAndOrderItemRequestDto);

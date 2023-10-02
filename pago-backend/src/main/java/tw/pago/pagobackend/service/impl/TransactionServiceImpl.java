@@ -232,10 +232,13 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void requestWithdraw(TransactionWithdrawRequestDto transactionWithdrawRequestDto) {
         User currentUser = currentUserInfoProvider.getCurrentLoginUser();
-        Integer withdrawalAmount = transactionWithdrawRequestDto.getWithdrawalAmount();
-        String otpCode = transactionWithdrawRequestDto.getOtpCode();
         String userId = currentUser.getUserId();
         String phone = currentUser.getPhone();
+
+        Integer withdrawalAmount = transactionWithdrawRequestDto.getWithdrawalAmount();
+        String otpCode = transactionWithdrawRequestDto.getOtpCode();
+        String bankAccountId = transactionWithdrawRequestDto.getBankAccountId();
+
         ValidatePhoneRequestDto validatePhoneRequestDto = new ValidatePhoneRequestDto();
         validatePhoneRequestDto.setPhone(phone);
         validatePhoneRequestDto.setOtpCode(otpCode);
@@ -251,7 +254,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new UnprocessableEntityException("Insufficient balance");
         }
 
-        transactionDao.withdraw(userId, -withdrawalAmount);
+        transactionDao.withdraw(userId, -withdrawalAmount, bankAccountId);
         transactionDao.applyTransactionFee(userId, -TRANSACTION_FEE);
 
     }

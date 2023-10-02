@@ -208,11 +208,11 @@ public class TransactionDaoImpl implements TransactionDao {
   }
 
   @Override
-  public void withdraw(String userId, Integer withdrawalAmount) {
+  public void withdraw(String userId, Integer withdrawalAmount, String bankAccountId) {
     String sql = "INSERT INTO transaction_record "
-        + "(transaction_id, user_id, transaction_amount, transaction_type, transaction_date, transaction_status) "
+        + "(transaction_id, user_id, transaction_amount, transaction_type, bank_account_id, transaction_date, transaction_status) "
         + "VALUES "
-        + "(:transactionId, :userId, :transactionAmount, :transactionType, NOW(), :transactionStatus) ";
+        + "(:transactionId, :userId, :transactionAmount, :transactionType, :bank_account_id, NOW(), :transactionStatus) ";
 
     Map<String, Object> map = new HashMap<>();
     map.put("transactionId", uuidGenerator.getUuid());
@@ -220,6 +220,7 @@ public class TransactionDaoImpl implements TransactionDao {
     map.put("transactionAmount", withdrawalAmount);
     map.put("transactionType", TransactionTypeEnum.WITHDRAW.toString());
     map.put("transactionStatus", TransactionStatusEnum.WITHDRAWAL_IN_PROGRESS.toString());
+    map.put("bank_account_id", bankAccountId);
 
     namedParameterJdbcTemplate.update(sql, map);
   }
