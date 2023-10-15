@@ -75,6 +75,7 @@ import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.BadRequestException;
 import tw.pago.pagobackend.exception.DuplicateKeyException;
 import tw.pago.pagobackend.exception.IllegalStatusTransitionException;
+import tw.pago.pagobackend.exception.NotFoundException;
 import tw.pago.pagobackend.exception.ResourceNotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.CancellationRecord;
@@ -93,6 +94,7 @@ import tw.pago.pagobackend.service.TripService;
 import tw.pago.pagobackend.util.CurrencyUtil;
 import tw.pago.pagobackend.util.CurrentUserInfoProvider;
 import tw.pago.pagobackend.util.EntityPropertyUtil;
+import tw.pago.pagobackend.util.ExchangeRateProvider;
 import tw.pago.pagobackend.util.UuidGenerator;
 
 @Service
@@ -121,6 +123,7 @@ public class OrderServiceImpl implements OrderService {
   private PostponeRecordDao postponeRecordDao;
   private NotificationService notificationService;
   private TransactionDao transactionDao;
+  private ExchangeRateProvider exchangeRateProvider;
 
   @Autowired
   public OrderServiceImpl(OrderDao orderDao,
@@ -134,7 +137,8 @@ public class OrderServiceImpl implements OrderService {
       ModelMapper modelMapper,
       CancellationRecordDao cancellationRecordDao,
       PostponeRecordDao postponeRecordDao, NotificationService notificationService,
-      TransactionDao transactionDao
+      TransactionDao transactionDao,
+      ExchangeRateProvider exchangeRateProvider
   ) {
     this.orderDao = orderDao;
     this.uuidGenerator = uuidGenerator;
@@ -149,6 +153,7 @@ public class OrderServiceImpl implements OrderService {
     this.postponeRecordDao = postponeRecordDao;
     this.notificationService = notificationService;
     this.transactionDao = transactionDao;
+    this.exchangeRateProvider = exchangeRateProvider;
   }
 
   @Autowired
@@ -899,25 +904,27 @@ public class OrderServiceImpl implements OrderService {
     int decimalScaleForCurrency = CurrencyUtil.getDecimalScale(orderCurrency);
 
     // 處理貨幣換算
+    Map<String, BigDecimal> exchangeRateMap = exchangeRateProvider.fetchExchangeRateFromApi();
+    if (exchangeRateMap == null) {
+      throw new NotFoundException("Exchange rate map not found");
+    }
+
+    // Get conversion rate for order currency and bid currency
     BigDecimal orderConversionRate = BigDecimal.ONE;
-    if (orderCurrency == CurrencyEnum.JPY) {
-      orderConversionRate = BigDecimal.valueOf(4.5);
-    } else if (orderCurrency == CurrencyEnum.USD) {
-      orderConversionRate = BigDecimal.valueOf(30);
+    if (exchangeRateMap.containsKey(orderCurrency.name())) {
+      orderConversionRate = exchangeRateMap.get(orderCurrency.name());
     }
 
     BigDecimal bidConversionRate = BigDecimal.ONE;
-    if (bidCurrency == CurrencyEnum.JPY) {
-      bidConversionRate = BigDecimal.valueOf(4.5);
-    } else if (bidCurrency == CurrencyEnum.USD) {
-      bidConversionRate = BigDecimal.valueOf(30);
+    if (exchangeRateMap.containsKey(bidCurrency.name())) {
+      bidConversionRate = exchangeRateMap.get(bidCurrency.name());
     }
 
-    itemTotalAmount = itemTotalAmount.divide(orderConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
-    tariffFee = tariffFee.divide(orderConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
-    platformFee = platformFee.divide(orderConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
-    travelerFee = travelerFee.divide(bidConversionRate, decimalScaleForCurrency, RoundingMode.HALF_EVEN);
-
+    // Convert total amount and fees to NTD
+    itemTotalAmount = itemTotalAmount.multiply(orderConversionRate).setScale(0, RoundingMode.HALF_EVEN);
+    tariffFee = tariffFee.divide(orderConversionRate, 0, RoundingMode.HALF_EVEN);
+    platformFee = platformFee.divide(orderConversionRate, 0, RoundingMode.HALF_EVEN);
+    travelerFee = travelerFee.divide(bidConversionRate, 0, RoundingMode.HALF_EVEN);
     BigDecimal totalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
 
     // Prepare response
