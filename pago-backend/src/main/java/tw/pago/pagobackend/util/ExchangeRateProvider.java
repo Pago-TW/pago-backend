@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,7 +25,11 @@ import tw.pago.pagobackend.exception.BadRequestException;
 @Component
 public class ExchangeRateProvider {
 
-    private static final String API_URL = "https://zko79b5x4a.execute-api.ap-northeast-1.amazonaws.com/default/get_exchange_rate";
+    @Value("${currency-exchange-rate-api-url}")
+    private String API_URL;
+    
+    @Value("${currency-exchange-rate-api-key}")
+    private String API_KEY;
 
     private Map<String, BigDecimal> exchangeRateMap = new HashMap<>();
 
@@ -35,6 +40,8 @@ public class ExchangeRateProvider {
 
             // Set request method to GET
             conn.setRequestMethod("GET");
+// Replace with your actual API key
+            conn.setRequestProperty("x-api-key", API_KEY);
 
             // Read the API response
             int responseCode = conn.getResponseCode();
