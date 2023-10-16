@@ -920,12 +920,13 @@ public class OrderServiceImpl implements OrderService {
       bidConversionRate = exchangeRateMap.get(bidCurrency.name());
     }
 
-    // Convert total amount and fees to NTD
+    // Convert total amount and fees to TWD
     itemTotalAmount = itemTotalAmount.multiply(orderConversionRate).setScale(0, RoundingMode.HALF_EVEN);
-    tariffFee = tariffFee.divide(orderConversionRate, 0, RoundingMode.HALF_EVEN);
-    platformFee = platformFee.divide(orderConversionRate, 0, RoundingMode.HALF_EVEN);
-    travelerFee = travelerFee.divide(bidConversionRate, 0, RoundingMode.HALF_EVEN);
+    tariffFee = tariffFee.multiply(orderConversionRate).setScale(0, RoundingMode.HALF_EVEN);
+    platformFee = platformFee.multiply(orderConversionRate).setScale(0, RoundingMode.HALF_EVEN);
+    travelerFee = travelerFee.multiply(bidConversionRate).setScale(0, RoundingMode.HALF_EVEN);
     BigDecimal totalAmount = itemTotalAmount.add(tariffFee).add(platformFee).add(travelerFee);
+
 
     // Prepare response
     CalculateOrderAmountResponseDto calculateOrderAmountResponseDto = new CalculateOrderAmountResponseDto();
