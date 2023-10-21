@@ -56,11 +56,11 @@ public class TripController {
     }
   }
 
-//  @GetMapping("trip")
-//  public ResponseEntity<List<Trip>> findAll() throws SQLException {
-//    List<Trip> trips = tripService.findAll();
-//    return ResponseEntity.status(HttpStatus.OK).body(trips);
-//  }
+  // @GetMapping("trip")
+  // public ResponseEntity<List<Trip>> findAll() throws SQLException {
+  // List<Trip> trips = tripService.findAll();
+  // return ResponseEntity.status(HttpStatus.OK).body(trips);
+  // }
 
   @PostMapping("/trips") // TODO 抵達時間不該在今天以前，不合理
   // TODO 先不要做 ^
@@ -74,7 +74,6 @@ public class TripController {
     return ResponseEntity.status(HttpStatus.CREATED).body(trip);
 
   }
-
 
   @PostMapping("/trips/batch")
   public ResponseEntity<TripCollection> batchCreateTrip(
@@ -130,7 +129,8 @@ public class TripController {
   public ResponseEntity<Object> getTripList(
       @RequestParam(required = false) String userId,
       @RequestParam(required = false) String orderId,
-      // Filter trips by the latest date to receive items (optional); only include trips with an arrival_date before this date
+      // Filter trips by the latest date to receive items (optional); only include
+      // trips with an arrival_date before this date
       @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate latestReceiveItemDate,
       @RequestParam(required = false) String search,
       @RequestParam(required = false) TripStatusEnum status,
@@ -200,12 +200,11 @@ public class TripController {
     return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoListResponseDto);
   }
 
-
   @GetMapping("/trip-collections")
   public ResponseEntity<ListResponseDto<TripCollectionResponseDto>> getTripCollectionList(
       @RequestParam(defaultValue = "0") @Min(0) Integer startIndex,
       @RequestParam(defaultValue = "25") @Min(0) @Max(100) Integer size,
-      @RequestParam(defaultValue = "create_date") String orderBy,
+      @RequestParam(defaultValue = "arrival_date") String orderBy,
       @RequestParam(defaultValue = "DESC") String sort,
       @RequestParam(required = false) String search) {
 
@@ -216,28 +215,40 @@ public class TripController {
         .search(search)
         .startIndex(startIndex)
         .size(size)
-        .orderBy(orderBy)
         .sort(sort)
         .build();
 
+    // Check the orderBy parameter is existed in MySQL table
+    if ("create_date".equals(orderBy) || "update_date".equals(orderBy)) {
+      // Use SQL to sort by create_date or update_date
+      listQueryParametersDto.setOrderBy(orderBy);
+    } else {
+      listQueryParametersDto.setOrderBy(null);
+    }
+
     List<TripCollection> tripCollectionList = tripService.getTripCollectionList(
         listQueryParametersDto);
-    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService.getTripCollectionResponseDtoListByTripCollectionList(
-        tripCollectionList);
+    List<TripCollectionResponseDto> tripCollectionResponseDtoList = tripService
+        .getTripCollectionResponseDtoListByTripCollectionList(
+            tripCollectionList);
+
+    List<TripCollectionResponseDto> sortedTripCollectionResponseDtoList = tripService.sortTripCollectionResponseDtoList(
+        tripCollectionResponseDtoList, sort, orderBy);
+
     int total = tripService.countTripCollection(listQueryParametersDto);
 
     // Build the pagination response DTO
-    ListResponseDto<TripCollectionResponseDto> tripResponseDtoListResponseDto = ListResponseDto.<TripCollectionResponseDto>builder()
+    ListResponseDto<TripCollectionResponseDto> tripResponseDtoListResponseDto = ListResponseDto
+        .<TripCollectionResponseDto>builder()
         .total(total)
         .startIndex(startIndex)
         .size(size)
-        .data(tripCollectionResponseDtoList)
+        .data(sortedTripCollectionResponseDtoList)
         .build();
 
     return ResponseEntity.status(HttpStatus.OK).body(tripResponseDtoListResponseDto);
 
   }
-
 
   @GetMapping("/trips/{tripId}/matching-orders")
   public ResponseEntity<ListResponseDto<OrderResponseDto>> getMatchingOrderListForTrip(
@@ -276,6 +287,5 @@ public class TripController {
     return ResponseEntity.status(HttpStatus.OK).body(listResponseDto);
 
   }
-
 
 }

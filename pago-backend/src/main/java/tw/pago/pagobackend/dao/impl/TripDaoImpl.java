@@ -317,7 +317,8 @@ public class TripDaoImpl implements TripDao {
     String sql = "SELECT trip_id, shopper_id, trip_collection_id, from_country, from_city, to_country, to_city, "
         + "arrival_date, profit, create_date, update_date "
         + "FROM trip "
-        + "WHERE trip_collection_id = :tripCollectionId ";
+        + "WHERE trip_collection_id = :tripCollectionId "
+        + "ORDER BY arrival_date ASC ";
 
     Map<String, Object> map = new HashMap<>();
     map.put("tripCollectionId", tripCollectionId);

@@ -14,6 +14,7 @@ public class TripCollectionResponseDto {
   private TripStatusEnum tripCollectionStatus;
   private ZonedDateTime createDate;
   private ZonedDateTime updateDate;
+  private ZonedDateTime arrivalDate;
   private List<TripResponseDto> trips;
 
 }
