@@ -65,6 +65,8 @@ public interface TripService {
 
     List<TripCollectionResponseDto> getTripCollectionResponseDtoListByTripCollectionList(List<TripCollection> tripCollectionList);
 
+    List<TripCollectionResponseDto> sortTripCollectionResponseDtoList(List<TripCollectionResponseDto> tripCollectionResponseDtoList, String sort, String orderBy);
+
     Integer countTrip(ListQueryParametersDto listQueryParametersDto);
 
     Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto);

@@ -6,9 +6,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -39,6 +42,7 @@ import tw.pago.pagobackend.dto.TripResponseDto;
 import tw.pago.pagobackend.dto.UpdateTripRequestDto;
 import tw.pago.pagobackend.exception.AccessDeniedException;
 import tw.pago.pagobackend.exception.ConflictException;
+import tw.pago.pagobackend.exception.NotFoundException;
 import tw.pago.pagobackend.model.Bid;
 import tw.pago.pagobackend.model.Order;
 import tw.pago.pagobackend.model.Trip;
@@ -61,6 +65,7 @@ public class TripServiceImpl implements TripService {
   private final OrderService orderService;
   private final UserDao userDao;
   private final TripCollectionDao tripCollectionDao;
+
   @Override
   public Trip getTripById(String tripId) {
     Trip trip = tripDao.getTripById(tripId);
@@ -88,7 +93,8 @@ public class TripServiceImpl implements TripService {
     tripResponseDto.setCurrency(CurrencyEnum.TWD);
 
     // Get/Set countries & cities chineseName
-    String fromCountryChineseName = CountryUtil.getChineseCountryName(tripResponseDto.getFromCountry());
+    String fromCountryChineseName = CountryUtil.getChineseCountryName(
+        tripResponseDto.getFromCountry());
     String fromCityChineseName = tripResponseDto.getFromCity().getChineseName();
     String toCountryChineseName = CountryUtil.getChineseCountryName(tripResponseDto.getToCountry());
     String toCityChineseName = tripResponseDto.getToCity().getChineseName();
@@ -152,14 +158,13 @@ public class TripServiceImpl implements TripService {
     String tripCollectionId = uuidGenerator.getUuid();
     String firstTripId = uuidGenerator.getUuid();
 
-
     // Create Trip Collection for new trips
     CreateTripCollectionRequestDto createTripCollectionRequestDto = new CreateTripCollectionRequestDto();
     createTripCollectionRequestDto.setTripCollectionId(tripCollectionId);
-    createTripCollectionRequestDto.setTripCollectionName(batchCreateTripRequestDto.getTripCollectionName());
+    createTripCollectionRequestDto.setTripCollectionName(
+        batchCreateTripRequestDto.getTripCollectionName());
     createTripCollectionRequestDto.setCreatorId(batchCreateTripRequestDto.getShopperId());
     createTripCollection(createTripCollectionRequestDto);
-
 
     // Create First trip, departure City -> stops.get(0)
     Departure departure = batchCreateTripRequestDto.getDeparture();
@@ -177,7 +182,7 @@ public class TripServiceImpl implements TripService {
 
     for (int i = 0; i < batchCreateTripRequestDto.getStops().size() - 1; i++) {
       Stop departureStop = batchCreateTripRequestDto.getStops().get(i);
-      Stop nextStop = batchCreateTripRequestDto.getStops().get(i+1);
+      Stop nextStop = batchCreateTripRequestDto.getStops().get(i + 1);
       String tripId = uuidGenerator.getUuid();
 
       createTripRequestDto.setTripId(tripId);
@@ -206,7 +211,8 @@ public class TripServiceImpl implements TripService {
         .anyMatch(bid -> bid.getBidStatus().equals(BidStatusEnum.IS_CHOSEN));
 
     if (hasChosenBid) {
-      throw new AccessDeniedException("TripId: " + tripId + ",\nYou have matched at least one order, so you have no permission to delete this trip ");
+      throw new AccessDeniedException("TripId: " + tripId
+          + ",\nYou have matched at least one order, so you have no permission to delete this trip ");
     }
 
     tripDao.delete(tripId);
@@ -223,7 +229,8 @@ public class TripServiceImpl implements TripService {
         .anyMatch(bid -> bid.getBidStatus().equals(BidStatusEnum.IS_CHOSEN));
 
     if (hasChosenBid) {
-      throw new AccessDeniedException("TripId: " + tripId + ",\nYou have matched at least one order, so you have no permission to delete this trip ");
+      throw new AccessDeniedException("TripId: " + tripId
+          + ",\nYou have matched at least one order, so you have no permission to delete this trip ");
     }
 
     String tripCollectionId = trip.getTripCollectionId();
@@ -238,11 +245,10 @@ public class TripServiceImpl implements TripService {
       if (lastTripId.equals(tripId)) {
         tripCollectionDao.deleteTripCollectionById(tripCollectionId);
       }
-    }
-    else {
+    } else {
       tripDao.delete(tripId);
     }
-    
+
   }
 
   @Override
@@ -269,7 +275,8 @@ public class TripServiceImpl implements TripService {
   }
 
   @Override
-  public List<Trip> getMatchingTripListByOrderId(String orderId, ListQueryParametersDto listQueryParametersDto) {
+  public List<Trip> getMatchingTripListByOrderId(String orderId,
+      ListQueryParametersDto listQueryParametersDto) {
 
     Order order = orderService.getOrderById(orderId);
     CountryCode purchaseCountry = order.getOrderItem().getPurchaseCountry();
@@ -277,10 +284,11 @@ public class TripServiceImpl implements TripService {
     CountryCode destinationCountry = order.getDestinationCountry();
     CityCode destinationCity = order.getDestinationCity();
     Date latestReceiveItemDate = order.getLatestReceiveItemDate();
-    LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    LocalDate latestReceiveItemLocalDate = latestReceiveItemDate.toInstant()
+        .atZone(ZoneId.systemDefault()).toLocalDate();
     Date orderCreateDate = order.getCreateDate();
-    LocalDate orderCreateLocalDate = orderCreateDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
+    LocalDate orderCreateLocalDate = orderCreateDate.toInstant().atZone(ZoneId.systemDefault())
+        .toLocalDate();
 
     listQueryParametersDto.setOrderId(orderId);
     listQueryParametersDto.setPurchaseCountry(purchaseCountry);
@@ -289,7 +297,6 @@ public class TripServiceImpl implements TripService {
     listQueryParametersDto.setDestinationCity(destinationCity);
     listQueryParametersDto.setLatestReceiveItemDate(latestReceiveItemLocalDate);
     listQueryParametersDto.setOrderCreateDate(orderCreateLocalDate);
-
 
     List<Trip> tripList = tripDao.getMatchingTripListForOrder(listQueryParametersDto);
 
@@ -339,8 +346,9 @@ public class TripServiceImpl implements TripService {
         .map(this::getTripResponseDtoByTrip);
 
     if (listQueryParametersDto.getTripStatus() != null) {
-      tripResponseDtoStream  = tripResponseDtoStream
-          .filter(tripResponseDto -> tripResponseDto.getTripStatus().equals(listQueryParametersDto.getTripStatus()));
+      tripResponseDtoStream = tripResponseDtoStream
+          .filter(tripResponseDto -> tripResponseDto.getTripStatus()
+              .equals(listQueryParametersDto.getTripStatus()));
     }
 
     List<TripResponseDto> tripResponseDtoList = tripResponseDtoStream.collect(Collectors.toList());
@@ -368,13 +376,34 @@ public class TripServiceImpl implements TripService {
   }
 
   @Override
+  public List<TripCollectionResponseDto> sortTripCollectionResponseDtoList(
+      List<TripCollectionResponseDto> tripCollectionResponseDtoList, String sort, String orderBy) {
+
+    if ("DESC".equals(sort) && "arrival_date".equals(orderBy)) {
+      tripCollectionResponseDtoList = tripCollectionResponseDtoList.stream()
+          .sorted(Comparator.comparing(TripCollectionResponseDto::getArrivalDate).reversed())
+          .collect(Collectors.toList());
+    } else if ("ASC".equals(sort) && "arrival_date".equals(
+        orderBy)) {
+      tripCollectionResponseDtoList = tripCollectionResponseDtoList.stream()
+          .sorted(Comparator.comparing(TripCollectionResponseDto::getArrivalDate))
+          .collect(Collectors.toList());
+    }
+
+    return tripCollectionResponseDtoList;
+  }
+
+  @Override
   public TripCollectionResponseDto getTripCollectionResponseDtoByTripCollection(
       TripCollection tripCollection) {
 
     List<Trip> tripList = getTripListByTripColletionId(tripCollection.getTripCollectionId());
     List<TripResponseDto> tripResponseDtoList = getTripResponseDtoByTripList(tripList);
+    ZonedDateTime nextOrLatestArrivalZonedDateTime = getNextOrLatestArrivalZonedDateTime(
+        tripList);
 
-    TripStatusEnum tripCollectionStatus = getTripCollectionStatusBasedOnEachTripStatus(tripResponseDtoList);
+    TripStatusEnum tripCollectionStatus = getTripCollectionStatusBasedOnEachTripStatus(
+        tripResponseDtoList);
 
     TripCollectionResponseDto tripCollectionResponseDto = new TripCollectionResponseDto();
     tripCollectionResponseDto.setTripCollectionId(tripCollection.getTripCollectionId());
@@ -382,6 +411,8 @@ public class TripServiceImpl implements TripService {
     tripCollectionResponseDto.setTripCollectionStatus(tripCollectionStatus);
     tripCollectionResponseDto.setCreateDate(tripCollection.getCreateDate());
     tripCollectionResponseDto.setUpdateDate(tripCollection.getUpdateDate());
+
+    tripCollectionResponseDto.setArrivalDate(nextOrLatestArrivalZonedDateTime);
     tripCollectionResponseDto.setTrips(tripResponseDtoList);
 
     return tripCollectionResponseDto;
@@ -396,7 +427,8 @@ public class TripServiceImpl implements TripService {
   }
 
   @Override
-  public Integer countTrip(TripStatusEnum tripStatus, ListQueryParametersDto listQueryParametersDto) {
+  public Integer countTrip(TripStatusEnum tripStatus,
+      ListQueryParametersDto listQueryParametersDto) {
 
     Integer total = tripDao.countTrip(tripStatus, listQueryParametersDto);
     return total;
@@ -514,13 +546,14 @@ public class TripServiceImpl implements TripService {
   public boolean isDuplicateTrip(String shopperId, CreateTripRequestDto createTripRequestDto) {
     List<Trip> existingTrips = tripDao.getTripsByShopperId(shopperId);
     for (Trip trip : existingTrips) {
-        if (trip.getFromCountry().equals(createTripRequestDto.getFromCountry()) &&
-            trip.getToCountry().equals(createTripRequestDto.getToCountry()) &&
-            trip.getFromCity().equals(createTripRequestDto.getFromCity()) &&
-            trip.getToCity().equals(createTripRequestDto.getToCity()) &&
-            dateToLocalDate(trip.getArrivalDate()).equals(dateToLocalDate(createTripRequestDto.getArrivalDate()))) {
-            return true;
-        }
+      if (trip.getFromCountry().equals(createTripRequestDto.getFromCountry()) &&
+          trip.getToCountry().equals(createTripRequestDto.getToCountry()) &&
+          trip.getFromCity().equals(createTripRequestDto.getFromCity()) &&
+          trip.getToCity().equals(createTripRequestDto.getToCity()) &&
+          dateToLocalDate(trip.getArrivalDate()).equals(
+              dateToLocalDate(createTripRequestDto.getArrivalDate()))) {
+        return true;
+      }
     }
     return false;
   }
@@ -543,13 +576,15 @@ public class TripServiceImpl implements TripService {
   }
 
 
-  private TripStatusEnum getTripCollectionStatusBasedOnEachTripStatus(List<TripResponseDto> tripResponseDtoList) {
-
+  private TripStatusEnum getTripCollectionStatusBasedOnEachTripStatus(
+      List<TripResponseDto> tripResponseDtoList) {
 
     // Check if any trip is ONGOING
-    if (tripResponseDtoList.stream().anyMatch(tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.ONGOING))) {
+    if (tripResponseDtoList.stream().anyMatch(
+        tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.ONGOING))) {
       return TripStatusEnum.ONGOING;
-    } else if (tripResponseDtoList.stream().allMatch(tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.UPCOMING))) {
+    } else if (tripResponseDtoList.stream().allMatch(
+        tripResponseDto -> tripResponseDto.getTripStatus().equals(TripStatusEnum.UPCOMING))) {
       // Check if all trips are UPCOMING
       return TripStatusEnum.UPCOMING;
     }
@@ -557,4 +592,29 @@ public class TripServiceImpl implements TripService {
     return TripStatusEnum.PAST;
   }
 
+
+  private ZonedDateTime getNextOrLatestArrivalZonedDateTime(List<Trip> tripList) {
+    if (tripList == null || tripList.isEmpty()) {
+      throw new NotFoundException("No Trips Found!");
+    }
+
+    Date latestArrivalDate = tripList.stream()
+        .map(Trip::getArrivalDate)
+        .filter(Objects::nonNull)
+        .max(Date::compareTo)
+        .orElse(null);
+
+    if (latestArrivalDate == null) {
+      throw new NotFoundException("No Arrival Dates Found!");
+    }
+
+    Date currentDate = new Date();
+    Date nextOrLatestArrivalDate = tripList.stream()
+        .map(Trip::getArrivalDate)
+        .filter(date -> date != null && date.after(currentDate))
+        .min(Date::compareTo)
+        .orElse(latestArrivalDate);
+
+    return nextOrLatestArrivalDate.toInstant().atZone(ZoneOffset.UTC);
+  }
 }

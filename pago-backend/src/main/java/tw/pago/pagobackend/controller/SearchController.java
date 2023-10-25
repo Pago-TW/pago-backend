@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
+import tw.pago.pagobackend.dto.ListQueryParametersDto;
 import tw.pago.pagobackend.dto.ListResponseDto;
-import tw.pago.pagobackend.dto.SearchQueryParametersDto;
 import tw.pago.pagobackend.service.SearchService;
 
 @RestController
@@ -28,16 +28,15 @@ public class SearchController {
       @RequestParam(defaultValue = "order") String type,
       @RequestParam(defaultValue = "") String query) {
 
-    SearchQueryParametersDto searchQueryParametersDto = SearchQueryParametersDto.builder()
+    ListQueryParametersDto listQueryParametersDto = ListQueryParametersDto.builder()
+        .search(query)
         .startIndex(startIndex)
         .size(size)
         .orderBy(orderBy)
         .sort(sort)
-        .type(type)
-        .query(query)
         .build();
 
-    ListResponseDto<?> result = searchService.search(searchQueryParametersDto);
+    ListResponseDto<?> result = searchService.search(listQueryParametersDto, type);
 
     
     return ResponseEntity.ok().body(result);
