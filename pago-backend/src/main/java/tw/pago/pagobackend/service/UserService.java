@@ -29,4 +29,6 @@ public interface UserService {
   List<User> searchUsers(String query);
 
   boolean isPhoneAlreadyRegistered(String phone);
+
+  String censorString(String str, int start, int end);
 }

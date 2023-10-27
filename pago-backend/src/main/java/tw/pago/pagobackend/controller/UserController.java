@@ -38,7 +38,6 @@ public class UserController {
   public ResponseEntity<User> updateUser(@PathVariable String userId,
       @RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
 
-
     // Update User
     updateUserRequestDto.setUserId(userId);
     userService.updateUser(updateUserRequestDto);
@@ -59,8 +58,10 @@ public class UserController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to change email");
     }
 
-    if (Boolean.TRUE.equals(user.getIsPhoneVerified() && updateUserRequestDto.getPhone() != null) && (!updateUserRequestDto.getPhone().equals(user.getPhone()))) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("It is not allowed to change phone number if user have already finished phone verified");
+    if (Boolean.TRUE.equals(user.getIsPhoneVerified() && updateUserRequestDto.getPhone() != null)
+        && (!updateUserRequestDto.getPhone().equals(user.getPhone()))) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body("It is not allowed to change phone number if user have already finished phone verified");
     }
 
     // Update User
@@ -76,6 +77,10 @@ public class UserController {
   @GetMapping("/users/{userId}")
   public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId) {
     User user = userService.getUserById(userId);
+    if (user.getPhone() != null) {
+      user.setPhone(userService.censorString(user.getPhone(), 3, 7));
+    }
+
     UserResponseDto userResponseDto = userService.getUserResponseDtoByUser(user);
 
     return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
@@ -99,7 +104,7 @@ public class UserController {
 
     // After update successfully, get updated data then return
     User updatedUser = userService.getUserById(userId);
-    UserResponseDto  updatedUserResponseDto = userService.getUserResponseDtoByUser(updatedUser);
+    UserResponseDto updatedUserResponseDto = userService.getUserResponseDtoByUser(updatedUser);
 
     return ResponseEntity.status(HttpStatus.OK).body(updatedUserResponseDto);
   }

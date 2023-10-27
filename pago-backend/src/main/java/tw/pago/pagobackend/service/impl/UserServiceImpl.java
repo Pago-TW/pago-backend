@@ -129,15 +129,11 @@ public class UserServiceImpl implements UserService {
     boolean isUserVerifiedPhone = userPhoneVerificationService.isUserVerifiedPhone(userId);
     user.setIsPhoneVerified(isUserVerifiedPhone);
 
-    String phone = user.getPhone();
-    if (phone != null) {
-      user.setPhone(censorString(phone, 3, 7));
-    }
-
     return user;
   }
 
-  public static String censorString(String str, int start, int end) {
+  @Override
+  public String censorString(String str, int start, int end) {
     // Build a regex pattern with three capturing groups:
     // 1. The first group captures the characters before the range to be censored.
     // 2. The second group captures the characters within the range to be censored.
