@@ -1,6 +1,7 @@
 package tw.pago.pagobackend.dao.impl;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -68,15 +69,17 @@ public class TransactionDaoImpl implements TransactionDao {
   public Integer getBalanceAtTransaction(String userId, TransactionRecord transactionRecord) {
 
     ZonedDateTime transactionDate = transactionRecord.getTransactionDate();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    String formattedDate = transactionDate.format(formatter);
+    ZoneId dbZoneId = ZoneId.systemDefault(); // Replace with the appropriate ZoneId if necessary
+    ZonedDateTime dbTransactionDate = transactionDate.withZoneSameInstant(dbZoneId);
 
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String formattedDate = dbTransactionDate.format(formatter);
 
     // Then, sum up all transactions that happened up to and including that time
     String sql = "SELECT SUM(transaction_amount) "
         + "FROM transaction_record "
         + "WHERE user_id = :userId "
-        + "AND transaction_date <= :transactionDate ";
+        + "AND transaction_date < :transactionDate ";
 
     Map<String, Object> map = new HashMap<>();
     map.put("userId", userId);

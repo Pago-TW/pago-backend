@@ -65,8 +65,7 @@ public class UserServiceImpl implements UserService {
       TripService tripService,
       CancellationRecordDao cancellationRecordDao,
       UserPhoneVerificationService userPhoneVerificationService,
-      FileService fileService
-      ) {
+      FileService fileService) {
     this.uuidGenerator = uuidGenerator;
     this.userDao = userDao;
     this.modelMapper = modelMapper;
@@ -112,7 +111,6 @@ public class UserServiceImpl implements UserService {
     // register
     userDao.createUser(userRegisterRequestDto);
 
-
     user = userDao.getUserById(userId);
 
     if (user == null) {
@@ -135,6 +133,25 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public String censorString(String str, int start, int end) {
+    // Build a regex pattern with three capturing groups:
+    // 1. The first group captures the characters before the range to be censored.
+    // 2. The second group captures the characters within the range to be censored.
+    // 3. The third group captures the characters after the range to be censored.
+    String regex = "(.{" + start + "})(.{" + (end - start) + "})(.*)";
+
+    // 1. $1 refers to the characters captured by the first group in the regex
+    // pattern (characters before the range to be censored).
+    // 2. "*".repeat(end - start) creates a string of asterisks with the same length
+    // as the range to be censored.
+    // 3. $3 refers to the characters captured by the third group in the regex
+    // pattern (characters after the range to be censored).
+    String replacement = "$1" + "*".repeat(end - start) + "$3";
+
+    return str.replaceAll(regex, replacement);
+  }
+
+  @Override
   public User getUserByEmail(String email) {
     User user = userDao.getUserByEmail(email);
     String userId = user.getUserId();
@@ -153,9 +170,11 @@ public class UserServiceImpl implements UserService {
     UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
 
     // Get averageRating & totalReview (FOR_SHOPPER)
-    ReviewRatingResultDto shopperReviewRatingResultDto = reviewService.calculateAverageRating(user.getUserId(), ReviewTypeEnum.FOR_SHOPPER);
+    ReviewRatingResultDto shopperReviewRatingResultDto = reviewService.calculateAverageRating(user.getUserId(),
+        ReviewTypeEnum.FOR_SHOPPER);
     // Get averageRating & totalReview (FOR_CONSUMER)
-    ReviewRatingResultDto consumerReviewRatingResultDto = reviewService.calculateAverageRating(user.getUserId(), ReviewTypeEnum.FOR_CONSUMER);
+    ReviewRatingResultDto consumerReviewRatingResultDto = reviewService.calculateAverageRating(user.getUserId(),
+        ReviewTypeEnum.FOR_CONSUMER);
 
     // Convert result to UserReviewDTO
     UserReviewDto shopperUserReviewDto = modelMapper.map(shopperReviewRatingResultDto, UserReviewDto.class);
@@ -166,7 +185,6 @@ public class UserServiceImpl implements UserService {
     // Set shopperUserReviewDto & consumerUserReviewDto To UserResponseDto
     userResponseDto.setShopperReview(shopperUserReviewDto);
     userResponseDto.setConsumerReview(consumerUserReviewDto);
-
 
     // Get user completionRating
     CompletionRatingEnum completionRating = getUserCompletionRating(user);
@@ -183,13 +201,11 @@ public class UserServiceImpl implements UserService {
   public User login(UserLoginRequestDto userLoginRequestDto) {
     User user = userDao.getUserByEmail(userLoginRequestDto.getEmail());
 
-
     // Check User Exist
     if (user == null) {
       log.warn("該email: {} 尚未註冊", userLoginRequestDto.getEmail());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
-
 
     // Hash user's login password (MD5)
     String hashedpassword = DigestUtils.md5DigestAsHex(userLoginRequestDto.getPassword().getBytes());
@@ -209,8 +225,6 @@ public class UserServiceImpl implements UserService {
     // Get old data by id
     User oldUser = userDao.getUserById(updateUserRequestDto.getUserId());
 
-
-
     // Check frontend update data, or set old data
     updateUserRequestDto.fillEmptyFieldsWithOldData(oldUser);
 
@@ -227,7 +241,7 @@ public class UserServiceImpl implements UserService {
     createFileRequestDto.setFileCreator(userId);
     createFileRequestDto.setObjectId(userId);
     createFileRequestDto.setObjectType(OBJECT_TYPE);
-    List<URL> fileUrls  = fileService.uploadFile(files, createFileRequestDto);
+    List<URL> fileUrls = fileService.uploadFile(files, createFileRequestDto);
 
     if (!fileUrls.isEmpty()) {
       avatarUrl = fileUrls.get(0).toString();
@@ -263,7 +277,6 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-
   public int getUserTotalOrdersInProcurementProcess(String userId) {
     final int startIndex = 0;
     final int size = 999;
@@ -276,7 +289,6 @@ public class UserServiceImpl implements UserService {
         .orderBy("create_date")
         .sort("DESC")
         .build();
-
 
     // Count orders where the user is the consumer
     List<Order> orderList = orderService.getOrderList(listQueryParametersDto);
@@ -303,7 +315,6 @@ public class UserServiceImpl implements UserService {
     return (int) (consumerOrderCount + shopperOrderCount);
   }
 
-
   public double calculateUserCancellationRating(int totalCancellations, int totalOrdersInProcurementProcess) {
     if (totalOrdersInProcurementProcess == 0) {
       return 0.0;
@@ -328,9 +339,9 @@ public class UserServiceImpl implements UserService {
       return CompletionRatingEnum.EXCELLENT;
     }
 
-    double cancellationRating = calculateUserCancellationRating(totalCancellationRecords, totalOrdersInProcurementProcess);
+    double cancellationRating = calculateUserCancellationRating(totalCancellationRecords,
+        totalOrdersInProcurementProcess);
     System.out.println("Cancellation: " + cancellationRating);
-
 
     if (cancellationRating >= 90) {
       return CompletionRatingEnum.EXCELLENT;
