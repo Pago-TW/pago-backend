@@ -64,7 +64,6 @@ public class TransactionDaoImpl implements TransactionDao {
     }
   }
 
-
   @Override
   public Integer getBalanceAtTransaction(String userId, TransactionRecord transactionRecord) {
 
@@ -75,15 +74,33 @@ public class TransactionDaoImpl implements TransactionDao {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     String formattedDate = dbTransactionDate.format(formatter);
 
-    // Then, sum up all transactions that happened up to and including that time
-    String sql = "SELECT SUM(transaction_amount) "
-        + "FROM transaction_record "
-        + "WHERE user_id = :userId "
-        + "AND transaction_date < :transactionDate ";
+    String transactionType = transactionRecord.getTransactionType();
+    // Then, sum up all transactions that happened up to and including that time.
+    String sql;
+    switch (TransactionTypeEnum.valueOf(transactionType)) {
+      case WITHDRAW:
+        sql = "SELECT SUM(transaction_amount) FROM transaction_record "
+            + "WHERE user_id = :userId "
+            + "AND transaction_date < :transactionDate";
+        break;
+      case FEE:
+        sql = "SELECT SUM(transaction_amount) FROM transaction_record "
+            + "WHERE user_id = :userId "
+            + "AND transaction_date <= :transactionDate "
+            + "AND transaction_id <> :transactionId";
+        break;
+      default:
+        // Handling other types, if any, assuming no transactions with the same timestamp
+        sql = "SELECT SUM(transaction_amount) FROM transaction_record "
+            + "WHERE user_id = :userId "
+            + "AND transaction_date < :transactionDate";
+        break;
+    }
 
     Map<String, Object> map = new HashMap<>();
     map.put("userId", userId);
     map.put("transactionDate", formattedDate);
+    map.put("transactionId", transactionRecord.getTransactionId());
 
     Integer balance = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
 
